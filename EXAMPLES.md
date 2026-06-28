@@ -33,7 +33,7 @@ pip install --force-reinstall --no-cache-dir \
   git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.0
 ```
 
-Pulls in `yt-helper` (and transitively `yt-dlp`, `audio-helper`,
+Pulls in `youtube-helper` (and transitively `yt-dlp`, `audio-helper`,
 `video-helper`, `os-helper`) plus `feedparser` + `podcastparser`.
 
 ## URL → PCM in one call
