@@ -27,7 +27,7 @@ pip install --force-reinstall --no-cache-dir \
   git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.0
 ```
 
-This pulls in [yt-helper](https://github.com/warith-harchaoui/yt-helper) v1.1.0 (and transitively `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) for RSS.
+This pulls in [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.1.0 (and transitively `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) for RSS.
 
 # Quick start
 
