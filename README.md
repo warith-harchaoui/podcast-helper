@@ -1,5 +1,7 @@
 # Podcast Helper
 
+> 🌐 Version française : [LISEZMOI.md](LISEZMOI.md)
+
 `Podcast Helper` belongs to a collection of libraries called `AI Helpers` developed for building Artificial Intelligence.
 
 Universal audio stream consumer for podcasts and any audio-bearing URL. **URL-in → PCM-out** for local files, direct audio URLs (RSS enclosure MP3 / M4A / Opus / WAV / HLS m3u8), RSS / Atom feed URLs (auto-picks the latest episode), and every `yt-dlp`-supported source (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuses Spotify-DRM and Apple Podcasts catalog URLs upfront, with clear hints toward the RSS feed workaround.
