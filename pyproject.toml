@@ -39,6 +39,10 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
 [project.urls]
 Homepage = "https://github.com/warith-harchaoui/podcast-helper"
 
+[tool.setuptools.packages.find]
+include = ["podcast_helper*"]
+exclude = ["tests*", "assets*"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 markers = [
