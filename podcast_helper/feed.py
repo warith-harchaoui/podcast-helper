@@ -19,7 +19,7 @@ Public surface
 
 Author
 ------
-Warith HARCHAOUI — https://harchaoui.org/warith
+Warith HARCHAOUI — https://linkedin.com/in/warith-harchaoui
 """
 
 from __future__ import annotations
