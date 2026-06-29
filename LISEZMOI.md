@@ -2,6 +2,8 @@
 
 [🇫🇷](LISEZMOI.md) · [🇬🇧](README.md)
 
+[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#)
+
 `Podcast Helper` fait partie d'une collection de bibliothèques appelée `AI Helpers`, développée pour bâtir des applications d'intelligence artificielle.
 
 Consommateur universel de flux audio pour podcasts et toute URL portant de l'audio. **URL en entrée → PCM en sortie** pour les fichiers locaux, les URLs audio directes (enclosure RSS MP3 / M4A / Opus / WAV / HLS m3u8), les URLs de flux RSS / Atom (sélectionne automatiquement le dernier épisode), et toute source supportée par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuse d'emblée les URLs Spotify (DRM) et Apple Podcasts (catalogue), avec des indications claires sur le contournement via flux RSS.
