@@ -8,7 +8,7 @@
 
 Consommateur universel de flux audio pour podcasts et toute URL portant de l'audio. **URL en entrée → PCM en sortie** pour les fichiers locaux, les URLs audio directes (enclosure RSS MP3 / M4A / Opus / WAV / HLS m3u8), les URLs de flux RSS / Atom (sélectionne automatiquement le dernier épisode), et toute source supportée par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuse d'emblée les URLs Spotify (DRM) et Apple Podcasts (catalogue), avec des indications claires sur le contournement via flux RSS.
 
-[🕸️ AI Helpers](https://harchaoui.org/warith/ai-helpers)
+[🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
 
 [![logo](assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
 
