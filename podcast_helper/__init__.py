@@ -18,7 +18,7 @@ Main entry points
   :class:`Episode` typed dict.
 
 Author:
-- Warith HARCHAOUI (https://harchaoui.org/warith)
+- Warith HARCHAOUI (https://linkedin.com/in/warith-harchaoui)
 """
 
 __all__ = [

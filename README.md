@@ -123,7 +123,7 @@ For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3
 | **v0.4.0+** | Chapters (ID3 CTOC/CHAP, Podcasting 2.0 `<podcast:chapters>`), transcripts, OPML import/export. |
 
 # Author
- - [Warith HARCHAOUI](https://harchaoui.org/warith)
+ - [Warith HARCHAOUI](https://linkedin.com/in/warith-harchaoui)
 
 # Acknowledgements
 Special thanks to [Mohamed Chelali](https://mchelali.github.io) and [Bachir Zerroug](https://www.linkedin.com/in/bachirzerroug) for fruitful discussions.
