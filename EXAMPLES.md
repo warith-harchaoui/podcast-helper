@@ -6,10 +6,14 @@ snippets assume:
 ```python
 import asyncio
 import podcast_helper as ph
+import os_helper as osh
+
+osh.verbosity(2)   # so osh.info(...) calls surface on stdout
 ```
 
-and that `ffmpeg` is on PATH (`brew install ffmpeg` on macOS;
-`sudo apt install ffmpeg` on Linux).
+and that `ffmpeg` is on PATH (`brew install ffmpeg` on macOS — install
+`brew` thanks to [brew.sh](https://brew.sh/); `sudo apt install ffmpeg`
+on Linux).
 
 ---
 
@@ -79,11 +83,15 @@ ph.extract_audio_stream("https://soundcloud.com/user/track-id")
 # Just give me the freshest episode
 ep = ph.latest_episode("https://feeds.npr.org/510289/podcast.xml")
 print(ep["title"], "→", ep["enclosure_url"])
+# Up First → https://chrt.fm/track/.../media.mp3
 
 # Browse the catalog (newest first)
 episodes = ph.feed("https://feeds.npr.org/510289/podcast.xml", max_episodes=20)
 for ep in episodes:
     print(ep["published_at"], "—", ep["title"], f"({ep['duration_seconds']}s)")
+    # 2026-06-29T07:00:00+00:00 — Friday's Headlines (730s)
+    # 2026-06-28T07:00:00+00:00 — Thursday's Headlines (708s)
+    # ...
 
 # Pick by index (e.g. yesterday's episode = second-newest)
 ep = ph.feed("https://feeds.npr.org/510289/podcast.xml", max_episodes=2)[1]
@@ -196,6 +204,7 @@ async def transcribe(url):
         if len(chunks) * 0.02 >= 5.0:           # every 5 seconds
             audio = np.concatenate(chunks)
             print(whisper.transcribe(audio))
+            # "And in tonight's headlines, the Senate voted..."
             chunks.clear()
 ```
 

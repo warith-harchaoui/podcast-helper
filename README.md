@@ -21,6 +21,8 @@ Podcast pipelines (ASR, diarization, summarisation, search indexing) usually sta
 You need `ffmpeg` on PATH:
 
 - macOS 🍎 : `brew install ffmpeg`
+
+  (install `brew` thanks to [brew.sh](https://brew.sh/))
 - Ubuntu 🐧 : `sudo apt install ffmpeg`
 - Windows 🪟 : grab a build from [ffmpeg.org/download.html](https://ffmpeg.org/download.html) and add it to `PATH`.
 
@@ -53,6 +55,8 @@ async def main():
 
 asyncio.run(main())
 ```
+
+For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / multichannel, anti-aliasing, downstream ASR / VAD / summarisation pipelines), see [📋 EXAMPLES.md](EXAMPLES.md).
 
 # What URLs are accepted
 
