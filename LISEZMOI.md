@@ -30,10 +30,10 @@ Puis :
 
 ```bash
 pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.3
+  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.4
 ```
 
-Cela tire [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.1.2 (et transitivement `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) pour le RSS.
+Cela tire [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.2.0 (et transitivement `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) pour le RSS.
 
 # Démarrage rapide
 
