@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-06-29
+
+### Changed
+
+- Bump `youtube-helper` pin from `v1.1.2` to `v1.2.0` — picks up the
+  new `extract_frames_stream` wrapper (not used by podcast-helper
+  directly, but the transitive `video-helper` v1.5.1 → v1.5.2 bump
+  unblocks URL-aware frame extraction for downstream users mixing
+  podcast-helper + video-helper in the same env).
+
+## [0.1.3] - 2026-06-29 — superseded by 0.1.4
+
 ### Documentation
 
 - Establish suite-wide Python coding-style mandate in `CONTRIBUTING.md`:
