@@ -1,6 +1,6 @@
 # Podcast Helper
 
-> 🌐 Version française : [LISEZMOI.md](LISEZMOI.md)
+[🇫🇷](LISEZMOI.md) · [🇬🇧](README.md)
 
 `Podcast Helper` belongs to a collection of libraries called `AI Helpers` developed for building Artificial Intelligence.
 
@@ -26,7 +26,7 @@ Then:
 
 ```bash
 pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.0
+  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.3
 ```
 
 This pulls in [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.1.0 (and transitively `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) for RSS.

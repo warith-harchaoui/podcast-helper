@@ -30,7 +30,7 @@ and that `ffmpeg` is on PATH (`brew install ffmpeg` on macOS;
 
 ```bash
 pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.0
+  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.3
 ```
 
 Pulls in `youtube-helper` (and transitively `yt-dlp`, `audio-helper`,
