@@ -30,7 +30,7 @@ Then:
 
 ```bash
 pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.4
+  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.2.0
 ```
 
 This pulls in [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.1.0 (and transitively `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) for RSS.
@@ -117,14 +117,15 @@ Each `Episode` dict has a normalised schema regardless of feed flavour:
 
 For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3u8` manifest. `extract_audio_stream` detects this (`is_live=True`) and automatically disables `-re` real-time pacing (the source paces itself). The async iterator runs indefinitely until the live stream ends; callers should `break` when they're done.
 
-`speed != 1.0` for live streams will raise `ValueError` in v0.2 — you can't fast-forward beyond the live edge.
+`speed != 1.0` for live streams raises `ValueError` (as of v0.2.0) — you can't fast-forward beyond the live edge. Use `speed=...` on VOD only.
 
 # Roadmap
 
 | Version | Feature |
 |---|---|
-| **v0.1.0** (this release) | `extract_audio_stream` + `feed` + `latest_episode`. yt-dlp + ffmpeg + feedparser + podcastparser. |
-| **v0.2.0** | `record_to="ep.mp3" \| ".m4a"` (tee-ffmpeg: PCM to caller + compressed archive to disk in parallel). `speed: float` for VOD (raises on live). `start_instant` / `end_instant` for VOD seek. |
+| v0.1.0 | `extract_audio_stream` + `feed` + `latest_episode`. yt-dlp + ffmpeg + feedparser + podcastparser. |
+| **v0.2.0** (this release) | `record_to="ep.mp3" \| ".m4a" \| ".opus" \| ".ogg" \| ".flac" \| ".wav"` (ffmpeg multi-output: PCM to caller + compressed archive to disk in parallel). `speed: float` for VOD (raises on live), via `atempo=` filter (pitch-preserving). |
+| **v0.3.0** | `start_instant` / `end_instant` for VOD seek. `apple_podcasts_to_rss(url)` via iTunes Search API. Podcast Index API integration. |
 | **v0.3.0** | `apple_podcasts_to_rss(url)` via iTunes Search API. Podcast Index API integration. Mic capture moves to `capture-helper`. |
 | **v0.4.0+** | Chapters (ID3 CTOC/CHAP, Podcasting 2.0 `<podcast:chapters>`), transcripts, OPML import/export. |
 

@@ -34,7 +34,7 @@ on Linux).
 
 ```bash
 pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.4
+  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.2.0
 ```
 
 Pulls in `youtube-helper` (and transitively `yt-dlp`, `audio-helper`,

@@ -30,7 +30,7 @@ Puis :
 
 ```bash
 pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.1.4
+  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.2.0
 ```
 
 Cela tire [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.2.0 (et transitivement `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) pour le RSS.
@@ -117,14 +117,15 @@ Chaque dictionnaire `Episode` a un schéma normalisé indépendamment de la vari
 
 Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un manifeste HLS `.m3u8`. `extract_audio_stream` le détecte (`is_live=True`) et désactive automatiquement le pacing temps réel `-re` (la source impose son propre tempo). L'itérateur asynchrone tourne indéfiniment jusqu'à la fin du live ; à l'appelant de `break` quand il a fini.
 
-`speed != 1.0` sur un flux live lèvera `ValueError` en v0.2 — impossible d'aller plus vite que le bord du direct.
+`speed != 1.0` sur un flux live lève `ValueError` (depuis v0.2.0) — impossible d'aller plus vite que le bord du direct. Utilisez `speed=...` uniquement en VOD.
 
 # Roadmap
 
 | Version | Fonctionnalité |
 |---|---|
-| **v0.1.x** (cette release) | `extract_audio_stream` + `feed` + `latest_episode`. yt-dlp + ffmpeg + feedparser + podcastparser. |
-| **v0.2.0** | `record_to="ep.mp3" \| ".m4a"` (tee ffmpeg : PCM vers l'appelant + archive compressée sur disque en parallèle). `speed: float` pour la VOD (lève sur live). `start_instant` / `end_instant` pour le seek VOD. |
+| v0.1.x | `extract_audio_stream` + `feed` + `latest_episode`. yt-dlp + ffmpeg + feedparser + podcastparser. |
+| **v0.2.0** (cette release) | `record_to="ep.mp3" \| ".m4a" \| ".opus" \| ".ogg" \| ".flac" \| ".wav"` (multi-output ffmpeg : PCM vers l'appelant + archive compressée sur disque en parallèle). `speed: float` pour la VOD (lève sur live), via le filtre `atempo=` (préserve la hauteur). |
+| **v0.3.0** | `start_instant` / `end_instant` pour le seek VOD. `apple_podcasts_to_rss(url)` via l'API iTunes Search. Intégration Podcast Index. |
 | **v0.3.0** | `apple_podcasts_to_rss(url)` via l'API iTunes Search. Intégration Podcast Index. La capture micro déménage dans `capture-helper`. |
 | **v0.4.0+** | Chapitres (ID3 CTOC/CHAP, Podcasting 2.0 `<podcast:chapters>`), transcripts, import/export OPML. |
 

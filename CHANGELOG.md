@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-29
+
+### Added
+
+- `extract_audio_stream(url, ..., speed=1.0)` — new `speed` parameter
+  for VOD only. Implemented via ffmpeg's `atempo=` filter so the pitch
+  is preserved (no chipmunk effect). `speed > 1.0` speeds up (e.g.
+  `2.0` for 2× ASR throughput); `0 < speed < 1.0` slows down (e.g.
+  `0.5` for proofreading). Outside `[0.5, 100]` the chain wraps
+  multiple `atempo` filters whose product equals `speed`. Raises
+  `ValueError` on live streams — you can't fast-forward past the live
+  edge, and slowing down lets the consumer fall behind unboundedly.
+  Implicitly disables `-re` realtime pacing when `speed != 1.0`.
+- `extract_audio_stream(url, ..., record_to=<path>)` — new `record_to`
+  parameter that writes a **parallel compressed archive** of the same
+  audio to disk while the live PCM stream is consumed. Implemented via
+  ffmpeg's native multi-output (one decode, two encoder paths, no
+  extra subprocess). Codec is picked from the extension: `.mp3` (mp3,
+  128 kbps), `.m4a` / `.aac` (aac, 128 kbps), `.opus` (opus, 96 kbps),
+  `.ogg` (vorbis quality 5), `.flac` (lossless), `.wav` (pcm_s16le).
+  The archive is `target_sample_rate` / `to_mono` / `speed`-coherent
+  with the live PCM (same filter chain). Works for both VOD and live
+  (live archives grow for the duration of the stream).
+
+### Tests
+
+- `tests/test_v02_features.py` — 22 unit tests covering `atempo`
+  chaining edge cases at the `[0.5, 2.0]` boundaries, codec dispatch
+  for every supported archive extension, the augmented
+  `_build_ffmpeg_cmd` output shape, and the public
+  `extract_audio_stream` validation paths (live-stream rejection,
+  non-positive speed, unknown archive extension). Network-free.
+
 ## [0.1.4] - 2026-06-29
 
 ### Changed
