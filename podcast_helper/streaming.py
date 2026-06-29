@@ -298,6 +298,93 @@ def _resolve_source(
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# v0.2.0 — speed= and record_to= helpers
+# ---------------------------------------------------------------------------
+
+
+def _build_atempo_chain(speed: float) -> str:
+    """
+    Build an ``atempo=...`` filter chain that applies ``speed`` to the
+    audio without changing pitch.
+
+    ``atempo`` is bounded by ffmpeg to ``[0.5, 100.0]``. Outside that
+    range, the trick is to chain multiple ``atempo`` filters whose
+    product equals the requested speed — e.g. ``speed=0.25`` becomes
+    ``atempo=0.5,atempo=0.5``.
+
+    Parameters
+    ----------
+    speed : float
+        Target playback rate (1.0 = unchanged; > 1.0 = faster;
+        0 < speed < 1.0 = slower). Caller must pre-validate ``speed > 0``.
+
+    Returns
+    -------
+    str
+        The filter expression to splice into ``-af`` (e.g.
+        ``"atempo=2.0"`` or ``"atempo=0.5,atempo=0.5"``).
+    """
+    chain: list[str] = []
+    remaining = speed
+    if speed >= 1.0:
+        # Keep doubling until we're under 100×, then apply the remainder.
+        while remaining > 2.0:
+            chain.append("atempo=2.0")
+            remaining /= 2.0
+        chain.append(f"atempo={remaining:.6f}")
+    else:
+        # Mirror logic for slowdown.
+        while remaining < 0.5:
+            chain.append("atempo=0.5")
+            remaining /= 0.5
+        chain.append(f"atempo={remaining:.6f}")
+    return ",".join(chain)
+
+
+# Output codec dispatch keyed off file extension. Compressed archive
+# formats only — uncompressed (.wav, .raw) routes to PCM separately.
+_ARCHIVE_CODECS: dict[str, list[str]] = {
+    "mp3":  ["-c:a", "libmp3lame", "-b:a", "128k"],
+    "m4a":  ["-c:a", "aac",        "-b:a", "128k"],
+    "aac":  ["-c:a", "aac",        "-b:a", "128k"],
+    "opus": ["-c:a", "libopus",    "-b:a", "96k"],
+    "ogg":  ["-c:a", "libvorbis",  "-q:a", "5"],
+    "flac": ["-c:a", "flac"],                   # lossless, no bitrate
+    "wav":  ["-c:a", "pcm_s16le"],              # PCM 16-bit
+}
+
+
+def _archive_codec_args(record_to: str) -> list[str]:
+    """
+    Pick the ffmpeg ``-c:a ... -b:a ...`` args for the parallel archive
+    output based on ``record_to``'s extension.
+
+    Parameters
+    ----------
+    record_to : str
+        Path to the archive file (extension picks the codec).
+
+    Returns
+    -------
+    list[str]
+        ffmpeg arguments to splice into the archive output spec.
+
+    Raises
+    ------
+    ValueError
+        If the extension is not in the supported set.
+    """
+    _, _, ext = record_to.rpartition(".")
+    ext = ext.lower()
+    if ext not in _ARCHIVE_CODECS:
+        raise ValueError(
+            f"record_to={record_to!r}: unsupported archive extension {ext!r}. "
+            f"Supported: {sorted(_ARCHIVE_CODECS)}"
+        )
+    return list(_ARCHIVE_CODECS[ext])
+
+
 def _build_ffmpeg_cmd(
     direct_url: str,
     *,
@@ -307,6 +394,8 @@ def _build_ffmpeg_cmd(
     realtime: bool,
     is_live: bool,
     headers: dict[str, str],
+    speed: float = 1.0,
+    record_to: Optional[str] = None,
 ) -> list[str]:
     """Assemble the ffmpeg command line.
 
@@ -321,12 +410,21 @@ def _build_ffmpeg_cmd(
     - ``-ac 1`` applies the standard ffmpeg downmix matrix when ``to_mono``.
     - When ``to_mono=False``, the channel count of the source is
       preserved verbatim.
+    - ``speed != 1.0`` adds ``atempo=...`` to the filter chain (pitch
+      preserved). For ``record_to`` archives, the atempo applies to
+      BOTH outputs — the PCM stream and the file — so the archive is
+      time-warped exactly like the live consumer hears it.
+    - ``record_to=<path>`` adds a second output mapping the same audio
+      stream to a compressed file (codec picked from the extension).
+      Implemented via ffmpeg's native multi-output: one decode, two
+      encoder paths, no extra subprocess.
     """
     cmd: list[str] = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin"]
 
     # Real-time pacing. Forced OFF for live (the source paces itself; -re
-    # would double the latency by waiting on already-paced packets).
-    if realtime and not is_live:
+    # would double the latency by waiting on already-paced packets) and
+    # OFF for any speed != 1.0 (the user explicitly asked for non-realtime).
+    if realtime and not is_live and speed == 1.0:
         cmd += ["-re"]
 
     # HTTP headers. ffmpeg expects a single CRLF-separated string before -i.
@@ -336,19 +434,41 @@ def _build_ffmpeg_cmd(
 
     cmd += ["-i", direct_url]
 
-    # Audio filter / resampler choice.
+    # Build the per-output audio filter chain. The atempo filter must
+    # come before / be combined with aresample for soxr to operate on
+    # the time-warped stream.
+    af_parts: list[str] = []
     if resample_quality == "high":
-        cmd += ["-af", f"aresample={target_sample_rate}:resampler=soxr:precision=28"]
-    else:
-        cmd += ["-ar", str(target_sample_rate)]
+        af_parts.append(f"aresample={target_sample_rate}:resampler=soxr:precision=28")
+    if speed != 1.0:
+        af_parts.append(_build_atempo_chain(speed))
 
-    # Channel handling — explicit downmix or preserve source.
+    # ── Output 1: raw 32-bit float LE PCM to stdout (the live consumer).
+    if af_parts:
+        cmd += ["-af", ",".join(af_parts)]
+    if resample_quality != "high":
+        # Cheap path: ffmpeg's `-ar` triggers libswresample without
+        # needing a filter-graph reference.
+        cmd += ["-ar", str(target_sample_rate)]
     if to_mono:
         cmd += ["-ac", "1"]
-    # else: omit -ac entirely so ffmpeg preserves the source channel count.
-
-    # Output: raw 32-bit float little-endian PCM to stdout.
     cmd += ["-f", "f32le", "-"]
+
+    # ── Output 2 (optional): parallel compressed archive.
+    if record_to is not None:
+        # Re-apply the same audio filter chain so the archive matches
+        # the live PCM exactly (same rate, channels, speed). ffmpeg
+        # decodes the input once and feeds two independent encoder
+        # paths from it.
+        if af_parts:
+            cmd += ["-af", ",".join(af_parts)]
+        if resample_quality != "high":
+            cmd += ["-ar", str(target_sample_rate)]
+        if to_mono:
+            cmd += ["-ac", "1"]
+        cmd += _archive_codec_args(record_to)
+        cmd += [record_to]
+
     return cmd
 
 
@@ -362,6 +482,8 @@ async def extract_audio_stream(
     frame_ms: int = 20,
     headers: Optional[dict[str, str]] = None,
     cookies_from_browser: Optional[str] = None,
+    speed: float = 1.0,
+    record_to: Optional[str] = None,
 ) -> AsyncIterator[PcmFrame]:
     """
     Yield PCM frames from any audio-bearing URL.
@@ -399,6 +521,36 @@ async def extract_audio_stream(
         ``"firefox"`` / ``"chrome"`` / ``"safari"`` / etc. — passed to
         yt-dlp's ``--cookies-from-browser`` for age-gated or
         members-only sources.
+    speed : float, default 1.0
+        Playback rate for **VOD only**. Implemented via ffmpeg's
+        ``atempo=`` filter so the pitch is preserved (no chipmunk
+        effect). ``1.0`` = unchanged; ``> 1.0`` = faster (e.g. ``2.0``
+        for 2× ASR throughput on long episodes); ``0 < speed < 1.0`` =
+        slower (e.g. ``0.5`` for half-speed transcription proofing).
+        Outside ``[0.5, 100]`` the chain wraps multiple ``atempo``
+        filters whose product equals ``speed``. **Raises ``ValueError``
+        on live streams** — you can't fast-forward past the live edge,
+        and slowing down lets the consumer fall behind unboundedly.
+        Implicitly disables the ``-re`` realtime pacing when
+        ``speed != 1.0``.
+    record_to : str, optional
+        If set, ffmpeg writes a **parallel compressed archive** of the
+        same audio to this path while the live PCM stream is consumed.
+        Implemented via ffmpeg's native multi-output: one decode, two
+        encoder paths, no extra subprocess. Codec is picked from the
+        extension:
+
+        - ``.mp3`` → ``libmp3lame`` (128 kbps)
+        - ``.m4a`` / ``.aac`` → ``aac`` (128 kbps)
+        - ``.opus`` → ``libopus`` (96 kbps)
+        - ``.ogg`` → ``libvorbis`` (quality 5)
+        - ``.flac`` → ``flac`` (lossless)
+        - ``.wav`` → ``pcm_s16le``
+
+        Unknown extensions raise ``ValueError``. The archive is
+        ``target_sample_rate`` / ``to_mono`` / ``speed`` -coherent
+        with the live PCM (same filter chain). For live sources, the
+        archive grows for the duration of the stream.
 
     Yields
     ------
@@ -414,6 +566,9 @@ async def extract_audio_stream(
         If yt-dlp can't resolve the URL (private / removed / geo-blocked).
     FileNotFoundError
         If ffmpeg is not on PATH.
+    ValueError
+        If ``speed != 1.0`` and the source is live, if ``speed <= 0``,
+        or if ``record_to``'s extension is not in the supported set.
 
     Examples
     --------
@@ -442,6 +597,22 @@ async def extract_audio_stream(
         cookies_from_browser=cookies_from_browser,
     )
 
+    # v0.2.0 — speed= validation. atempo is only meaningful for VOD; on
+    # a live stream the playhead is at the live edge so "faster" means
+    # nothing (you'd have to time-travel forward) and "slower" means
+    # the consumer falls behind unboundedly. Surface that explicitly
+    # before spawning ffmpeg.
+    if speed != 1.0:
+        if speed <= 0:
+            raise ValueError(f"speed must be > 0, got {speed}")
+        if resolved["is_live"]:
+            raise ValueError(
+                "speed != 1.0 is invalid for live streams (the playhead is "
+                "at the live edge — you can't fast-forward past it, and "
+                "slowing down lets the consumer fall behind unboundedly). "
+                f"is_live=True for URL: {url!r}"
+            )
+
     cmd = _build_ffmpeg_cmd(
         resolved["direct_url"],
         target_sample_rate=target_sample_rate,
@@ -450,6 +621,8 @@ async def extract_audio_stream(
         realtime=realtime,
         is_live=resolved["is_live"],
         headers=resolved["headers"],
+        speed=speed,
+        record_to=record_to,
     )
     logging.debug(
         "podcast-helper: source=%s is_live=%s cmd=%s",
