@@ -113,6 +113,38 @@ Each `Episode` dict has a normalised schema regardless of feed flavour:
  image_url}
 ```
 
+# Multi-surface exposure
+
+`podcast-helper` exposes the same public functions through four
+interchangeable surfaces — pick the one that fits the caller.
+
+| Surface | Entry point | Extra | Best for |
+|---|---|---|---|
+| Library (async iterator) | `import podcast_helper as ph` | — | Python code, notebooks, downstream ASR / VAD / summarisation |
+| argparse CLI | `podcast-helper` | — (stdlib only) | shell scripts, CI, ffmpeg pipelines |
+| click CLI | `podcast-helper-click` | `[cli]` | click-native shells (bash / zsh completion, colored help) |
+| FastAPI HTTP | `uvicorn podcast_helper.api:app` | `[api]` | HTTP microservices, cross-language callers |
+| MCP server | `podcast-helper-mcp` | `[api,mcp]` | Claude Desktop, MCP-aware agents, IDE integrations |
+
+Install any combination of extras:
+
+```bash
+pip install 'podcast-helper[cli]'          # + click twin
+pip install 'podcast-helper[api]'          # + FastAPI HTTP surface
+pip install 'podcast-helper[api,mcp]'      # + MCP tools on top of FastAPI
+pip install 'podcast-helper[cli,api,mcp]'  # everything
+```
+
+Every surface publishes the same verbs — `feed`, `latest`, `stream`,
+`record`, `probe` — with identical argument names, so switching
+between them is a copy-paste. The Dockerfile in this repo ships the
+FastAPI + MCP surfaces on port 8000 out of the box (`docker build -t
+podcast-helper . && docker run --rm -p 8000:8000 podcast-helper`).
+
+For an ambitious visual product on top, see [`GUI.md`](GUI.md). For a
+competitive comparison against the Python audio / podcast ecosystem,
+see [`LANDSCAPE.md`](LANDSCAPE.md).
+
 # Live streams
 
 For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3u8` manifest. `extract_audio_stream` detects this (`is_live=True`) and automatically disables `-re` real-time pacing (the source paces itself). The async iterator runs indefinitely until the live stream ends; callers should `break` when they're done.

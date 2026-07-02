@@ -113,6 +113,39 @@ Chaque dictionnaire `Episode` a un schéma normalisé indépendamment de la vari
  image_url}
 ```
 
+# Exposition multi-surface
+
+`podcast-helper` expose les mêmes fonctions publiques via quatre
+surfaces interchangeables — choisissez celle qui convient à l'appelant.
+
+| Surface | Point d'entrée | Extra | Idéal pour |
+|---|---|---|---|
+| Bibliothèque (itérateur async) | `import podcast_helper as ph` | — | code Python, notebooks, ASR / VAD / résumé en aval |
+| CLI argparse | `podcast-helper` | — (stdlib uniquement) | scripts shell, CI, pipelines ffmpeg |
+| CLI click | `podcast-helper-click` | `[cli]` | shells click-native (auto-complétion bash / zsh, aide colorée) |
+| API FastAPI | `uvicorn podcast_helper.api:app` | `[api]` | microservices HTTP, appelants multi-langages |
+| Serveur MCP | `podcast-helper-mcp` | `[api,mcp]` | Claude Desktop, agents MCP, intégrations IDE |
+
+Installez la combinaison d'extras qui vous convient :
+
+```bash
+pip install 'podcast-helper[cli]'          # + le jumeau click
+pip install 'podcast-helper[api]'          # + la surface HTTP FastAPI
+pip install 'podcast-helper[api,mcp]'      # + les outils MCP sur FastAPI
+pip install 'podcast-helper[cli,api,mcp]'  # tout
+```
+
+Chaque surface publie les mêmes verbes — `feed`, `latest`, `stream`,
+`record`, `probe` — avec des noms d'arguments identiques, donc
+basculer d'une surface à l'autre relève du copier-coller. Le
+Dockerfile de ce dépôt embarque les surfaces FastAPI + MCP sur le
+port 8000 par défaut (`docker build -t podcast-helper . && docker run
+--rm -p 8000:8000 podcast-helper`).
+
+Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](GUI.md).
+Pour une comparaison face à l'écosystème audio / podcast Python, voir
+[`LANDSCAPE.md`](LANDSCAPE.md).
+
 # Flux en direct
 
 Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un manifeste HLS `.m3u8`. `extract_audio_stream` le détecte (`is_live=True`) et désactive automatiquement le pacing temps réel `-re` (la source impose son propre tempo). L'itérateur asynchrone tourne indéfiniment jusqu'à la fin du live ; à l'appelant de `break` quand il a fini.

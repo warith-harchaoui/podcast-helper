@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "podcast-helper"
-version = "0.2.0"
-description = "Podcast Helper — universal audio stream consumer. URL-in → PCM-out for local files, direct audio URLs, RSS feed enclosures, and yt-dlp-supported sources (YouTube, Vimeo, Twitch, SoundCloud, …). Built on youtube-helper + ffmpeg + feedparser + podcastparser; Shannon-correct resampling, mono downmix or native channels preserved."
+version = "0.3.0"
+description = "Podcast Helper — universal audio stream consumer exposed as library, argparse CLI, click CLI, FastAPI HTTP surface and MCP tools. URL-in → PCM-out for local files, direct audio URLs, RSS feed enclosures, and yt-dlp-supported sources (YouTube, Vimeo, Twitch, SoundCloud, …). Built on youtube-helper + ffmpeg + feedparser + podcastparser; Shannon-correct resampling, mono downmix or native channels preserved."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
 license = {text = "BSD-3-Clause"}
@@ -34,10 +34,49 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+# CLI-only-with-click extra. argparse variant needs no runtime dep and
+# is always available.
+cli = ["click>=8.1,<9"]
+# FastAPI HTTP surface (podcast_helper.api). uvicorn + python-multipart
+# so multipart form data works out of the box.
+api = [
+    "fastapi>=0.111,<1",
+    "uvicorn>=0.30,<1",
+    "python-multipart>=0.0.9,<1",
+]
+# MCP surface (podcast_helper.mcp). Depends on the `api` extra
+# — fastapi-mcp wraps the FastAPI app.
+mcp = [
+    "fastapi-mcp>=0.3,<1",
+    "fastapi>=0.111,<1",
+    "uvicorn>=0.30,<1",
+    "python-multipart>=0.0.9,<1",
+]
+# `dev` keeps the bar low for CI — pytest + pytest-asyncio + httpx (for
+# FastAPI TestClient) + click (so the click CLI import always resolves
+# in tests) + fastapi + fastapi-mcp so smoke tests can import every
+# surface without requiring the caller to install all extras.
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "click>=8.1,<9",
+    "fastapi>=0.111,<1",
+    "python-multipart>=0.0.9,<1",
+    "fastapi-mcp>=0.3,<1",
+]
+
+[project.scripts]
+# argparse-based CLI — no runtime dep beyond stdlib + core package.
+podcast-helper = "podcast_helper.cli_argparse:main"
+# click-based twin — install with the [cli] extra.
+podcast-helper-click = "podcast_helper.cli_click:cli"
+# MCP server (over FastAPI) — install with the [api,mcp] extras.
+podcast-helper-mcp = "podcast_helper.mcp:main"
 
 [project.urls]
 Homepage = "https://github.com/warith-harchaoui/podcast-helper"
+Issues = "https://github.com/warith-harchaoui/podcast-helper/issues"
 
 [tool.setuptools.packages.find]
 include = ["podcast_helper*"]
