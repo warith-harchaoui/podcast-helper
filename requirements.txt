@@ -1,0 +1,17 @@
+# podcast-helper — pip requirements (portable, no `file://` deps).
+#
+# For a plain install:
+#     pip install -r requirements.txt
+#     pip install -e .           # podcast-helper itself (editable) or `pip install .`
+#
+# Optional surfaces (CLI/API/MCP) live behind extras, e.g. `.[cli]`, `.[api,mcp]`.
+# The youtube-helper pin is kept in lock-step with the release tag below
+# (and transitively pulls os/audio/video-helper at their pinned tags).
+
+# --- Suite dependency -----------------------------------------------------
+youtube-helper @ git+https://github.com/warith-harchaoui/youtube-helper.git@v1.3.3
+# --- Core runtime ---------------------------------------------------------
+feedparser>=6.0,<7
+podcastparser>=0.6,<1
+requests>=2.28,<3
+numpy>=1.24
