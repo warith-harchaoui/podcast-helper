@@ -12,6 +12,12 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL-in
 
 [![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
 
+# Documentation
+
+[💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
+
+[📋 Examples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md)
+
 ## Why it exists
 
 Podcast pipelines (ASR, diarization, summarisation, search indexing) usually start with the same question: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function — and the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.

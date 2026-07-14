@@ -12,6 +12,12 @@ Consommateur universel de flux audio pour podcasts et toute URL portant de l'aud
 
 [![logo](assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
 
+# Documentation
+
+[💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
+
+[📋 Exemples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md)
+
 ## Pourquoi cette bibliothèque
 
 Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commencent souvent par la même question : *« donne-moi un flux de frames PCM depuis cette URL, peu importe que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube, ou un podcast hébergé sur un CDN que je ne connais pas »*. Cette bibliothèque est cette fonction unique — plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent l'usage des sources RSS agréable.
