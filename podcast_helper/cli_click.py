@@ -41,13 +41,11 @@ try:
     import click
 except ImportError as exc:  # pragma: no cover
     raise ImportError(
-        "The click CLI requires the [cli] extra. "
-        "Install with: pip install 'podcast-helper[cli]'"
+        "The click CLI requires the [cli] extra. Install with: pip install 'podcast-helper[cli]'"
     ) from exc
 
 # Same underlying functions as the argparse twin — one source of truth.
 from . import extract_audio_stream, feed, latest_episode
-
 
 # ---------------------------------------------------------------------------
 # Top-level group
@@ -75,7 +73,9 @@ def cli() -> None:
 
 @cli.command()
 @click.option("--url", required=True, help="Feed URL.")
-@click.option("--max-episodes", type=int, default=None, help="Cap episodes returned (default: all).")
+@click.option(
+    "--max-episodes", type=int, default=None, help="Cap episodes returned (default: all)."
+)
 def feed_cmd(url: str, max_episodes: int | None) -> None:
     """Dump an RSS / Atom podcast feed as JSON."""
     episodes = feed(url, max_episodes=max_episodes)
@@ -93,7 +93,9 @@ cli.add_command(feed_cmd, name="feed")
 
 @cli.command()
 @click.option("--url", required=True, help="Feed URL.")
-@click.option("--json", "as_json", is_flag=True, default=False, help="Print full Episode dict as JSON.")
+@click.option(
+    "--json", "as_json", is_flag=True, default=False, help="Print full Episode dict as JSON."
+)
 def latest(url: str, as_json: bool) -> None:
     """Print the latest episode's enclosure URL (or full Episode as JSON)."""
     ep = latest_episode(url)
@@ -147,13 +149,39 @@ async def _stream_impl(
 
 @cli.command()
 @click.option("--url", required=True, help="Audio-bearing URL.")
-@click.option("--sample-rate", type=int, default=16000, show_default=True, help="Target sample rate in Hz.")
-@click.option("--mono/--stereo", default=True, show_default=True, help="Downmix to mono or preserve native channels.")
+@click.option(
+    "--sample-rate", type=int, default=16000, show_default=True, help="Target sample rate in Hz."
+)
+@click.option(
+    "--mono/--stereo",
+    default=True,
+    show_default=True,
+    help="Downmix to mono or preserve native channels.",
+)
 @click.option("--frame-ms", type=int, default=20, show_default=True, help="Frame duration in ms.")
-@click.option("--speed", type=float, default=1.0, show_default=True, help="Playback rate (VOD only, pitch-preserving).")
+@click.option(
+    "--speed",
+    type=float,
+    default=1.0,
+    show_default=True,
+    help="Playback rate (VOD only, pitch-preserving).",
+)
 @click.option("--output", type=click.Path(), default=None, help="Optional compressed archive path.")
-@click.option("--realtime/--no-realtime", default=True, show_default=True, help="Pace decoding at wall-clock (ffmpeg -re).")
-def stream(url: str, sample_rate: int, mono: bool, frame_ms: int, speed: float, output: str | None, realtime: bool) -> None:
+@click.option(
+    "--realtime/--no-realtime",
+    default=True,
+    show_default=True,
+    help="Pace decoding at wall-clock (ffmpeg -re).",
+)
+def stream(
+    url: str,
+    sample_rate: int,
+    mono: bool,
+    frame_ms: int,
+    speed: float,
+    output: str | None,
+    realtime: bool,
+) -> None:
     """Decode any audio-bearing URL to raw f32le PCM on stdout, or a compressed archive on disk."""
     asyncio.run(_stream_impl(url, sample_rate, mono, realtime, frame_ms, speed, output))
     if output:
@@ -167,13 +195,18 @@ def stream(url: str, sample_rate: int, mono: bool, frame_ms: int, speed: float, 
 
 @cli.command()
 @click.option("--url", required=True, help="Audio-bearing URL.")
-@click.option("--output", required=True, type=click.Path(), help="Output archive (mp3/m4a/opus/ogg/flac/wav).")
+@click.option(
+    "--output", required=True, type=click.Path(), help="Output archive (mp3/m4a/opus/ogg/flac/wav)."
+)
 @click.option("--sample-rate", type=int, default=16000, show_default=True)
 @click.option("--mono/--stereo", default=True, show_default=True)
 @click.option("--frame-ms", type=int, default=20, show_default=True)
 @click.option("--speed", type=float, default=1.0, show_default=True)
-def record(url: str, output: str, sample_rate: int, mono: bool, frame_ms: int, speed: float) -> None:
+def record(
+    url: str, output: str, sample_rate: int, mono: bool, frame_ms: int, speed: float
+) -> None:
     """Archive any audio-bearing URL to a compressed file."""
+
     async def _run() -> None:
         async for _ in extract_audio_stream(
             url,
@@ -197,7 +230,12 @@ def record(url: str, output: str, sample_rate: int, mono: bool, frame_ms: int, s
 
 @cli.command()
 @click.option("--url", required=True, help="URL to classify.")
-@click.option("--show-url", is_flag=True, default=False, help="Include resolved direct URL (may contain signed tokens).")
+@click.option(
+    "--show-url",
+    is_flag=True,
+    default=False,
+    help="Include resolved direct URL (may contain signed tokens).",
+)
 def probe(url: str, show_url: bool) -> None:
     """Report how podcast-helper classified a URL."""
     from .streaming import _resolve_source  # internal but stable across releases

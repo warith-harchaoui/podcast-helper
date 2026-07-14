@@ -46,8 +46,8 @@ from __future__ import annotations
 
 import shutil
 import tempfile
+from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import AsyncIterator, Optional
 
 try:
     from fastapi import BackgroundTasks, FastAPI, Form, HTTPException, Query
@@ -59,7 +59,6 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 from . import extract_audio_stream, feed, latest_episode
-
 
 # ---------------------------------------------------------------------------
 # App factory + shared plumbing
@@ -116,7 +115,7 @@ def health() -> dict:
 @app.get("/feed", tags=["reads"])
 def get_feed(
     url: str = Query(..., description="RSS / Atom feed URL."),
-    max_episodes: Optional[int] = Query(None, description="Cap number of episodes returned."),
+    max_episodes: int | None = Query(None, description="Cap number of episodes returned."),
 ) -> JSONResponse:
     """Return the feed's episodes as JSON (most-recent first)."""
     try:
@@ -170,7 +169,11 @@ def probe(
 
 
 async def _pcm_iterator(
-    url: str, sample_rate: int, mono: bool, frame_ms: int, speed: float,
+    url: str,
+    sample_rate: int,
+    mono: bool,
+    frame_ms: int,
+    speed: float,
 ) -> AsyncIterator[bytes]:
     # Bridge our async iterator of PcmFrame dicts to the byte-stream
     # protocol FastAPI expects for a StreamingResponse. Each yielded

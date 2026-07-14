@@ -26,7 +26,6 @@ click = pytest.importorskip("click")
 
 from click.testing import CliRunner  # noqa: E402
 
-
 # The set of subcommand names both CLIs must expose. Defined once so
 # the two parametrized suites stay in lockstep.
 _EXPECTED_SUBCOMMANDS = {"feed", "latest", "stream", "record", "probe"}

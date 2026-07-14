@@ -9,7 +9,8 @@
 # (and transitively pulls os/audio/video-helper at their pinned tags).
 
 # --- Suite dependency -----------------------------------------------------
-youtube-helper @ git+https://github.com/warith-harchaoui/youtube-helper.git@v1.3.3
+youtube-helper>=1.3.4
+os-helper>=1.5.0
 # --- Core runtime ---------------------------------------------------------
 feedparser>=6.0,<7
 podcastparser>=0.6,<1

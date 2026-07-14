@@ -46,7 +46,8 @@ jobs:
   lint:
     name: ruff
     runs-on: ubuntu-latest
-    continue-on-error: true
+    # No `continue-on-error`: a style violation blocks the merge exactly
+    # like a failing test (coding standard rule 15 — PEP 8 enforced in CI).
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -55,5 +56,10 @@ jobs:
           cache: pip
       - name: Install ruff
         run: pip install ruff
-      - name: Run ruff
-        run: ruff check . || true
+      # Lint check — must exit 0. Scoped to the package + tests so the
+      # gate matches what contributors run locally.
+      - name: Run ruff check
+        run: ruff check podcast_helper tests
+      # Format check — the tree must already be `ruff format`-clean.
+      - name: Run ruff format --check
+        run: ruff format --check podcast_helper tests

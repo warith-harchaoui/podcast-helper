@@ -34,12 +34,11 @@ import argparse
 import asyncio
 import json
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 # Import the pure functions here — every subcommand is a thin dispatch
 # on top of these, no logic duplication with the library core.
 from . import extract_audio_stream, feed, latest_episode
-
 
 # ---------------------------------------------------------------------------
 # Subcommand handlers
@@ -150,7 +149,9 @@ def _handle_probe(ns: argparse.Namespace) -> int:
     from .streaming import _resolve_source  # internal but stable across releases
 
     resolved = _resolve_source(
-        ns.url, user_headers=None, cookies_from_browser=None,
+        ns.url,
+        user_headers=None,
+        cookies_from_browser=None,
     )
     # Redact the direct_url by default (may contain time-limited signatures).
     payload = {
@@ -177,7 +178,10 @@ def _add_feed(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("feed", help="Dump an RSS / Atom podcast feed as JSON.")
     p.add_argument("--url", required=True, help="Feed URL.")
     p.add_argument(
-        "--max-episodes", type=int, default=None, dest="max_episodes",
+        "--max-episodes",
+        type=int,
+        default=None,
+        dest="max_episodes",
         help="Cap the number of episodes returned (default: all).",
     )
     p.set_defaults(func=_handle_feed)
@@ -193,16 +197,33 @@ def _add_latest(sub: argparse._SubParsersAction) -> None:
 def _stream_common_args(p: argparse.ArgumentParser) -> None:
     # Shared streaming knobs — apply to `stream` and `record` alike.
     p.add_argument("--url", required=True, help="Audio-bearing URL.")
-    p.add_argument("--sample-rate", type=int, default=16000, dest="sample_rate",
-                   help="Target sample rate in Hz (default 16000).")
-    p.add_argument("--mono", action="store_true", default=True,
-                   help="Downmix to mono (default).")
-    p.add_argument("--stereo", dest="mono", action="store_false",
-                   help="Preserve source's native channel count.")
-    p.add_argument("--frame-ms", type=int, default=20, dest="frame_ms",
-                   help="Frame duration in ms (default 20 — matches Silero VAD).")
-    p.add_argument("--speed", type=float, default=1.0,
-                   help="Playback rate (VOD only). 1.0 = unchanged. Pitch-preserving.")
+    p.add_argument(
+        "--sample-rate",
+        type=int,
+        default=16000,
+        dest="sample_rate",
+        help="Target sample rate in Hz (default 16000).",
+    )
+    p.add_argument("--mono", action="store_true", default=True, help="Downmix to mono (default).")
+    p.add_argument(
+        "--stereo",
+        dest="mono",
+        action="store_false",
+        help="Preserve source's native channel count.",
+    )
+    p.add_argument(
+        "--frame-ms",
+        type=int,
+        default=20,
+        dest="frame_ms",
+        help="Frame duration in ms (default 20 — matches Silero VAD).",
+    )
+    p.add_argument(
+        "--speed",
+        type=float,
+        default=1.0,
+        help="Playback rate (VOD only). 1.0 = unchanged. Pitch-preserving.",
+    )
 
 
 def _add_stream(sub: argparse._SubParsersAction) -> None:
@@ -211,12 +232,20 @@ def _add_stream(sub: argparse._SubParsersAction) -> None:
         help="Decode any audio-bearing URL to raw f32le PCM on stdout, or a compressed archive on disk.",
     )
     _stream_common_args(p)
-    p.add_argument("--output", default=None,
-                   help="Optional compressed archive (mp3/m4a/opus/ogg/flac/wav). Extension picks the codec.")
-    p.add_argument("--realtime", action="store_true", default=True,
-                   help="Pace decoding at wall-clock (ffmpeg -re; default).")
-    p.add_argument("--no-realtime", dest="realtime", action="store_false",
-                   help="Decode as fast as possible.")
+    p.add_argument(
+        "--output",
+        default=None,
+        help="Optional compressed archive (mp3/m4a/opus/ogg/flac/wav). Extension picks the codec.",
+    )
+    p.add_argument(
+        "--realtime",
+        action="store_true",
+        default=True,
+        help="Pace decoding at wall-clock (ffmpeg -re; default).",
+    )
+    p.add_argument(
+        "--no-realtime", dest="realtime", action="store_false", help="Decode as fast as possible."
+    )
     p.set_defaults(func=_handle_stream)
 
 
@@ -226,16 +255,21 @@ def _add_record(sub: argparse._SubParsersAction) -> None:
         help="Archive any audio-bearing URL to a compressed file (mp3/m4a/opus/ogg/flac/wav).",
     )
     _stream_common_args(p)
-    p.add_argument("--output", required=True,
-                   help="Output archive path (mp3/m4a/opus/ogg/flac/wav).")
+    p.add_argument(
+        "--output", required=True, help="Output archive path (mp3/m4a/opus/ogg/flac/wav)."
+    )
     p.set_defaults(func=_handle_record)
 
 
 def _add_probe(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("probe", help="Report how podcast-helper classified a URL.")
     p.add_argument("--url", required=True, help="URL to classify.")
-    p.add_argument("--show-url", action="store_true", dest="show_url",
-                   help="Include the resolved direct URL in the JSON output (may contain signed tokens).")
+    p.add_argument(
+        "--show-url",
+        action="store_true",
+        dest="show_url",
+        help="Include the resolved direct URL in the JSON output (may contain signed tokens).",
+    )
     p.set_defaults(func=_handle_probe)
 
 

@@ -46,16 +46,16 @@ Warith HARCHAOUI — https://linkedin.com/in/warith-harchaoui
 from __future__ import annotations
 
 import asyncio
-import logging
 import os
 import shlex
-from typing import AsyncIterator, Literal, Optional, TypedDict
+from collections.abc import AsyncIterator
+from typing import Literal, TypedDict
 from urllib.parse import urlparse
 
 import numpy as np
+import os_helper as osh
 from numpy.typing import NDArray
 from yt_dlp import YoutubeDL
-
 
 # ---------------------------------------------------------------------------
 # Public types
@@ -83,7 +83,7 @@ class PcmFrame(TypedDict):
 
     t_abs_s: float
     pcm: NDArray[np.float32]
-    voiced: Optional[bool]
+    voiced: bool | None
 
 
 # ---------------------------------------------------------------------------
@@ -91,11 +91,25 @@ class PcmFrame(TypedDict):
 # ---------------------------------------------------------------------------
 
 # File extensions we treat as direct audio without probing yt-dlp.
-_DIRECT_AUDIO_EXTS = frozenset({
-    "mp3", "m4a", "aac", "opus", "ogg", "oga", "wav", "flac",
-    "wma", "aiff", "aif", "ape", "ac3", "amr",
-    "m3u8",  # HLS manifest — ffmpeg handles natively
-})
+_DIRECT_AUDIO_EXTS = frozenset(
+    {
+        "mp3",
+        "m4a",
+        "aac",
+        "opus",
+        "ogg",
+        "oga",
+        "wav",
+        "flac",
+        "wma",
+        "aiff",
+        "aif",
+        "ape",
+        "ac3",
+        "amr",
+        "m3u8",  # HLS manifest — ffmpeg handles natively
+    }
+)
 
 # File extensions / Content-Type substrings that mean "this is a feed".
 _FEED_EXTS = frozenset({"xml", "rss", "atom"})
@@ -122,14 +136,14 @@ def _is_local_file(url: str) -> bool:
     if url.startswith("file://"):
         return True
     # Bare path — must exist on disk to count.
-    if os.path.sep in url and os.path.isfile(url):
+    if os.path.sep in url and osh.file_exists(url):
         return True
-    return os.path.isfile(url)
+    return osh.file_exists(url)
 
 
 def _strip_file_scheme(url: str) -> str:
     if url.startswith("file://"):
-        return url[len("file://"):]
+        return url[len("file://") :]
     return url
 
 
@@ -175,6 +189,7 @@ def _looks_like_feed_url(url: str) -> bool:
 
 class _ResolvedSource(TypedDict):
     """Internal: what ``_resolve_source`` returns for the ffmpeg leg."""
+
     direct_url: str
     headers: dict[str, str]
     is_live: bool
@@ -184,7 +199,7 @@ class _ResolvedSource(TypedDict):
 def _resolve_via_ytdlp(
     url: str,
     *,
-    cookies_from_browser: Optional[str],
+    cookies_from_browser: str | None,
 ) -> _ResolvedSource:
     """Resolve a URL via yt-dlp's ``bestaudio*`` selector.
 
@@ -217,8 +232,7 @@ def _resolve_via_ytdlp(
     direct_url = info.get("url")
     if not direct_url:
         raise RuntimeError(
-            f"yt-dlp resolved {url!r} but produced no direct URL "
-            f"(extractor={extractor!r})"
+            f"yt-dlp resolved {url!r} but produced no direct URL (extractor={extractor!r})"
         )
 
     is_live = bool(info.get("is_live") or info.get("live_status") == "is_live")
@@ -235,8 +249,8 @@ def _resolve_via_ytdlp(
 def _resolve_source(
     url: str,
     *,
-    user_headers: Optional[dict[str, str]],
-    cookies_from_browser: Optional[str],
+    user_headers: dict[str, str] | None,
+    cookies_from_browser: str | None,
 ) -> _ResolvedSource:
     """Auto-detect ``url`` and return everything needed to feed ffmpeg.
 
@@ -276,6 +290,7 @@ def _resolve_source(
     # 4. Feed URL — pick latest episode and recurse on its enclosure.
     if _looks_like_feed_url(url):
         from .feed import latest_episode  # lazy import — avoids cycle at import time
+
         episode = latest_episode(url)
         return _resolve_source(
             episode["enclosure_url"],
@@ -345,13 +360,13 @@ def _build_atempo_chain(speed: float) -> str:
 # Output codec dispatch keyed off file extension. Compressed archive
 # formats only — uncompressed (.wav, .raw) routes to PCM separately.
 _ARCHIVE_CODECS: dict[str, list[str]] = {
-    "mp3":  ["-c:a", "libmp3lame", "-b:a", "128k"],
-    "m4a":  ["-c:a", "aac",        "-b:a", "128k"],
-    "aac":  ["-c:a", "aac",        "-b:a", "128k"],
-    "opus": ["-c:a", "libopus",    "-b:a", "96k"],
-    "ogg":  ["-c:a", "libvorbis",  "-q:a", "5"],
-    "flac": ["-c:a", "flac"],                   # lossless, no bitrate
-    "wav":  ["-c:a", "pcm_s16le"],              # PCM 16-bit
+    "mp3": ["-c:a", "libmp3lame", "-b:a", "128k"],
+    "m4a": ["-c:a", "aac", "-b:a", "128k"],
+    "aac": ["-c:a", "aac", "-b:a", "128k"],
+    "opus": ["-c:a", "libopus", "-b:a", "96k"],
+    "ogg": ["-c:a", "libvorbis", "-q:a", "5"],
+    "flac": ["-c:a", "flac"],  # lossless, no bitrate
+    "wav": ["-c:a", "pcm_s16le"],  # PCM 16-bit
 }
 
 
@@ -395,7 +410,7 @@ def _build_ffmpeg_cmd(
     is_live: bool,
     headers: dict[str, str],
     speed: float = 1.0,
-    record_to: Optional[str] = None,
+    record_to: str | None = None,
 ) -> list[str]:
     """Assemble the ffmpeg command line.
 
@@ -480,10 +495,10 @@ async def extract_audio_stream(
     resample_quality: Literal["default", "high"] = "default",
     realtime: bool = True,
     frame_ms: int = 20,
-    headers: Optional[dict[str, str]] = None,
-    cookies_from_browser: Optional[str] = None,
+    headers: dict[str, str] | None = None,
+    cookies_from_browser: str | None = None,
     speed: float = 1.0,
-    record_to: Optional[str] = None,
+    record_to: str | None = None,
 ) -> AsyncIterator[PcmFrame]:
     """
     Yield PCM frames from any audio-bearing URL.
@@ -587,9 +602,7 @@ async def extract_audio_stream(
     if target_sample_rate <= 0:
         raise ValueError(f"target_sample_rate must be > 0, got {target_sample_rate}")
     if resample_quality not in ("default", "high"):
-        raise ValueError(
-            f"resample_quality must be 'default' or 'high', got {resample_quality!r}"
-        )
+        raise ValueError(f"resample_quality must be 'default' or 'high', got {resample_quality!r}")
 
     resolved = _resolve_source(
         url,
@@ -624,9 +637,9 @@ async def extract_audio_stream(
         speed=speed,
         record_to=record_to,
     )
-    logging.debug(
-        "podcast-helper: source=%s is_live=%s cmd=%s",
-        resolved["source_kind"], resolved["is_live"], shlex.join(cmd),
+    osh.debug(
+        f"podcast-helper: source={resolved['source_kind']} "
+        f"is_live={resolved['is_live']} cmd={shlex.join(cmd)}"
     )
 
     samples_per_frame = max(1, (target_sample_rate * frame_ms) // 1000)
@@ -652,8 +665,13 @@ async def extract_audio_stream(
     #
     # For v0.1.0 simplicity: in to_mono=False mode we probe channel
     # count via ffprobe before launching ffmpeg.
-    n_channels = 1 if to_mono else _probe_channel_count(
-        resolved["direct_url"], headers=resolved["headers"],
+    n_channels = (
+        1
+        if to_mono
+        else _probe_channel_count(
+            resolved["direct_url"],
+            headers=resolved["headers"],
+        )
     )
     bytes_per_sample = 4  # float32 LE
     bytes_per_frame = samples_per_frame * n_channels * bytes_per_sample
@@ -698,7 +716,7 @@ async def extract_audio_stream(
                 await proc.wait()
         err = (await proc.stderr.read()).decode("utf-8", errors="replace").strip()
         if err and proc.returncode not in (0, None):
-            logging.warning("podcast-helper ffmpeg stderr: %s", err)
+            osh.warning(f"podcast-helper ffmpeg stderr: {err}")
 
 
 def _probe_channel_count(direct_url: str, *, headers: dict[str, str]) -> int:
@@ -707,10 +725,19 @@ def _probe_channel_count(direct_url: str, *, headers: dict[str, str]) -> int:
     Used when ``to_mono=False`` so we know how to reshape the raw bytes.
     """
     import subprocess
-    cmd = ["ffprobe", "-hide_banner", "-loglevel", "error",
-           "-select_streams", "a:0",
-           "-show_entries", "stream=channels",
-           "-of", "default=nokey=1:noprint_wrappers=1"]
+
+    cmd = [
+        "ffprobe",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-select_streams",
+        "a:0",
+        "-show_entries",
+        "stream=channels",
+        "-of",
+        "default=nokey=1:noprint_wrappers=1",
+    ]
     if headers:
         joined = "\r\n".join(f"{k}: {v}" for k, v in headers.items()) + "\r\n"
         cmd += ["-headers", joined]
@@ -721,7 +748,7 @@ def _probe_channel_count(direct_url: str, *, headers: dict[str, str]) -> int:
             return max(1, int(proc.stdout.strip()))
     except (subprocess.TimeoutExpired, OSError):
         pass
-    logging.warning(
+    osh.warning(
         "podcast-helper: ffprobe failed to detect channel count; assuming stereo (2). "
         "If the source is mono, set to_mono=True to avoid silently doubled reshape."
     )

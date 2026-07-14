@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-07-14
+
+### Changed
+- Add `os-helper>=1.5.0` as a declared dependency and route library logging
+  through the os-helper logging surface (`osh.info/warning/error`); flip the
+  `youtube-helper` dependency from `git+https` to a PyPI version specifier so
+  the package installs from PyPI.
+
+### Maintenance
+- Apply the project coding standards across the package and `tests/` (Numpy
+  docstrings, full typing, comment density above the floor); make the CI ruff
+  job blocking. Refresh the project logo asset.
+
+
 ## [0.3.3] - 2026-07-08
 
 ### Documentation

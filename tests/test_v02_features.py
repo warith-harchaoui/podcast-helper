@@ -28,7 +28,6 @@ from podcast_helper.streaming import (
     extract_audio_stream,
 )
 
-
 # ---------------------------------------------------------------------------
 # _build_atempo_chain
 # ---------------------------------------------------------------------------
@@ -222,7 +221,8 @@ def test_extract_audio_stream_unknown_archive_extension_raises(
 
     async def _consume():
         async for _ in extract_audio_stream(
-            "https://example.com/clip.mp3", record_to="archive.xyz",
+            "https://example.com/clip.mp3",
+            record_to="archive.xyz",
         ):
             pass
 

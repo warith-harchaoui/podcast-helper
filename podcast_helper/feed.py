@@ -24,15 +24,14 @@ Warith HARCHAOUI — https://linkedin.com/in/warith-harchaoui
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timezone
 from io import BytesIO
-from typing import Any, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 import feedparser
+import os_helper as osh
 import podcastparser
 import requests
-
 
 # ---------------------------------------------------------------------------
 # Public type
@@ -96,7 +95,10 @@ def _fetch_feed_bytes(url: str, *, timeout: float = 15.0) -> bytes:
     """GET ``url`` with a browser-like UA and return the raw body."""
     resp = requests.get(
         url,
-        headers={"User-Agent": _USER_AGENT, "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8"},
+        headers={
+            "User-Agent": _USER_AGENT,
+            "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
+        },
         timeout=timeout,
     )
     resp.raise_for_status()
@@ -110,7 +112,7 @@ def _safe_int(v: Any) -> int:
         return 0
 
 
-def _epoch_to_iso(epoch: Optional[float]) -> str:
+def _epoch_to_iso(epoch: float | None) -> str:
     """Convert a Unix epoch (float or int) into ISO 8601 UTC. Empty on error."""
     if epoch is None or epoch == 0:
         return ""
@@ -126,6 +128,7 @@ def _struct_time_to_iso(st: Any) -> str:
         return ""
     try:
         import calendar
+
         return _epoch_to_iso(calendar.timegm(st))
     except (TypeError, ValueError):
         return ""
@@ -161,7 +164,9 @@ def _episode_from_podcastparser(item: dict, *, feed_image: str) -> Episode:
         "duration_seconds": _safe_int(item.get("total_time")),
         "enclosure_url": chosen.get("url", "") if isinstance(chosen, dict) else "",
         "enclosure_type": chosen.get("mime_type", "") if isinstance(chosen, dict) else "",
-        "enclosure_size_bytes": _safe_int(chosen.get("file_size")) if isinstance(chosen, dict) else 0,
+        "enclosure_size_bytes": _safe_int(chosen.get("file_size"))
+        if isinstance(chosen, dict)
+        else 0,
         "image_url": item.get("episode_art_url") or feed_image,
     }
 
@@ -180,7 +185,9 @@ def _episode_from_feedparser(entry: Any, *, feed_image: str) -> Episode:
         if encs:
             chosen = encs[0]
 
-    published_iso = _struct_time_to_iso(getattr(entry, "published_parsed", None) or entry.get("published_parsed"))
+    published_iso = _struct_time_to_iso(
+        getattr(entry, "published_parsed", None) or entry.get("published_parsed")
+    )
 
     # iTunes duration may be "MM:SS", "HH:MM:SS", or seconds as a string.
     duration_raw = entry.get("itunes_duration") or entry.get("duration") or 0
@@ -231,22 +238,22 @@ def _parse_duration(raw: Any) -> int:
     return 0
 
 
-def _try_podcastparser(raw_body: bytes, url: str) -> Optional[List[Episode]]:
+def _try_podcastparser(raw_body: bytes, url: str) -> list[Episode] | None:
     """Run podcastparser; return None on failure (so caller can fall back)."""
     try:
         parsed = podcastparser.parse(url, BytesIO(raw_body))
     except Exception as exc:
-        logging.debug("podcastparser refused %s: %s", url, exc)
+        osh.debug(f"podcastparser refused {url}: {exc}")
         return None
     feed_image = parsed.get("cover_url") or ""
-    episodes: List[Episode] = []
+    episodes: list[Episode] = []
     for item in parsed.get("episodes") or []:
         ep = _episode_from_podcastparser(item, feed_image=feed_image)
         episodes.append(ep)
     return episodes
 
 
-def _try_feedparser(raw_body: bytes) -> List[Episode]:
+def _try_feedparser(raw_body: bytes) -> list[Episode]:
     """Fallback parse via feedparser. Returns possibly empty list on weird feeds."""
     parsed = feedparser.parse(raw_body)
     feed_image = ""
@@ -256,7 +263,7 @@ def _try_feedparser(raw_body: bytes) -> List[Episode]:
     elif isinstance(img, str):
         feed_image = img
 
-    episodes: List[Episode] = []
+    episodes: list[Episode] = []
     for entry in parsed.entries or []:
         episodes.append(_episode_from_feedparser(entry, feed_image=feed_image))
     return episodes
@@ -267,7 +274,7 @@ def _try_feedparser(raw_body: bytes) -> List[Episode]:
 # ---------------------------------------------------------------------------
 
 
-def feed(url: str, *, max_episodes: Optional[int] = None) -> List[Episode]:
+def feed(url: str, *, max_episodes: int | None = None) -> list[Episode]:
     """
     Fetch an RSS / Atom podcast feed and return its episodes.
 
