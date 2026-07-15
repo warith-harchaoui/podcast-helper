@@ -12,7 +12,7 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL-in
 
 [![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
 
-# Documentation
+## Documentation
 
 [💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
 
@@ -22,7 +22,7 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL-in
 
 Podcast pipelines (ASR, diarization, summarisation, search indexing) usually start with the same question: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function — and the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.
 
-# Installation
+## Installation
 
 **Prerequisites** — **Python 3.10–3.13** and **git**, **ffmpeg**, cross-platform:
 
@@ -30,27 +30,25 @@ Podcast pipelines (ASR, diarization, summarisation, search indexing) usually sta
 - 🐧 **Ubuntu/Debian**: `sudo apt update && sudo apt install -y python3 python3-pip git ffmpeg`
 - 🪟 **Windows** (PowerShell): `winget install Python.Python.3.12 Git.Git Gyan.FFmpeg`
 
-Then install the package:
+We recommend using Python environments. Check this link if you're unfamiliar with setting one up: [🥸 Tech tips](https://harchaoui.org/warith/4ml/#install).
 
-
-You need `ffmpeg` on PATH:
-
-- macOS 🍎 : `brew install ffmpeg`
-
-  (install `brew` thanks to [brew.sh](https://brew.sh/))
-- Ubuntu 🐧 : `sudo apt install ffmpeg`
-- Windows 🪟 : grab a build from [ffmpeg.org/download.html](https://ffmpeg.org/download.html) and add it to `PATH`.
-
-Then:
+### From source
 
 ```bash
-pip install --force-reinstall --no-cache-dir \
-  git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.3
+# Core library
+pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+
+# Optional surfaces
+pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
 ```
 
-This pulls in [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) v1.1.0 (and transitively `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) for RSS.
+PyPI release coming soon.
 
-# Quick start
+This pulls in [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) (and transitively `yt-dlp`, [os-helper](https://github.com/warith-harchaoui/os-helper), [audio-helper](https://github.com/warith-harchaoui/audio-helper), [video-helper](https://github.com/warith-harchaoui/video-helper)) plus [feedparser](https://feedparser.readthedocs.io/) + [podcastparser](https://podcastparser.readthedocs.io/) for RSS.
+
+## Quick start
 
 ```python
 import asyncio
@@ -73,7 +71,7 @@ asyncio.run(main())
 
 For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / multichannel, anti-aliasing, downstream ASR / VAD / summarisation pipelines), see [📋 EXAMPLES.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md).
 
-# What URLs are accepted
+## What URLs are accepted
 
 | Source | Detection | What happens |
 |---|---|---|
@@ -85,7 +83,7 @@ For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / mul
 | **Spotify** (open.spotify.com) | hostname match | `NotImplementedError` — Spotify audio is DRM-gated. Use the show's RSS feed if it exists. |
 | **Apple Podcasts** (podcasts.apple.com) | hostname match | `NotImplementedError` — Apple URLs point to the catalog, not the audio. Use the show's RSS feed (linked on the show's site, or via `getrssfeed.com` / Podcast Index). |
 
-# Signal-processing correctness
+## Signal-processing correctness
 
 When `target_sample_rate` differs from the source rate, the conversion is performed by ffmpeg's `libswresample` (default) or `libsoxr` (`resample_quality="high"`). Both apply an **anti-aliasing low-pass filter at the new Nyquist frequency** (`target_sample_rate / 2`) before decimation — satisfying the Shannon-Nyquist sampling theorem. Naïve subsampling is never used.
 
@@ -96,7 +94,7 @@ Channel handling has exactly two modes — no synthetic upmix:
 | `True` (default) | `(n_samples,)` | Standard downmix (stereo → L+R with -3 dB, 5.1 → ITU mix) |
 | `False` | `(n_samples, n_channels)` interleaved | Preserves the source's native channel count |
 
-# Working with RSS feeds explicitly
+## Working with RSS feeds explicitly
 
 If you want to inspect or select episodes yourself:
 
@@ -128,7 +126,7 @@ Each `Episode` dict has a normalised schema regardless of feed flavour:
  image_url}
 ```
 
-# Multi-surface exposure
+## Multi-surface exposure
 
 `podcast-helper` exposes the same public functions through four
 interchangeable surfaces — pick the one that fits the caller.
@@ -160,13 +158,13 @@ For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith
 competitive comparison against the Python audio / podcast ecosystem,
 see [`LANDSCAPE.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md).
 
-# Live streams
+## Live streams
 
 For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3u8` manifest. `extract_audio_stream` detects this (`is_live=True`) and automatically disables `-re` real-time pacing (the source paces itself). The async iterator runs indefinitely until the live stream ends; callers should `break` when they're done.
 
 `speed != 1.0` for live streams raises `ValueError` (as of v0.2.0) — you can't fast-forward beyond the live edge. Use `speed=...` on VOD only.
 
-# Roadmap
+## Roadmap
 
 | Version | Feature |
 |---|---|
@@ -176,8 +174,14 @@ For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3
 | **v0.3.0** | `apple_podcasts_to_rss(url)` via iTunes Search API. Podcast Index API integration. Mic capture moves to `capture-helper`. |
 | **v0.4.0+** | Chapters (ID3 CTOC/CHAP, Podcasting 2.0 `<podcast:chapters>`), transcripts, OPML import/export. |
 
-# Author
+## Author
+
  - [Warith HARCHAOUI](https://linkedin.com/in/warith-harchaoui)
 
-# Acknowledgements
+## Acknowledgements
+
 Special thanks to [Mohamed Chelali](https://mchelali.github.io) and [Bachir Zerroug](https://www.linkedin.com/in/bachirzerroug) for fruitful discussions.
+
+## License
+
+This project is licensed under the BSD-3-Clause License — see the [LICENSE](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) file for details.

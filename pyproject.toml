@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "podcast-helper"
-version = "0.3.4"
+version = "0.3.5"
 description = "Podcast Helper — universal audio stream consumer exposed as library, argparse CLI, click CLI, FastAPI HTTP surface and MCP tools. URL-in → PCM-out for local files, direct audio URLs, RSS feed enclosures, and yt-dlp-supported sources (YouTube, Vimeo, Twitch, SoundCloud, …). Built on youtube-helper + ffmpeg + feedparser + podcastparser; Shannon-correct resampling, mono downmix or native channels preserved."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
