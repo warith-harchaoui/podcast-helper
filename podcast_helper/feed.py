@@ -106,6 +106,21 @@ def _fetch_feed_bytes(url: str, *, timeout: float = 15.0) -> bytes:
 
 
 def _safe_int(v: Any) -> int:
+    """Coerce an arbitrary value to ``int``, falling back to ``0``.
+
+    Parameters
+    ----------
+    v : Any
+        Value to convert; typically a feed field that may be ``None``,
+        a numeric string, or already an ``int``.
+
+    Returns
+    -------
+    int
+        ``int(v)`` when the conversion succeeds, otherwise ``0``.
+    """
+    # Best-effort cast: feed fields are untrusted, so a bad value must not
+    # raise — we swallow the usual conversion errors and report 0 instead.
     try:
         return int(v)
     except (TypeError, ValueError):

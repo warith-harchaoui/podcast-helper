@@ -175,6 +175,26 @@ async def _pcm_iterator(
     frame_ms: int,
     speed: float,
 ) -> AsyncIterator[bytes]:
+    """Yield raw ``f32le`` PCM bytes from a URL for a streaming response.
+
+    Parameters
+    ----------
+    url : str
+        Audio-bearing URL to decode.
+    sample_rate : int
+        Target sample rate in Hz.
+    mono : bool
+        Downmix to a single channel when ``True``.
+    frame_ms : int
+        Frame duration in milliseconds.
+    speed : float
+        Playback rate (VOD only); ``1.0`` leaves timing unchanged.
+
+    Yields
+    ------
+    bytes
+        The little-endian ``float32`` bytes of one decoded frame.
+    """
     # Bridge our async iterator of PcmFrame dicts to the byte-stream
     # protocol FastAPI expects for a StreamingResponse. Each yielded
     # chunk is the raw f32le bytes of one frame.

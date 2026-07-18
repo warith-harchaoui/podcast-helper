@@ -142,6 +142,20 @@ def _is_local_file(url: str) -> bool:
 
 
 def _strip_file_scheme(url: str) -> str:
+    """Remove a leading ``file://`` scheme from a URL, if present.
+
+    Parameters
+    ----------
+    url : str
+        A URL or path that may carry a ``file://`` prefix.
+
+    Returns
+    -------
+    str
+        The bare filesystem path when the scheme was present, otherwise
+        the input unchanged.
+    """
+    # ffmpeg wants a plain path for local files; drop the scheme when set.
     if url.startswith("file://"):
         return url[len("file://") :]
     return url
@@ -157,6 +171,25 @@ def _url_extension(url: str) -> str:
 
 
 def _spotify_guard(url: str) -> None:
+    """Reject Spotify-hosted URLs with an actionable hint.
+
+    Parameters
+    ----------
+    url : str
+        The URL to inspect.
+
+    Returns
+    -------
+    None
+        Returns silently when the host is not a Spotify domain.
+
+    Raises
+    ------
+    NotImplementedError
+        When ``url`` points at a Spotify host — its audio is DRM-gated and
+        not retrievable; the message steers the user to the RSS feed.
+    """
+    # Match on the host suffix so subdomains are covered too.
     host = urlparse(url).netloc.lower()
     if any(host.endswith(h) for h in _SPOTIFY_HOSTS):
         raise NotImplementedError(
@@ -169,6 +202,25 @@ def _spotify_guard(url: str) -> None:
 
 
 def _apple_podcasts_guard(url: str) -> None:
+    """Reject Apple Podcasts catalog URLs with an actionable hint.
+
+    Parameters
+    ----------
+    url : str
+        The URL to inspect.
+
+    Returns
+    -------
+    None
+        Returns silently when the host is not an Apple Podcasts domain.
+
+    Raises
+    ------
+    NotImplementedError
+        When ``url`` points at ``podcasts.apple.com`` — it references the
+        catalog, not the audio; the message steers the user to the RSS feed.
+    """
+    # Match on the host suffix so subdomains are covered too.
     host = urlparse(url).netloc.lower()
     if any(host.endswith(h) for h in _APPLE_PODCASTS_HOSTS):
         raise NotImplementedError(

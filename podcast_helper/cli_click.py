@@ -119,6 +119,31 @@ async def _stream_impl(
     speed: float,
     output: str | None,
 ) -> None:
+    """Drive the streaming decode for the click ``stream`` command.
+
+    Parameters
+    ----------
+    url : str
+        Audio-bearing URL to decode.
+    sample_rate : int
+        Target sample rate in Hz.
+    mono : bool
+        Downmix to a single channel when ``True``.
+    realtime : bool
+        Pace decoding at wall-clock (ffmpeg ``-re``) when ``True``.
+    frame_ms : int
+        Frame duration in milliseconds.
+    speed : float
+        Playback rate (VOD only); ``1.0`` leaves timing unchanged.
+    output : str or None
+        When set, write a compressed archive to this path; otherwise stream
+        raw ``f32le`` PCM to stdout.
+
+    Returns
+    -------
+    None
+        Runs for its side effects (stdout bytes or an on-disk archive).
+    """
     # When --output is set, ffmpeg writes the parallel archive AND emits
     # PCM to stdout; we sink the PCM frames but let the archive form on
     # disk. Without --output we forward raw f32le to stdout so a shell
@@ -208,6 +233,13 @@ def record(
     """Archive any audio-bearing URL to a compressed file."""
 
     async def _run() -> None:
+        """Pull the whole stream once, sinking PCM so the archive is written.
+
+        Returns
+        -------
+        None
+            Runs the archive-only decode for its on-disk side effect.
+        """
         async for _ in extract_audio_stream(
             url,
             target_sample_rate=sample_rate,

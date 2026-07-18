@@ -52,6 +52,18 @@ from . import extract_audio_stream, feed, latest_episode
 
 
 def _handle_feed(ns: argparse.Namespace) -> int:
+    """Handle the ``feed`` subcommand: dump a podcast feed as JSON.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; uses ``ns.url`` and ``ns.max_episodes``.
+
+    Returns
+    -------
+    int
+        Process exit code (``0`` on success).
+    """
     # Dump every episode as JSON — one array so `jq` / downstream pipelines
     # can filter cleanly. Episodes come back most-recent first from feed().
     episodes = feed(ns.url, max_episodes=ns.max_episodes)
@@ -60,6 +72,19 @@ def _handle_feed(ns: argparse.Namespace) -> int:
 
 
 def _handle_latest(ns: argparse.Namespace) -> int:
+    """Handle the ``latest`` subcommand: print the latest episode.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; uses ``ns.url`` and the ``ns.json`` flag.
+
+    Returns
+    -------
+    int
+        Process exit code (``0`` on success). Prints the enclosure URL by
+        default, or the full ``Episode`` dict as JSON when ``--json`` is set.
+    """
     # latest_episode() returns an Episode dict. We support two output
     # modes: plain URL (default; friendly for shell chaining) or full
     # JSON (for scripts that want the metadata too).
@@ -72,6 +97,19 @@ def _handle_latest(ns: argparse.Namespace) -> int:
 
 
 async def _stream_to_stdout(ns: argparse.Namespace) -> None:
+    """Stream decoded PCM frames to stdout as raw ``f32le`` bytes.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; supplies the URL and every streaming knob
+        (sample rate, mono/stereo, realtime pacing, frame size, speed).
+
+    Returns
+    -------
+    None
+        Frames are written to ``sys.stdout.buffer`` for their side effect.
+    """
     # Emit raw f32le PCM samples to stdout — this is the "URL-in → PCM-out"
     # promise of the library, exposed as a shell primitive. A downstream
     # `ffplay -f f32le -ar <rate> -ac <ch> -i -` will play it back verbatim.
@@ -90,6 +128,20 @@ async def _stream_to_stdout(ns: argparse.Namespace) -> None:
 
 
 async def _stream_to_wav(ns: argparse.Namespace) -> None:
+    """Stream a URL straight to a compressed archive on disk.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; uses the URL, the streaming knobs, and
+        ``ns.output`` as the ``record_to=`` archive path.
+
+    Returns
+    -------
+    None
+        The on-disk archive at ``ns.output`` is the deliverable; PCM
+        frames are consumed and discarded.
+    """
     # Delegate to `record_to=` — ffmpeg opens two outputs (PCM to stdout
     # and compressed archive on disk). We only care about the archive
     # here so we sink the PCM frames without keeping them in memory.
@@ -107,6 +159,19 @@ async def _stream_to_wav(ns: argparse.Namespace) -> None:
 
 
 def _handle_stream(ns: argparse.Namespace) -> int:
+    """Handle the ``stream`` subcommand: PCM to stdout or archive to disk.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; ``ns.output`` selects the archive path (when set)
+        versus raw PCM on stdout.
+
+    Returns
+    -------
+    int
+        Process exit code (``0`` on success).
+    """
     # stream is streamy — needs an event loop. When --output is set we
     # ride the parallel-archive path; otherwise raw PCM to stdout.
     if ns.output:
@@ -118,6 +183,19 @@ def _handle_stream(ns: argparse.Namespace) -> int:
 
 
 def _handle_record(ns: argparse.Namespace) -> int:
+    """Handle the ``record`` subcommand: archive a URL to a compressed file.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; ``ns.output`` (the archive path) is required.
+
+    Returns
+    -------
+    int
+        Process exit code: ``0`` on success, ``2`` when ``--output`` is
+        missing.
+    """
     # Alias for `stream --output ...` — kept as its own subcommand so
     # the intent ("give me a compressed archive of this URL") is
     # obvious in shell scripts.
@@ -126,6 +204,13 @@ def _handle_record(ns: argparse.Namespace) -> int:
         return 2
 
     async def _run() -> None:
+        """Pull the whole stream once, sinking PCM so the archive is written.
+
+        Returns
+        -------
+        None
+            Runs the archive-only decode for its on-disk side effect.
+        """
         async for _ in extract_audio_stream(
             ns.url,
             target_sample_rate=ns.sample_rate,
@@ -143,6 +228,20 @@ def _handle_record(ns: argparse.Namespace) -> int:
 
 
 def _handle_probe(ns: argparse.Namespace) -> int:
+    """Handle the ``probe`` subcommand: report how a URL is classified.
+
+    Parameters
+    ----------
+    ns : argparse.Namespace
+        Parsed arguments; uses ``ns.url`` and the ``ns.show_url`` flag.
+
+    Returns
+    -------
+    int
+        Process exit code (``0`` on success). Prints a JSON payload with the
+        source kind, live flag and header count; the resolved direct URL is
+        included only when ``--show-url`` is set (may carry signed tokens).
+    """
     # Expose the internal source-resolution routing so operators can
     # tell whether their URL will be handled as file / direct / rss /
     # yt-dlp-<extractor>. Handy for debugging weird podcast networks.
@@ -175,6 +274,18 @@ def _handle_probe(ns: argparse.Namespace) -> int:
 
 
 def _add_feed(sub: argparse._SubParsersAction) -> None:
+    """Register the ``feed`` subcommand on the subparsers action.
+
+    Parameters
+    ----------
+    sub : argparse._SubParsersAction
+        The subparsers container returned by ``add_subparsers``.
+
+    Returns
+    -------
+    None
+        The subparser is attached to ``sub`` in place.
+    """
     p = sub.add_parser("feed", help="Dump an RSS / Atom podcast feed as JSON.")
     p.add_argument("--url", required=True, help="Feed URL.")
     p.add_argument(
@@ -188,6 +299,18 @@ def _add_feed(sub: argparse._SubParsersAction) -> None:
 
 
 def _add_latest(sub: argparse._SubParsersAction) -> None:
+    """Register the ``latest`` subcommand on the subparsers action.
+
+    Parameters
+    ----------
+    sub : argparse._SubParsersAction
+        The subparsers container returned by ``add_subparsers``.
+
+    Returns
+    -------
+    None
+        The subparser is attached to ``sub`` in place.
+    """
     p = sub.add_parser("latest", help="Print the latest episode's enclosure URL.")
     p.add_argument("--url", required=True, help="Feed URL.")
     p.add_argument("--json", action="store_true", help="Print the full Episode dict as JSON.")
@@ -195,6 +318,19 @@ def _add_latest(sub: argparse._SubParsersAction) -> None:
 
 
 def _stream_common_args(p: argparse.ArgumentParser) -> None:
+    """Attach the streaming flags shared by ``stream`` and ``record``.
+
+    Parameters
+    ----------
+    p : argparse.ArgumentParser
+        The subparser to extend with URL and decoding knobs (sample rate,
+        mono/stereo, frame size, playback speed).
+
+    Returns
+    -------
+    None
+        Arguments are added to ``p`` in place.
+    """
     # Shared streaming knobs — apply to `stream` and `record` alike.
     p.add_argument("--url", required=True, help="Audio-bearing URL.")
     p.add_argument(
@@ -227,6 +363,18 @@ def _stream_common_args(p: argparse.ArgumentParser) -> None:
 
 
 def _add_stream(sub: argparse._SubParsersAction) -> None:
+    """Register the ``stream`` subcommand on the subparsers action.
+
+    Parameters
+    ----------
+    sub : argparse._SubParsersAction
+        The subparsers container returned by ``add_subparsers``.
+
+    Returns
+    -------
+    None
+        The subparser is attached to ``sub`` in place.
+    """
     p = sub.add_parser(
         "stream",
         help="Decode any audio-bearing URL to raw f32le PCM on stdout, or a compressed archive on disk.",
@@ -250,6 +398,18 @@ def _add_stream(sub: argparse._SubParsersAction) -> None:
 
 
 def _add_record(sub: argparse._SubParsersAction) -> None:
+    """Register the ``record`` subcommand on the subparsers action.
+
+    Parameters
+    ----------
+    sub : argparse._SubParsersAction
+        The subparsers container returned by ``add_subparsers``.
+
+    Returns
+    -------
+    None
+        The subparser is attached to ``sub`` in place.
+    """
     p = sub.add_parser(
         "record",
         help="Archive any audio-bearing URL to a compressed file (mp3/m4a/opus/ogg/flac/wav).",
@@ -262,6 +422,18 @@ def _add_record(sub: argparse._SubParsersAction) -> None:
 
 
 def _add_probe(sub: argparse._SubParsersAction) -> None:
+    """Register the ``probe`` subcommand on the subparsers action.
+
+    Parameters
+    ----------
+    sub : argparse._SubParsersAction
+        The subparsers container returned by ``add_subparsers``.
+
+    Returns
+    -------
+    None
+        The subparser is attached to ``sub`` in place.
+    """
     p = sub.add_parser("probe", help="Report how podcast-helper classified a URL.")
     p.add_argument("--url", required=True, help="URL to classify.")
     p.add_argument(
