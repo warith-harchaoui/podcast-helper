@@ -36,12 +36,12 @@ Nous recommandons l'utilisation d'environnements Python. Consultez ce lien si vo
 
 ```bash
 # Bibliothèque de base
-pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
 
 # Surfaces optionnelles
-pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
-pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
-pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
+pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
+pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
 ```
 
 Publication sur PyPI à venir.

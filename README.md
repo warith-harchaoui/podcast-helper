@@ -36,12 +36,12 @@ We recommend using Python environments. Check this link if you're unfamiliar wit
 
 ```bash
 # Core library
-pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
 
 # Optional surfaces
-pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
-pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
-pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.5"
+pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
+pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
+pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
 ```
 
 PyPI release coming soon.
