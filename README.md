@@ -2,9 +2,13 @@
 
 [🇫🇷](https://github.com/warith-harchaoui/podcast-helper/blob/main/LISEZMOI.md) · [🇬🇧](https://github.com/warith-harchaoui/podcast-helper/blob/main/README.md)
 
-[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#)
+[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#the-promise)
 
 `Podcast Helper` belongs to a collection of libraries called `AI Helpers` developed for building Artificial Intelligence.
+
+## The Promise
+
+**Local-first by design.** podcast-helper runs entirely on your machine — it fetches only the episodes/feeds you ask for and processes them locally; your data is never uploaded to a third-party service, no telemetry, no account, no cloud lock-in. Part of the [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) suite: sovereignty over your data through local-first Open Source.
 
 Universal audio stream consumer for podcasts and any audio-bearing URL. **URL-in → PCM-out** for local files, direct audio URLs (RSS enclosure MP3 / M4A / Opus / WAV / HLS m3u8), RSS / Atom feed URLs (auto-picks the latest episode), and every `yt-dlp`-supported source (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuses Spotify-DRM and Apple Podcasts catalog URLs upfront, with clear hints toward the RSS feed workaround.
 
@@ -36,12 +40,12 @@ We recommend using Python environments. Check this link if you're unfamiliar wit
 
 ```bash
 # Core library
-pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
+pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
 
 # Optional surfaces
-pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
-pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
-pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.3.6"
+pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
+pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
+pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
 ```
 
 PyPI release coming soon.
@@ -128,7 +132,7 @@ Each `Episode` dict has a normalised schema regardless of feed flavour:
 
 ## Multi-surface exposure
 
-`podcast-helper` exposes the same public functions through four
+`podcast-helper` exposes the same public functions through five
 interchangeable surfaces — pick the one that fits the caller.
 
 | Surface | Entry point | Extra | Best for |
@@ -138,6 +142,7 @@ interchangeable surfaces — pick the one that fits the caller.
 | click CLI | `podcast-helper-click` | `[cli]` | click-native shells (bash / zsh completion, colored help) |
 | FastAPI HTTP | `uvicorn podcast_helper.api:app` | `[api]` | HTTP microservices, cross-language callers |
 | MCP server | `podcast-helper-mcp` | `[api,mcp]` | Claude Desktop, MCP-aware agents, IDE integrations |
+| Browser GUI | `GET /gui` (served by the API) | `[api]` | drop-a-URL episode browser: list · preview · archive, no terminal |
 
 Install any combination of extras:
 
@@ -154,6 +159,31 @@ between them is a copy-paste. The Dockerfile in this repo ships the
 FastAPI + MCP surfaces on port 8000 out of the box (`docker build -t
 podcast-helper . && docker run --rm -p 8000:8000 podcast-helper`).
 
+### Browser GUI — the episode browser (`GET /gui`)
+
+With the `[api]` extra, the FastAPI app serves a self-contained
+single-page **episode browser** (Tailwind via CDN + vanilla JS, no
+build step) that drives the very same endpoints:
+
+```bash
+pip install 'podcast-helper[api]'
+uvicorn podcast_helper.api:app --port 8000
+# open http://localhost:8000/gui  (or just http://localhost:8000/)
+```
+
+Paste a feed / RSS / audio / yt-dlp URL → **List episodes** (calls
+`/feed`) → click an episode to see its metadata and play the enclosure
+inline → **Record to file** (calls `/record`) to download a compressed
+archive. **Probe** classifies any URL. Nothing is uploaded — playback
+streams the enclosure straight to your browser and archiving runs
+ffmpeg on your own machine.
+
+For the exhaustive catalogue of triggers, phrasings, accepted URLs and
+when *not* to reach for podcast-helper, see
+[`TRIGGERS.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/TRIGGERS.md).
+podcast-helper also ships as an installable Claude / OpenCode **skill**
+— see [`skills/README.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/skills/README.md).
+
 For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md). For a
 competitive comparison against the Python audio / podcast ecosystem,
 see [`LANDSCAPE.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md).
@@ -169,10 +199,10 @@ For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3
 | Version | Feature |
 |---|---|
 | v0.1.0 | `extract_audio_stream` + `feed` + `latest_episode`. yt-dlp + ffmpeg + feedparser + podcastparser. |
-| **v0.2.0** (this release) | `record_to="ep.mp3" \| ".m4a" \| ".opus" \| ".ogg" \| ".flac" \| ".wav"` (ffmpeg multi-output: PCM to caller + compressed archive to disk in parallel). `speed: float` for VOD (raises on live), via `atempo=` filter (pitch-preserving). |
-| **v0.3.0** | `start_instant` / `end_instant` for VOD seek. `apple_podcasts_to_rss(url)` via iTunes Search API. Podcast Index API integration. |
-| **v0.3.0** | `apple_podcasts_to_rss(url)` via iTunes Search API. Podcast Index API integration. Mic capture moves to `capture-helper`. |
-| **v0.4.0+** | Chapters (ID3 CTOC/CHAP, Podcasting 2.0 `<podcast:chapters>`), transcripts, OPML import/export. |
+| v0.2.0 | `record_to="ep.mp3" \| ".m4a" \| ".opus" \| ".ogg" \| ".flac" \| ".wav"` (ffmpeg multi-output: PCM to caller + compressed archive to disk in parallel). `speed: float` for VOD (raises on live), via `atempo=` filter (pitch-preserving). |
+| **v0.4.0** (this release) | Browser **episode-browser GUI** at `GET /gui`; installable Claude / OpenCode **skill** (`skills/podcast-helper/`); exhaustive `TRIGGERS.md`. Additive, backward-compatible. |
+| **v0.5.0** | `start_instant` / `end_instant` for VOD seek. `apple_podcasts_to_rss(url)` via iTunes Search API. Podcast Index API integration. |
+| **v0.6.0+** | Chapters (ID3 CTOC/CHAP, Podcasting 2.0 `<podcast:chapters>`), transcripts, OPML import/export. |
 
 ## Author
 

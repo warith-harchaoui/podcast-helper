@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-20
+
+### Added
+
+- **Browser GUI — episode browser** served at `GET /gui` by the FastAPI app
+  (`[api]` extra). A self-contained single-page client (Tailwind via CDN +
+  vanilla ES-module JS, no build step) defined in `podcast_helper/gui.py`:
+  paste a feed / RSS / audio / yt-dlp URL → **List episodes** (calls `/feed`) →
+  click an episode to see its metadata and play the enclosure inline in an
+  `<audio>` element → **Record to file** (calls `/record`) to download a
+  compressed archive; **Probe** classifies any URL (calls `/probe`). Adds zero
+  server-side logic — it is a thin client over the existing endpoints. `GET /`
+  now redirects to `/gui`.
+- **Agent skill** (`skills/podcast-helper/`) packaging podcast-helper as an
+  installable **Claude Skill** and **OpenCode skill**: `SKILL.md` (frontmatter
+  with an exhaustive third-person TRIGGER + SKIP description) plus progressive-
+  disclosure references (`cli-reference.md`, `surfaces.md`, `triggers.md`) and
+  an install `skills/README.md` (symlink to `~/.claude/skills` and
+  `~/.opencode/skills`).
+- **`TRIGGERS.md`** at the repo root — the exhaustive, auditable catalogue of
+  phrasings, commands, functions, accepted URLs and SKIP boundaries; referenced
+  from both `README.md` and `LISEZMOI.md`.
+
+### Changed
+
+- The FastAPI app `version` is now read dynamically from
+  `importlib.metadata.version("podcast-helper")` instead of a hard-coded string,
+  so the OpenAPI version can never drift from `pyproject.toml` again (was stale
+  at `0.3.3`).
+- README / LISEZMOI: the surfaces table now lists **five** surfaces (adds the
+  GUI row + a dedicated GUI section), the Local-first badge + Promise / La
+  promesse sections were added, the duplicated roadmap row was removed, and
+  source-install pins bumped to `v0.4.0`.
+
+### Tests
+
+- `tests/test_api.py`: GUI-route smoke tests (`GET /gui` returns 200 HTML wiring
+  `/feed` + `/probe` + `/record`; `GET /` resolves to the browser).
+
 ## [0.3.6] - 2026-07-18
 
 ### Documentation

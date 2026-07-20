@@ -15,6 +15,9 @@ and consumed by other services. Kept intentionally minimal:
 - ``/record``: server-side archive to a compressed file, returned via
   ``FileResponse``; the temp file is cleaned up by a ``BackgroundTask``
   once the response has been fully streamed to the client.
+- ``/gui`` (and ``/`` which redirects to it): a self-contained single-page
+  episode browser (Tailwind CDN + vanilla JS) that drives the very same
+  ``/feed`` / ``/probe`` / ``/record`` endpoints — no extra server logic.
 
 Install the extra to get the runtime dependencies::
 
@@ -47,11 +50,19 @@ from __future__ import annotations
 import shutil
 import tempfile
 from collections.abc import AsyncIterator
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
 from pathlib import Path
 
 try:
     from fastapi import BackgroundTasks, FastAPI, Form, HTTPException, Query
-    from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+    from fastapi.responses import (
+        FileResponse,
+        HTMLResponse,
+        JSONResponse,
+        RedirectResponse,
+        StreamingResponse,
+    )
 except ImportError as exc:  # pragma: no cover
     raise ImportError(
         "The FastAPI HTTP surface requires the [api] extra. "
@@ -65,14 +76,37 @@ from . import extract_audio_stream, feed, latest_episode
 # ---------------------------------------------------------------------------
 
 
+def _package_version() -> str:
+    """Resolve the installed package version, or a sentinel when unknown.
+
+    Reading the version from :mod:`importlib.metadata` (rather than hard-coding
+    it) keeps the OpenAPI ``version`` field in lock-step with ``pyproject.toml``
+    across releases — it can never drift.
+
+    Returns
+    -------
+    str
+        The installed distribution version (e.g. ``"0.4.0"``), or
+        ``"0+unknown"`` when the package metadata cannot be found (e.g. running
+        straight from a source checkout that was never installed).
+    """
+    # importlib.metadata raises PackageNotFoundError when the dist is absent;
+    # a served app should never crash over a cosmetic version string.
+    try:
+        return _pkg_version("podcast-helper")
+    except PackageNotFoundError:  # pragma: no cover — only on bare checkouts
+        return "0+unknown"
+
+
 app = FastAPI(
     title="Podcast Helper API",
     description=(
         "HTTP surface for podcast-helper: RSS / Atom feed introspection, "
         "URL classification, and streaming PCM / archive output for any "
-        "audio-bearing URL (files, direct enclosures, RSS feeds, yt-dlp sources)."
+        "audio-bearing URL (files, direct enclosures, RSS feeds, yt-dlp sources). "
+        "A minimal single-page episode browser is served at GET /gui."
     ),
-    version="0.3.3",
+    version=_package_version(),
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -105,6 +139,36 @@ def _new_tmpdir() -> Path:
 def health() -> dict:
     """Simple liveness probe — no dependency check, just proves the app is up."""
     return {"status": "ok"}
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    """Redirect the bare root to the GUI so opening the server just works."""
+    # A human hitting http://host:port/ almost always wants the episode
+    # browser, not a 404. Machines use the documented endpoints directly,
+    # so this convenience redirect is safe.
+    return RedirectResponse(url="/gui")
+
+
+@app.get("/gui", response_class=HTMLResponse, tags=["meta"])
+def gui() -> HTMLResponse:
+    """Serve the self-contained single-page 'episode browser' GUI.
+
+    The page (defined in :mod:`podcast_helper.gui`) is a build-step-free
+    HTML + Tailwind-CDN + vanilla-JS client that calls the very same
+    ``/feed`` / ``/probe`` / ``/record`` endpoints defined below. It adds
+    no server-side logic — it is purely a friendlier front door to the API.
+
+    Returns
+    -------
+    HTMLResponse
+        The complete HTML document (status 200, ``text/html``).
+    """
+    # Import here so the (large) HTML string is only materialised when the
+    # route is actually hit, keeping the API module import cheap.
+    from .gui import GUI_HTML
+
+    return HTMLResponse(content=GUI_HTML)
 
 
 # ---------------------------------------------------------------------------
