@@ -20,6 +20,8 @@ Consommateur universel de flux audio pour podcasts et toute URL portant de l'aud
 
 [💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
 
+[🗺️ Paysage](https://github.com/warith-harchaoui/podcast-helper/blob/main/PAYSAGE.md)
+
 [📋 Exemples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md)
 
 ## Pourquoi cette bibliothèque
@@ -188,8 +190,8 @@ acceptées et des cas où *ne pas* utiliser podcast-helper, voir
 [`skills/README.md`](skills/README.md).
 
 Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](GUI.md).
-Pour une comparaison face à l'écosystème audio / podcast Python, voir
-[`LANDSCAPE.md`](LANDSCAPE.md).
+Pour une comparaison face à l'écosystème audio / podcast Python, avec
+une carte de positionnement, voir [`PAYSAGE.md`](PAYSAGE.md).
 
 ## Flux en direct
 

@@ -1,8 +1,10 @@
-# LANDSCAPE
+# Landscape
+
+[🇫🇷 PAYSAGE.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/PAYSAGE.md) · 🇬🇧 English
 
 Related and competing Python libraries in the "consume a podcast /
 audio URL and hand off PCM or metadata" space, benchmarked against
-`podcast-helper`. Ratings are `⭐️` (1) to `⭐️⭐️⭐️⭐️⭐️` (5), scored on
+`podcast-helper`. Ratings are ⭐ (1) to ⭐⭐⭐⭐⭐ (5), scored on
 `podcast-helper`'s intended job — universal URL-in → PCM-out for AI
 pipelines (files, direct enclosures, RSS / Atom feeds, yt-dlp-supported
 sources), with signal-processing correctness and pragmatic ergonomics.
@@ -12,19 +14,27 @@ penalised — the score just reflects fit to *this* niche.
 
 ## At a glance
 
-| Library / project | Universal URL-in (file, direct, RSS, yt-dlp) | RSS / Atom feed parsing | yt-dlp source resolution | Live-stream (HLS) support | Shannon-correct resampling | PCM streaming (async iterator) | Parallel compressed archive | Multi-surface (CLI / API / MCP) |
+| Audio Ingestion | Universal URL-in | RSS / Atom parsing | yt-dlp resolution | Live-stream (HLS) | Correct resampling | PCM streaming | Compressed archive | Multi-surface |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **podcast-helper** *(this project)* | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️⭐️ (ffmpeg swresample / soxr) | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️ (mp3 / m4a / opus / ogg / flac / wav) | ⭐️⭐️⭐️⭐️⭐️ (argparse + click + FastAPI + MCP) |
-| yt-dlp (CLI) | ⭐️⭐️⭐️⭐️ (needs `--audio-format` post-processing) | ⭐️ | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️ | ⭐️⭐️ (via ffmpeg post-processor) | ⭐️ (writes to disk, not iterator) | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️ (CLI only) |
-| feedparser | ⭐️ | ⭐️⭐️⭐️⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ (library only) |
-| podcastparser | ⭐️ | ⭐️⭐️⭐️⭐️⭐️ (iTunes + Podcasting 2.0) | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ (library only) |
-| pyPodcastParser | ⭐️ | ⭐️⭐️⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ |
-| gPodder core | ⭐️⭐️ (download to disk) | ⭐️⭐️⭐️⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️⭐️⭐️⭐️ (`.mp3` archive) | ⭐️⭐️ (desktop app) |
-| Podcast Index client libs (`podcastindex-python`, `pypodcastindex`) | ⭐️ (discovery only) | ⭐️⭐️⭐️⭐️ (via Podcast Index API) | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️ |
-| pydub | ⭐️⭐️ (file-only) | ⭐️ | ⭐️ | ⭐️ | ⭐️⭐️⭐️ (ffmpeg-backed) | ⭐️ (in-memory `AudioSegment`) | ⭐️⭐️⭐️⭐️ (export any format) | ⭐️⭐️ (library only) |
-| librosa | ⭐️⭐️ (file / audioread) | ⭐️ | ⭐️ | ⭐️ | ⭐️⭐️⭐️⭐️ (`resampy`) | ⭐️ (batch load) | ⭐️ | ⭐️ |
-| soundfile | ⭐️ (WAV / FLAC / OGG only) | ⭐️ | ⭐️ | ⭐️ | ⭐️ | ⭐️⭐️ (block reader) | ⭐️⭐️ | ⭐️ |
-| requests + ffmpeg (DIY) | ⭐️⭐️ (only what you write) | ⭐️ | ⭐️ | ⭐️⭐️ | ⭐️⭐️⭐️⭐️⭐️ (whatever ffmpeg does) | ⭐️⭐️⭐️ (with subprocess) | ⭐️⭐️⭐️ | ⭐️ |
+| **podcast-helper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| yt-dlp | ⭐⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| feedparser | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
+| podcastparser | ⭐ | ⭐⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
+| pyPodcastParser | ⭐ | ⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
+| gPodder core | ⭐⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+| podcastindex-python | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
+| pydub | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+| librosa | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ |
+| soundfile | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐ | ⭐ |
+| requests + ffmpeg | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+
+## Positioning map
+
+2D representation of the table above.
+
+![Positioning map](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/landscape.png)
+
+The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Parsing ↔ Compressed** and **Vertical — Resampling ↔ Surface**.
 
 ## Positioning
 
@@ -46,6 +56,12 @@ possible) without ever hitting the disk. The main differentiator against
 `podcastparser` / `feedparser` is that a feed URL becomes an
 audio-bearing URL transparently — the caller does not have to walk the
 enclosure list themselves.
+
+Resampling correctness is the quietest but most load-bearing edge:
+`podcast-helper` resamples through ffmpeg's `swresample` / `soxr`, so a
+downstream model always sees band-limited, aliasing-free PCM. A DIY
+`requests + ffmpeg` chain can match that fidelity but leaves every other
+concern (routing, feeds, streaming iterator, archive) to the caller.
 
 ## When to pick what
 

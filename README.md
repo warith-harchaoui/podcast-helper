@@ -20,6 +20,8 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL-in
 
 [💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
 
+[🗺️ Landscape](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md)
+
 [📋 Examples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md)
 
 ## Why it exists
@@ -186,7 +188,8 @@ podcast-helper also ships as an installable Claude / OpenCode **skill**
 
 For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md). For a
 competitive comparison against the Python audio / podcast ecosystem,
-see [`LANDSCAPE.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md).
+with a positioning map, see
+[`LANDSCAPE.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md).
 
 ## Live streams
 
