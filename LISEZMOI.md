@@ -8,9 +8,9 @@
 
 ## La promesse
 
-**Local d'abord, par conception.** podcast-helper s'exécute entièrement sur votre machine — il ne récupère que les épisodes/flux que vous demandez et les traite localement ; vos données ne sont jamais téléversées vers un service tiers, aucune télémétrie, aucun compte, aucun verrouillage propriétaire dans le cloud. Fait partie de la suite [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) : la souveraineté sur vos données grâce à l'Open Source local-first.
+**Local d'abord, par conception.** podcast-helper s'exécute entièrement sur votre machine — il ne récupère que les épisodes / flux que vous demandez et les traite localement ; vos données ne partent jamais vers un service tiers, aucune télémétrie, aucun compte, aucun verrouillage propriétaire dans le cloud. Fait partie de la suite [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) : la souveraineté sur vos données grâce à l'Open Source local-first.
 
-Consommateur universel de flux audio pour podcasts et toute URL portant de l'audio. **URL en entrée → PCM en sortie** pour les fichiers locaux, les URLs audio directes (enclosure RSS MP3 / M4A / Opus / WAV / HLS m3u8), les URLs de flux RSS / Atom (sélectionne automatiquement le dernier épisode), et toute source supportée par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuse d'emblée les URLs Spotify (DRM) et Apple Podcasts (catalogue), avec des indications claires sur le contournement via flux RSS.
+Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée → PCM en sortie** pour les fichiers locaux, les URLs audio directes (enclosure RSS MP3 / M4A / Opus / WAV / HLS m3u8), les URLs de flux RSS / Atom (le dernier épisode est sélectionné automatiquement), et toute source supportée par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuse d'emblée les URLs Spotify (DRM) et Apple Podcasts (catalogue), en indiquant comment contourner via le flux RSS.
 
 [🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
 
@@ -26,7 +26,7 @@ Consommateur universel de flux audio pour podcasts et toute URL portant de l'aud
 
 ## Pourquoi cette bibliothèque
 
-Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commencent souvent par la même question : *« donne-moi un flux de frames PCM depuis cette URL, peu importe que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube, ou un podcast hébergé sur un CDN que je ne connais pas »*. Cette bibliothèque est cette fonction unique — plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent l'usage des sources RSS agréable.
+Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commencent souvent par la même demande : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube, ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là — plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
 
 ## Installation
 
@@ -36,7 +36,7 @@ Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commenc
 - 🐧 **Ubuntu/Debian** : `sudo apt update && sudo apt install -y python3 python3-pip git ffmpeg`
 - 🪟 **Windows** (PowerShell) : `winget install Python.Python.3.12 Git.Git Gyan.FFmpeg`
 
-Nous recommandons l'utilisation d'environnements Python. Consultez ce lien si vous ne savez pas comment faire : [🥸 Conseils techniques](https://harchaoui.org/warith/4ml/#install).
+On recommande de travailler dans un environnement Python. Si vous ne savez pas en créer un, voir [🥸 Conseils techniques](https://harchaoui.org/warith/4ml/#install).
 
 ### Depuis les sources
 

@@ -59,16 +59,16 @@ Le principal différenciateur face à yt-dlp lui-même est l'**itérateur
 asynchrone de trames PCM**, qui laisse un consommateur en aval (ASR / VAD /
 diarisation) tirer les trames exactement au rythme de la source (ou aussi
 vite que possible) sans jamais toucher le disque. Le principal différenciateur
-face à `podcastparser` / `feedparser` est qu'une URL de flux devient de façon
-transparente une URL porteuse d'audio — l'appelant n'a pas à parcourir
+face à `podcastparser` / `feedparser` est qu'une URL de flux se résout
+directement en URL porteuse d'audio — l'appelant n'a pas à parcourir
 lui-même la liste des enclosures.
 
-La correction du rééchantillonnage est l'arête la plus discrète mais la plus
-déterminante : `podcast-helper` rééchantillonne via `swresample` / `soxr` de
+La correction du rééchantillonnage est le détail le plus discret mais le plus
+déterminant : `podcast-helper` rééchantillonne via `swresample` / `soxr` de
 ffmpeg, de sorte qu'un modèle en aval voit toujours du PCM à bande limitée,
 sans repliement. Une chaîne artisanale `requests + ffmpeg` peut atteindre la
-même fidélité, mais laisse toutes les autres préoccupations (routage, flux,
-itérateur de streaming, archive) à la charge de l'appelant.
+même fidélité, mais laisse tout le reste (routage, flux, itérateur de
+streaming, archive) à la charge de l'appelant.
 
 ## Quand choisir quoi
 
