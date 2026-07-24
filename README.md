@@ -186,10 +186,7 @@ when *not* to reach for podcast-helper, see
 podcast-helper also ships as an installable Claude / OpenCode **skill**
 — see [`skills/README.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/skills/README.md).
 
-For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md). For a
-competitive comparison against the Python audio / podcast ecosystem,
-with a positioning map, see
-[`LANDSCAPE.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md).
+For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md).
 
 ## Live streams
 

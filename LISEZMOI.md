@@ -190,8 +190,6 @@ acceptées et des cas où *ne pas* utiliser podcast-helper, voir
 [`skills/README.md`](skills/README.md).
 
 Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](GUI.md).
-Pour une comparaison face à l'écosystème audio / podcast Python, avec
-une carte de positionnement, voir [`PAYSAGE.md`](PAYSAGE.md).
 
 ## Flux en direct
 
