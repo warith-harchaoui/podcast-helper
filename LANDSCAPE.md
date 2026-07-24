@@ -14,6 +14,7 @@ penalised — the score just reflects fit to *this* niche.
 
 ## At a glance
 
+<!-- TABLE:START -->
 | Audio Ingestion | Universal URL-in | RSS / Atom parsing | yt-dlp resolution | Live-stream (HLS) | Correct resampling | PCM streaming | Compressed archive | Multi-surface |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **podcast-helper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
@@ -27,14 +28,17 @@ penalised — the score just reflects fit to *this* niche.
 | librosa | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ |
 | soundfile | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐ | ⭐ |
 | requests + ffmpeg | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+<!-- TABLE:END -->
 
 ## Positioning map
 
+<!-- FIGURE:START -->
 2D representation of the table above.
 
 ![Positioning map](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/landscape.png)
 
-The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Parsing ↔ Compressed** and **Vertical — Resampling ↔ Surface**.
+The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Feed Expertise ↔ Streaming Versatility** and **Vertical — Compression Precision ↔ Multi-Format Mastery**.
+<!-- FIGURE:END -->
 
 ## Positioning
 

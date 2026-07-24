@@ -1,0 +1,12 @@
+Audio Ingestion,Universal URL-in,RSS / Atom parsing,yt-dlp resolution,Live-stream (HLS),Correct resampling,PCM streaming,Compressed archive,Multi-surface
+podcast-helper,5,5,5,4,5,5,4,5
+yt-dlp,4,1,5,4,2,1,5,2
+feedparser,1,4,1,1,1,1,1,1
+podcastparser,1,5,1,1,1,1,1,1
+pyPodcastParser,1,3,1,1,1,1,1,1
+gPodder core,2,4,1,1,1,1,4,2
+podcastindex-python,1,4,1,1,1,1,1,1
+pydub,2,1,1,1,3,1,4,2
+librosa,2,1,1,1,4,1,1,1
+soundfile,1,1,1,1,1,2,2,1
+requests + ffmpeg,2,1,1,2,5,3,3,1

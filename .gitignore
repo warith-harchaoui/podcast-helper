@@ -67,5 +67,3 @@ nomoreclaude.sh
 .pypirc
 
 # Generated landscape CSVs (standpoint input; regenerated from the *.md tables)
-assets/landscape.csv
-assets/paysage.csv
