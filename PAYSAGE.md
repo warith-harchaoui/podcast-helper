@@ -38,7 +38,7 @@ Représentation 2D du tableau ci-dessus.
 
 ![Carte de positionnement](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/paysage.png)
 
-La carte est un résumé en 2D des 8 critères : à lire comme une forme, pas comme un classement. « podcast-helper » se situe dans le coin en haut à droite. Les axes se lisent **Horizontal — Efficace ↔ Polyvalent** et **Vertical — Simple ↔ Performant**.
+La carte est un résumé en 2D des 8 critères : à lire comme une forme, pas comme un classement. « podcast-helper » se situe dans le coin en haut à droite. Les axes se lisent **Horizontal — Précision ↔ Flexibilité** et **Vertical — Compacte ↔ Complétude**.
 <!-- FIGURE:END -->
 
 ## Positionnement

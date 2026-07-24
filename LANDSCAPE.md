@@ -37,7 +37,7 @@ penalised — the score just reflects fit to *this* niche.
 
 ![Positioning map](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/landscape.png)
 
-The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Feed Expertise ↔ Streaming Versatility** and **Vertical — Compression Precision ↔ Multi-Format Mastery**.
+The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Efficiency ↔ Versatility** and **Vertical — Accuracy ↔ Comprehensive**.
 <!-- FIGURE:END -->
 
 ## Positioning
