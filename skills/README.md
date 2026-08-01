@@ -13,7 +13,7 @@ skills/podcast-helper/
 ├── SKILL.md                 # name + trigger-rich description + instructions
 └── references/
     ├── cli-reference.md      # full subcommand + flag matrix, output contract
-    ├── surfaces.md           # library, CLIs, API, MCP, and the /gui browser
+    ├── surfaces.md           # library, CLIs, API, and the /gui browser
     └── triggers.md           # exhaustive, auditable trigger catalogue
 ```
 

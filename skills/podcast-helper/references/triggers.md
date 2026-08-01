@@ -32,12 +32,12 @@ human-reviewable full list). Keep the two in sync, and mirror the repo-root
 - "how will podcast-helper resolve this URL"
 
 **Explicit command / function mentions**
-- `podcast-helper`, `podcast-helper-click`, `podcast-helper-mcp`
+- `podcast-helper`, `podcast-helper-click`
 - subcommands `feed latest stream record probe`
 - functions `extract_audio_stream feed latest_episode`; types `Episode PcmFrame`
 
 **Surfaces**
-- "run the podcast API / podcast-helper server", "expose these as HTTP / MCP tools"
+- "run the podcast API / podcast-helper server", "expose these as HTTP"
 - "open the podcast GUI / episode browser"
 - "how do I install / run podcast-helper"
 

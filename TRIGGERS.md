@@ -13,7 +13,7 @@ edit files already on disk.
 
 ## The five verbs → how to invoke
 
-| Intent | CLI | Library | API / MCP |
+| Intent | CLI | Library | API |
 |--------|-----|---------|-----------|
 | List an RSS / Atom feed's episodes | `podcast-helper feed` | `feed` | `GET /feed` |
 | Get the latest episode / enclosure URL | `podcast-helper latest` | `latest_episode` | `GET /latest` |
@@ -37,7 +37,7 @@ same flags) and the browser episode browser at `GET /gui`.
   "save the latest episode as an mp3", "archive this live stream while it airs".
 - **probe**: "classify / probe this URL", "is this a feed, a direct file, or a
   yt-dlp source", "is this URL live".
-- **Surfaces**: "run the podcast API / MCP server", "open the episode browser
+- **Surfaces**: "run the podcast API server", "open the episode browser
   GUI", "install podcast-helper".
 
 ## URLs and file types it accepts

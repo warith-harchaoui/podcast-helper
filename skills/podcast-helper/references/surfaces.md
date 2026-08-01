@@ -62,19 +62,7 @@ Endpoints:
 - `POST /record` — form `url output_format sample_rate mono frame_ms speed` →
   the archive file (`FileResponse`); the temp dir is cleaned by a `BackgroundTask`.
 
-## 4. MCP server — FastAPI-MCP (`podcast-helper[api,mcp]`)
-
-```bash
-pip install 'podcast-helper[api,mcp]'
-podcast-helper-mcp                 # serves FastAPI + MCP on :8000
-# or: python -m podcast_helper.mcp
-```
-
-Wraps the exact FastAPI app with `fastapi_mcp` — the same endpoints become MCP
-tools (`feed`, `latest`, `probe`, `stream`, `record`) for any MCP-aware host.
-Host / port via `PODCAST_HELPER_HOST` / `PODCAST_HELPER_PORT` env vars.
-
-## 5. GUI — minimal episode browser (`GET /gui`)
+## 4. GUI — minimal episode browser (`GET /gui`)
 
 Served by the FastAPI app; no build step, no framework — a single self-contained
 HTML page (Tailwind via CDN + vanilla ES-module JS) defined in

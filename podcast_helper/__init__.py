@@ -25,8 +25,6 @@ The same public functions are surfaced as:
 - ``podcast-helper-click`` — click CLI (:mod:`podcast_helper.cli_click`);
   needs the ``[cli]`` extra.
 - FastAPI HTTP app (:mod:`podcast_helper.api`); needs the ``[api]`` extra.
-- ``podcast-helper-mcp`` — Model Context Protocol server built on top of
-  the FastAPI app (:mod:`podcast_helper.mcp`); needs the ``[api,mcp]`` extras.
 
 Usage Example
 -------------

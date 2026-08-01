@@ -9,8 +9,8 @@ description: >-
   compressed file (mp3/m4a/opus/ogg/flac/wav), and probe how a URL is
   classified. Exposed as a Python library (`import podcast_helper as ph`), two
   CLIs (`podcast-helper` argparse and `podcast-helper-click`), a FastAPI HTTP
-  surface, an MCP tool set, and a minimal browser GUI at `/gui`. Local-first,
-  ffmpeg + yt-dlp backed, no SaaS, no telemetry.
+  surface, and a minimal browser GUI at `/gui`. Local-first, ffmpeg + yt-dlp
+  backed, no SaaS, no telemetry.
 
   TRIGGER — any of: the user names a podcast / feed / stream operation on a URL
   ("get the latest episode of this podcast", "list the episodes in this RSS
@@ -26,10 +26,10 @@ description: >-
   / audio / video URL (a YouTube / Vimeo / SoundCloud / Twitch VOD or live URL,
   or a direct `.mp3 .m4a .aac .opus .ogg .wav .flac .m3u8` enclosure) and wants
   its audio decoded, streamed, or archived; the user types or references a
-  command (`podcast-helper`, `podcast-helper-click`, `podcast-helper-mcp`,
+  command (`podcast-helper`, `podcast-helper-click`,
   subcommands `feed|latest|stream|record|probe`) or a library function
   (`extract_audio_stream`, `feed`, `latest_episode`, `Episode`, `PcmFrame`); the
-  user wants the podcast API / MCP server run, or the episode-browser GUI; the
+  user wants the podcast API server run, or the episode-browser GUI; the
   user asks to install / run podcast-helper.
 
   SKIP when: the task is speech-to-text / transcription / captions / subtitles /
@@ -49,8 +49,8 @@ description: >-
 question well: *"give me a stream of PCM frames from this URL — never mind
 whether it's a `.mp3` link, an RSS feed, a YouTube video, or a podcast on a CDN
 I've never heard of."* Around that core sit friendly RSS helpers (`feed`,
-`latest_episode`). The same functions are reachable five ways (library, two
-CLIs, HTTP API, MCP, GUI) so an agent can pick whichever fits.
+`latest_episode`). The same functions are reachable four ways (library, two
+CLIs, HTTP API, GUI) so an agent can pick whichever fits.
 
 ## Before anything: verify it is installed
 
@@ -65,7 +65,6 @@ If missing, install it (ffmpeg is a hard system dependency):
 pip install podcast-helper                 # core (extract_audio_stream + feed helpers)
 pip install 'podcast-helper[cli]'          # + click CLI twin
 pip install 'podcast-helper[api]'          # + FastAPI HTTP surface + /gui browser
-pip install 'podcast-helper[api,mcp]'      # + MCP tools on top of FastAPI
 ```
 
 ffmpeg must be on PATH:
@@ -75,7 +74,7 @@ ffmpeg must be on PATH:
 
 ## The five verbs
 
-Same names across the library, both CLIs, the API, and the MCP tools:
+Same names across the library, both CLIs, and the API:
 
 | Intent | CLI | Library |
 |--------|-----|---------|
@@ -115,7 +114,7 @@ asyncio.run(main())
 ```
 
 For the full flag matrix and every option, read `references/cli-reference.md`.
-For the API / MCP / GUI surfaces (endpoints, ports, the `/gui` browser), read
+For the API / GUI surfaces (endpoints, ports, the `/gui` browser), read
 `references/surfaces.md`. For the exhaustive, auditable trigger list, read
 `references/triggers.md`.
 

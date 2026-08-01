@@ -4,13 +4,13 @@
 #
 # Two-stage build: the base stage pulls system deps (ffmpeg is
 # mandatory for the whole toolkit) and installs the package with the
-# [api,mcp] extras so the container can serve the HTTP + MCP surfaces
-# out of the box.
+# [api] extra so the container can serve the HTTP surface out of the
+# box.
 #
 # Build:
 #   docker build -t podcast-helper .
 #
-# Run (HTTP + MCP on 0.0.0.0:8000):
+# Run (HTTP on 0.0.0.0:8000):
 #   docker run --rm -p 8000:8000 podcast-helper
 #
 # Run CLI one-shot:
@@ -41,12 +41,12 @@ WORKDIR /app
 COPY --chown=app:app pyproject.toml README.md LISEZMOI.md LICENSE ./
 COPY --chown=app:app podcast_helper ./podcast_helper
 
-# Install with [api,mcp] extras so the container is ready to serve
-# HTTP + MCP out of the box. `git` is kept in the image because our
+# Install with the [api] extra so the container is ready to serve
+# HTTP out of the box. `git` is kept in the image because our
 # intra-family deps (youtube-helper, os-helper, audio-helper, …) are
 # installed via git+https tags — pip needs `git` to resolve them.
 RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir '.[api,mcp]'
+ && pip install --no-cache-dir '.[api]'
 
 # --- runtime ----------------------------------------------------------------
 USER app
@@ -57,5 +57,5 @@ ENV PYTHONUNBUFFERED=1 \
 
 # tini reaps orphan children (ffmpeg subprocesses) cleanly on SIGTERM.
 ENTRYPOINT ["/usr/bin/tini", "--"]
-# Default: serve FastAPI + MCP. Override for one-shot CLI usage.
-CMD ["podcast-helper-mcp"]
+# Default: serve the FastAPI surface. Override for one-shot CLI usage.
+CMD ["uvicorn", "podcast_helper.api:app", "--host", "0.0.0.0", "--port", "8000"]

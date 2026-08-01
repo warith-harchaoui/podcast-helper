@@ -28,7 +28,7 @@ What the page does
 - **Record** the selected episode (or any raw URL) to a compressed archive via
   ``POST /record`` and offer the resulting file as a download.
 
-Everything talks to the SAME FastAPI endpoints the CLI and MCP surfaces use —
+Everything talks to the SAME FastAPI endpoints the CLI surface uses —
 the GUI adds zero new server logic and never uploads the user's data anywhere.
 
 Author

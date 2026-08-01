@@ -42,12 +42,11 @@ We recommend using Python environments. Check this link if you're unfamiliar wit
 
 ```bash
 # Core library
-pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
+pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
 
 # Optional surfaces
-pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
-pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
-pip install "podcast-helper[api,mcp] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.4.0"
+pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
+pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
 ```
 
 PyPI release coming soon.
@@ -134,7 +133,7 @@ Each `Episode` dict has a normalised schema regardless of feed flavour:
 
 ## Multi-surface exposure
 
-`podcast-helper` exposes the same public functions through five
+`podcast-helper` exposes the same public functions through four
 interchangeable surfaces — pick the one that fits the caller.
 
 | Surface | Entry point | Extra | Best for |
@@ -143,7 +142,6 @@ interchangeable surfaces — pick the one that fits the caller.
 | argparse CLI | `podcast-helper` | — (stdlib only) | shell scripts, CI, ffmpeg pipelines |
 | click CLI | `podcast-helper-click` | `[cli]` | click-native shells (bash / zsh completion, colored help) |
 | FastAPI HTTP | `uvicorn podcast_helper.api:app` | `[api]` | HTTP microservices, cross-language callers |
-| MCP server | `podcast-helper-mcp` | `[api,mcp]` | Claude Desktop, MCP-aware agents, IDE integrations |
 | Browser GUI | `GET /gui` (served by the API) | `[api]` | drop-a-URL episode browser: list · preview · archive, no terminal |
 
 Install any combination of extras:
@@ -151,14 +149,13 @@ Install any combination of extras:
 ```bash
 pip install 'podcast-helper[cli]'          # + click twin
 pip install 'podcast-helper[api]'          # + FastAPI HTTP surface
-pip install 'podcast-helper[api,mcp]'      # + MCP tools on top of FastAPI
-pip install 'podcast-helper[cli,api,mcp]'  # everything
+pip install 'podcast-helper[cli,api]'      # everything
 ```
 
 Every surface publishes the same verbs — `feed`, `latest`, `stream`,
 `record`, `probe` — with identical argument names, so switching
 between them is a copy-paste. The Dockerfile in this repo ships the
-FastAPI + MCP surfaces on port 8000 out of the box (`docker build -t
+FastAPI surface on port 8000 out of the box (`docker build -t
 podcast-helper . && docker run --rm -p 8000:8000 podcast-helper`).
 
 ### Browser GUI — the episode browser (`GET /gui`)
