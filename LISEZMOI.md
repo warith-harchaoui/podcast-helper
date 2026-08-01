@@ -182,9 +182,7 @@ ffmpeg sur votre propre machine.
 
 Pour le catalogue exhaustif des déclencheurs, formulations, URLs
 acceptées et des cas où *ne pas* utiliser podcast-helper, voir
-[`TRIGGERS.md`](TRIGGERS.md). podcast-helper est aussi livré comme
-**skill** Claude / OpenCode installable — voir
-[`skills/README.md`](skills/README.md).
+[`TRIGGERS.md`](TRIGGERS.md).
 
 Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](GUI.md).
 

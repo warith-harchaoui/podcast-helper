@@ -2,9 +2,7 @@
 
 This is the user-facing, exhaustive catalogue of what `podcast-helper` can do and
 the natural-language phrasings, commands, functions, URLs, and file types that
-should invoke it — whether you call it yourself or drive it as a Claude /
-OpenCode **skill** (see [`skills/podcast-helper/SKILL.md`](skills/podcast-helper/SKILL.md)
-and its [`references/triggers.md`](skills/podcast-helper/references/triggers.md)).
+should invoke it.
 
 `podcast-helper` is **URL-in → PCM-out**: it resolves any podcast / RSS / audio /
 video URL and hands you a stream of PCM frames, plus friendly RSS helpers. It is
@@ -71,4 +69,3 @@ same flags) and the browser episode browser at `GET /gui`.
 - [`README.md`](README.md) — features, install, quick start.
 - [`EXAMPLES.md`](EXAMPLES.md) — runnable recipes.
 - [`GUI.md`](GUI.md) — the shipped minimal GUI + the roadmap for a richer one.
-- [`skills/README.md`](skills/README.md) — installing this as an agent skill.

@@ -180,8 +180,6 @@ ffmpeg on your own machine.
 For the exhaustive catalogue of triggers, phrasings, accepted URLs and
 when *not* to reach for podcast-helper, see
 [`TRIGGERS.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/TRIGGERS.md).
-podcast-helper also ships as an installable Claude / OpenCode **skill**
-— see [`skills/README.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/skills/README.md).
 
 For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md).
 
