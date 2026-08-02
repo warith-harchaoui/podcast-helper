@@ -20,15 +20,15 @@ pénalisée — la note reflète seulement l'adéquation à *ce* créneau.
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **podcast-helper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | yt-dlp | ⭐⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| streamlink | ⭐⭐⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| pytube | ⭐⭐ | ⭐ | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐ |
 | feedparser | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
 | podcastparser | ⭐ | ⭐⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
-| pyPodcastParser | ⭐ | ⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
-| gPodder core | ⭐⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| podcastindex-python | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
-| pydub | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| librosa | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ |
-| soundfile | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐ | ⭐ |
-| requests + ffmpeg | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+| ffmpeg-python | ⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐ |
+| requests + ffmpeg (manual) | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+| pydub | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ |
+| librosa.load | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐ |
+| audioread | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐ |
 <!-- TABLE:END -->
 
 ## Carte de positionnement
@@ -38,7 +38,7 @@ Représentation 2D du tableau ci-dessus.
 
 ![Carte de positionnement](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/paysage.png)
 
-La carte est un résumé en 2D des 8 critères : à lire comme une forme, pas comme un classement. « podcast-helper » se situe dans le coin en haut à droite. Les axes se lisent **Horizontal — Précision ↔ Flexibilité** et **Vertical — Compacte ↔ Complétude**.
+La carte est un résumé en 2D des 8 critères : à lire comme une forme, pas comme un classement. « podcast-helper » se situe dans le coin en haut à droite. Les axes se lisent **Horizontal — Précision ↔ Flexibilité** et **Vertical — Qualité audio ↔ Complétude**.
 <!-- FIGURE:END -->
 
 ## Positionnement
@@ -78,9 +78,9 @@ streaming, archive) à la charge de l'appelant.
   compressée optionnelle.
 - **`yt-dlp`** — vous avez seulement besoin du fichier sur disque et vous ne
   vous souciez ni du RSS ni du streaming asynchrone.
+- **`streamlink`** — vous avez précisément besoin de récupérer un flux HLS en
+  direct et rien d'autre.
 - **`feedparser` / `podcastparser`** — vous avez seulement besoin de parcourir
   les métadonnées d'un flux ; l'ingestion audio est hors périmètre.
-- **`gPodder`** — vous voulez un client de podcast de bureau avec un magasin
-  d'abonnements.
-- **`pydub` / `librosa` / `soundfile`** — vous avez déjà le fichier et vous
-  voulez manipuler ses échantillons avec une bibliothèque audio mature.
+- **`pydub` / `librosa` / `audioread`** — vous avez déjà le fichier et vous
+  voulez manipuler ou décoder ses échantillons avec une bibliothèque audio mature.

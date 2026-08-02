@@ -19,15 +19,15 @@ penalised — the score just reflects fit to *this* niche.
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **podcast-helper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | yt-dlp | ⭐⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| streamlink | ⭐⭐⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| pytube | ⭐⭐ | ⭐ | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐ |
 | feedparser | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
 | podcastparser | ⭐ | ⭐⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
-| pyPodcastParser | ⭐ | ⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
-| gPodder core | ⭐⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| podcastindex-python | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ |
-| pydub | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| librosa | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐ |
-| soundfile | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐ | ⭐ |
-| requests + ffmpeg | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+| ffmpeg-python | ⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐ |
+| requests + ffmpeg (manual) | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+| pydub | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ |
+| librosa.load | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐ |
+| audioread | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐ | ⭐ |
 <!-- TABLE:END -->
 
 ## Positioning map
@@ -37,7 +37,7 @@ penalised — the score just reflects fit to *this* niche.
 
 ![Positioning map](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/landscape.png)
 
-The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Efficiency ↔ Versatility** and **Vertical — Accuracy ↔ Comprehensive**.
+The map is a 2-D summary of the eight criteria, so read it as a shape, not a scoreboard. `podcast-helper` is at the top-right corner. The axes read **Horizontal — Efficiency ↔ Versatility** and **Vertical — Precision ↔ Comprehensive**.
 <!-- FIGURE:END -->
 
 ## Positioning
@@ -74,9 +74,10 @@ concern (routing, feeds, streaming iterator, archive) to the caller.
   Shannon-correct resampling with an optional compressed archive.
 - **`yt-dlp`** — you only need the file on disk and do not care about
   RSS or async streaming.
+- **`streamlink`** — you specifically need a live HLS stream pulled
+  down and nothing else.
 - **`feedparser` / `podcastparser`** — you only need to walk feed
   metadata; audio ingest is out of scope.
-- **`gPodder`** — you want a desktop podcast client with a
-  subscription store.
-- **`pydub` / `librosa` / `soundfile`** — you already have the file
-  and want to manipulate its samples with a mature audio library.
+- **`pydub` / `librosa` / `audioread`** — you already have the file
+  and want to manipulate or decode its samples with a mature audio
+  library.
