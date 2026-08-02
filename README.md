@@ -42,11 +42,11 @@ We recommend using Python environments. Check this link if you're unfamiliar wit
 
 ```bash
 # Core library
-pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
+pip install podcast-helper
 
 # Optional surfaces
-pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
-pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
+pip install "podcast-helper[cli]"
+pip install "podcast-helper[api]"
 ```
 
 PyPI release coming soon.

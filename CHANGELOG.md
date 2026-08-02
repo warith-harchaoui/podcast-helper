@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-02
+
+First stable release. The URL-in → PCM-out contract (`extract_audio_stream` and
+friends) has been stable across the 0.x line; 1.0.0 commits to it on the 2.x
+suite foundation.
+
+### Changed
+
+- **Adopts the 2.x suite majors:** `youtube-helper>=2.0.0,<3` (was `>=1.3.4`) and
+  `os-helper>=2.0.0,<3` (was `>=1.5.0`), bringing the hardened logging / file /
+  smart-download foundation and youtube-helper's 2.x source resolution.
+- Development status promoted to Production/Stable.
+- CI test matrix trimmed to a single Python (the full sweep runs locally before
+  push); lint stays fully blocking (`ruff check` + `ruff format --check`).
+
+### Fixed
+
+- README / LISEZMOI / EXAMPLES install commands no longer self-pin to a git tag
+  (`@v0.5.0`); they use `pip install podcast-helper`, which always resolves to
+  the latest published release.
+
+### Added
+
+- `tests/test_readme_install_pin.py` guards against the stale git self-pin ever
+  returning to any Markdown file.
+
 ## [0.5.1] - 2026-08-01
 
 ### Removed

@@ -1,8 +1,8 @@
 # Podcast Helper
 
-[🇫🇷](LISEZMOI.md) · [🇬🇧](README.md)
+[🇫🇷](https://github.com/warith-harchaoui/podcast-helper/blob/main/LISEZMOI.md) · [🇬🇧](https://github.com/warith-harchaoui/podcast-helper/blob/main/README.md)
 
-[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#la-promesse)
+[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#la-promesse)
 
 `Podcast Helper` fait partie d'une collection de bibliothèques appelée `AI Helpers`, développée pour bâtir des applications d'intelligence artificielle.
 
@@ -14,7 +14,7 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 [🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
 
-[![logo](assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
+[![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
 
 ## Documentation
 
@@ -42,11 +42,11 @@ On recommande de travailler dans un environnement Python. Si vous ne savez pas e
 
 ```bash
 # Bibliothèque de base
-pip install "git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
+pip install podcast-helper
 
 # Surfaces optionnelles
-pip install "podcast-helper[cli] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
-pip install "podcast-helper[api] @ git+https://github.com/warith-harchaoui/podcast-helper.git@v0.5.0"
+pip install "podcast-helper[cli]"
+pip install "podcast-helper[api]"
 ```
 
 Publication sur PyPI à venir.
@@ -74,7 +74,7 @@ async def main():
 asyncio.run(main())
 ```
 
-Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo / multicanal, anti-aliasing, pipelines ASR / VAD / résumé downstream), voir [📋 EXAMPLES.md](EXAMPLES.md).
+Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo / multicanal, anti-aliasing, pipelines ASR / VAD / résumé downstream), voir [📋 EXAMPLES.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md).
 
 ## URLs acceptées
 
@@ -182,9 +182,9 @@ ffmpeg sur votre propre machine.
 
 Pour le catalogue exhaustif des déclencheurs, formulations, URLs
 acceptées et des cas où *ne pas* utiliser podcast-helper, voir
-[`TRIGGERS.md`](TRIGGERS.md).
+[`TRIGGERS.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/TRIGGERS.md).
 
-Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](GUI.md).
+Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md).
 
 ## Flux en direct
 
