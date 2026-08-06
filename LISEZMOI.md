@@ -133,7 +133,7 @@ Chaque dictionnaire `Episode` a un schéma normalisé indépendamment de la vari
 
 ## Exposition multi-surface
 
-`podcast-helper` expose les mêmes fonctions publiques via quatre
+`podcast-helper` expose les mêmes fonctions publiques via cinq
 surfaces interchangeables — choisissez celle qui convient à l'appelant.
 
 | Surface | Point d'entrée | Extra | Idéal pour |
@@ -143,13 +143,15 @@ surfaces interchangeables — choisissez celle qui convient à l'appelant.
 | CLI click | `podcast-helper-click` | `[cli]` | shells click-native (auto-complétion bash / zsh, aide colorée) |
 | API FastAPI | `uvicorn podcast_helper.api:app` | `[api]` | microservices HTTP, appelants multi-langages |
 | GUI navigateur | `GET /gui` (servi par l'API) | `[api]` | explorateur d'épisodes glisser-une-URL : lister · prévisualiser · archiver, sans terminal |
+| MCP | `podcast-helper-mcp` | `[mcp]` | tout hôte agentique compatible MCP (appelle les mêmes points d'accès comme outils) |
 
 Installez la combinaison d'extras qui vous convient :
 
 ```bash
 pip install 'podcast-helper[cli]'          # + le jumeau click
 pip install 'podcast-helper[api]'          # + la surface HTTP FastAPI
-pip install 'podcast-helper[cli,api]'      # tout
+pip install 'podcast-helper[mcp]'          # + les outils MCP (inclut [api] automatiquement)
+pip install 'podcast-helper[cli,api,mcp]'  # tout
 ```
 
 Chaque surface publie les mêmes verbes — `feed`, `latest`, `stream`,

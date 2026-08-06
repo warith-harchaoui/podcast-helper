@@ -45,9 +45,21 @@ api = [
     "uvicorn>=0.30,<1",
     "python-multipart>=0.0.9,<1",
 ]
+# MCP surface (podcast_helper.mcp) — fastapi-mcp wraps the FastAPI app, so it
+# needs the api extra's runtime deps too.
+mcp = [
+    "podcast-helper[api]",
+    "fastapi-mcp>=0.3,<1",
+    # Cap the MCP SDK below 2.0: fastapi-mcp 0.4.0 declares only `mcp>=1.12`
+    # (no upper bound), but mcp 2.0.0 changed the low-level `Server.__init__`
+    # signature and breaks fastapi-mcp at import (`Server.__init__() takes 2
+    # positional arguments but 3 were given`). Pin to the 1.x line until
+    # fastapi-mcp ships a 2.x-compatible release (same issue hit md2star).
+    "mcp>=1.12,<2",
+]
 # `dev` keeps the bar low for CI — pytest + pytest-asyncio + httpx (for
 # FastAPI TestClient) + click (so the click CLI import always resolves
-# in tests) + fastapi so smoke tests can import every surface without
+# in tests) + fastapi/mcp so smoke tests can import every surface without
 # requiring the caller to install all extras.
 dev = [
     "pytest>=8.0",
@@ -56,6 +68,8 @@ dev = [
     "click>=8.1,<9",
     "fastapi>=0.111,<1",
     "python-multipart>=0.0.9,<1",
+    "fastapi-mcp>=0.3,<1",
+    "mcp>=1.12,<2",
 ]
 
 [project.scripts]
@@ -63,6 +77,8 @@ dev = [
 podcast-helper = "podcast_helper.cli_argparse:main"
 # click-based twin — install with the [cli] extra.
 podcast-helper-click = "podcast_helper.cli_click:cli"
+# HTTP API + MCP server — install with the [mcp] extra.
+podcast-helper-mcp = "podcast_helper.mcp:main"
 
 [project.urls]
 Homepage = "https://github.com/warith-harchaoui/podcast-helper"

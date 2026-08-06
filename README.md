@@ -133,7 +133,7 @@ Each `Episode` dict has a normalised schema regardless of feed flavour:
 
 ## Multi-surface exposure
 
-`podcast-helper` exposes the same public functions through four
+`podcast-helper` exposes the same public functions through five
 interchangeable surfaces — pick the one that fits the caller.
 
 | Surface | Entry point | Extra | Best for |
@@ -143,13 +143,15 @@ interchangeable surfaces — pick the one that fits the caller.
 | click CLI | `podcast-helper-click` | `[cli]` | click-native shells (bash / zsh completion, colored help) |
 | FastAPI HTTP | `uvicorn podcast_helper.api:app` | `[api]` | HTTP microservices, cross-language callers |
 | Browser GUI | `GET /gui` (served by the API) | `[api]` | drop-a-URL episode browser: list · preview · archive, no terminal |
+| MCP | `podcast-helper-mcp` | `[mcp]` | any MCP-aware agent host (calls the same endpoints as tools) |
 
 Install any combination of extras:
 
 ```bash
 pip install 'podcast-helper[cli]'          # + click twin
 pip install 'podcast-helper[api]'          # + FastAPI HTTP surface
-pip install 'podcast-helper[cli,api]'      # everything
+pip install 'podcast-helper[mcp]'          # + MCP tools (needs [api] too, pulled in automatically)
+pip install 'podcast-helper[cli,api,mcp]'  # everything
 ```
 
 Every surface publishes the same verbs — `feed`, `latest`, `stream`,
