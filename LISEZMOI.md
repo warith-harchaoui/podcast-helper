@@ -10,7 +10,7 @@
 
 **Local d'abord, par conception.** podcast-helper s'exécute entièrement sur votre machine — il ne récupère que les épisodes / flux que vous demandez et les traite localement ; vos données ne partent jamais vers un service tiers, aucune télémétrie, aucun compte, aucun verrouillage propriétaire dans le cloud. Fait partie de la suite [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) : la souveraineté sur vos données grâce à l'Open Source local-first.
 
-Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée → PCM en sortie** pour les fichiers locaux, les URLs audio directes (enclosure RSS MP3 / M4A / Opus / WAV / HLS m3u8), les URLs de flux RSS / Atom (le dernier épisode est sélectionné automatiquement), et toute source supportée par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuse d'emblée les URLs Spotify (DRM) et Apple Podcasts (catalogue), en indiquant comment contourner via le flux RSS.
+Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée → PCM en sortie** pour les fichiers locaux, les URLs audio directes (enclosure RSS MP3 / M4A / Opus / WAV / HLS m3u8), les URLs de flux RSS / Atom (le dernier épisode est sélectionné automatiquement) et toute source supportée par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD / live, …). Refuse d'emblée les URLs Spotify (DRM) et Apple Podcasts (catalogue), en indiquant comment contourner via le flux RSS.
 
 [🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
 
@@ -26,7 +26,7 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 ## Pourquoi cette bibliothèque
 
-Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commencent souvent par la même demande : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube, ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là — plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
+Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commencent souvent par la même demande : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là — plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
 
 ## Installation
 
@@ -86,7 +86,7 @@ Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo /
 | **YouTube / Vimeo / SoundCloud / Twitch VOD / Twitch live / …** | l'extracteur yt-dlp l'identifie | yt-dlp choisit `bestaudio*`, passe l'URL directe + les headers à ffmpeg. |
 | **URL web générique** (tout le reste) | extracteur `generic` de yt-dlp | URL utilisée telle quelle. |
 | **Spotify** (open.spotify.com) | match par hostname | `NotImplementedError` — l'audio Spotify est sous DRM. Utilisez le flux RSS de l'émission s'il existe. |
-| **Apple Podcasts** (podcasts.apple.com) | match par hostname | `NotImplementedError` — les URLs Apple pointent vers le catalogue, pas vers l'audio. Utilisez le flux RSS de l'émission (lié sur son site, ou via `getrssfeed.com` / Podcast Index). |
+| **Apple Podcasts** (podcasts.apple.com) | match par hostname | `NotImplementedError` — les URLs Apple pointent vers le catalogue, pas vers l'audio. Utilisez le flux RSS de l'émission (lié sur son site ou via `getrssfeed.com` / Podcast Index). |
 
 ## Correction du traitement du signal
 
