@@ -137,7 +137,7 @@ def _consume(coro_gen: AsyncIterator[Any]) -> list[Any]:
         # the error being raised while the generator is driven, not lazily.
         return [x async for x in coro_gen]
 
-    return asyncio.get_event_loop().run_until_complete(_run())
+    return asyncio.run(_run())
 
 
 def test_invalid_target_sample_rate() -> None:
@@ -216,7 +216,7 @@ def test_extract_audio_stream_from_local_file_yields_frames(tmp_path: Path) -> N
             out.append(frame)
         return out
 
-    frames = asyncio.get_event_loop().run_until_complete(collect())
+    frames = asyncio.run(collect())
     # ~1s at 50 frames/s (20ms each) = ~50 frames
     assert 40 <= len(frames) <= 60
     # Mono → shape (n_samples,) with 320 samples for 20ms @ 16kHz
