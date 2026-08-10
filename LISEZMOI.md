@@ -22,7 +22,7 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 [🗺️ Paysage](https://github.com/warith-harchaoui/podcast-helper/blob/main/PAYSAGE.md)
 
-[📋 Exemples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md)
+[📋 Exemples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXEMPLES.md)
 
 ## Pourquoi cette bibliothèque
 
