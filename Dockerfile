@@ -36,8 +36,13 @@ RUN useradd --create-home --shell /bin/bash app
 WORKDIR /app
 
 # --- deps -------------------------------------------------------------------
-# Copy the package first so pip picks up pyproject.toml before we invalidate
-# the layer with source changes.
+# requirements.txt first (core deps only) so this layer caches independently
+# of source changes; the package itself (with its extras) is installed once
+# the source is in place, right below.
+COPY --chown=app:app requirements.txt ./
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir -r requirements.txt
+
 COPY --chown=app:app pyproject.toml README.md LISEZMOI.md LICENSE ./
 COPY --chown=app:app podcast_helper ./podcast_helper
 
@@ -45,8 +50,7 @@ COPY --chown=app:app podcast_helper ./podcast_helper
 # HTTP out of the box. `git` is kept in the image because our
 # intra-family deps (youtube-helper, os-helper, audio-helper, …) are
 # installed via git+https tags — pip needs `git` to resolve them.
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir '.[api]'
+RUN pip install --no-cache-dir '.[api]'
 
 # --- runtime ----------------------------------------------------------------
 USER app
