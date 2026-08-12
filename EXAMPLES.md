@@ -11,8 +11,8 @@ import os_helper as osh
 osh.verbosity(2)   # so osh.info(...) calls surface on stdout
 ```
 
-and that `ffmpeg` is on PATH (`brew install ffmpeg` on macOS — install
-`brew` thanks to [brew.sh](https://brew.sh/); `sudo apt install ffmpeg`
+and that `ffmpeg` is on PATH (`brew install ffmpeg` on macOS: install
+`brew` from [brew.sh](https://brew.sh/); `sudo apt install ffmpeg`
 on Linux).
 
 ---
@@ -25,7 +25,7 @@ on Linux).
 4. [YouTube / Vimeo / SoundCloud audio](#youtube--vimeo--soundcloud-audio)
 5. [Live streams](#live-streams)
 6. [Stereo / multichannel sources](#stereo--multichannel-sources)
-7. [Anti-aliasing — high precision resampler](#anti-aliasing--high-precision-resampler)
+7. [Anti-aliasing: high-precision resampler](#anti-aliasing-high-precision-resampler)
 8. [Common downstream pipelines](#common-downstream-pipelines)
 
 ---
@@ -70,7 +70,7 @@ ph.extract_audio_stream("/Users/me/podcasts/episode.mp3")
 # Direct RSS enclosure
 ph.extract_audio_stream("https://cdn.simplecast.com/audio/.../episode.mp3")
 
-# YouTube video — yt-dlp resolves bestaudio
+# YouTube video: yt-dlp resolves bestaudio
 ph.extract_audio_stream("https://www.youtube.com/watch?v=YE7VzlLtp-4")
 
 # SoundCloud
@@ -113,7 +113,7 @@ Each `Episode` is a typed dict:
 | `link` | str | Episode webpage (NOT the audio URL). |
 | `published_at` | str | ISO 8601 UTC `YYYY-MM-DDTHH:MM:SS+00:00` (empty when absent). |
 | `duration_seconds` | int | 0 when missing. |
-| `enclosure_url` | str | The actual audio URL — feed this to `extract_audio_stream`. |
+| `enclosure_url` | str | The actual audio URL: feed this to `extract_audio_stream`. |
 | `enclosure_type` | str | MIME (`"audio/mpeg"`, `"audio/x-m4a"`, …). |
 | `enclosure_size_bytes` | int | 0 when missing. |
 | `image_url` | str | Episode art, falls back to show art. |
@@ -148,8 +148,8 @@ async def transcribe_live(url):
                 break
 ```
 
-In a future release, `speed != 1.0` on live streams will raise
-`ValueError` — you can't fast-forward past the live edge.
+`speed != 1.0` on live streams raises `ValueError`: you can't
+fast-forward past the live edge.
 
 ## Stereo / multichannel sources
 
@@ -170,19 +170,19 @@ async def keep_stereo():
         ...
 ```
 
-There is no `channels=N` knob — downmix-to-mono is canonical and
+There is no `channels=N` knob: downmix-to-mono is canonical and
 deterministic; arbitrary upmix is a creative choice that belongs in
 your downstream stack.
 
-## Anti-aliasing — high precision resampler
+## Anti-aliasing: high-precision resampler
 
 When `target_sample_rate` differs from the source rate, the conversion
-goes through ffmpeg's `libswresample` by default — a polyphase resampler
+goes through ffmpeg's `libswresample` by default: a polyphase resampler
 with anti-aliasing low-pass at the new Nyquist (`target_sample_rate / 2`).
 That's Shannon-correct and more than enough for ASR / VAD / ML.
 
 For audiophile / lossless work, opt into `libsoxr` 28-bit precision
-(~10× slower, inaudible artefacts):
+(about 10x slower, inaudible artifacts):
 
 ```python
 ph.extract_audio_stream(
@@ -220,7 +220,7 @@ async def vad_ingest(url):
             await queue.put(frame)
 ```
 
-### Streaming summarisation (LLM-friendly chunks)
+### Streaming summarization (LLM-friendly chunks)
 
 ```python
 async def summarise_window(url, window_s=60.0):

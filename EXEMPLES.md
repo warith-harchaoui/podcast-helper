@@ -89,7 +89,7 @@ print(ep["title"], "→", ep["enclosure_url"])
 # Parcourir le catalogue (du plus récent au plus ancien)
 episodes = ph.feed("https://feeds.npr.org/510289/podcast.xml", max_episodes=20)
 for ep in episodes:
-    print(ep["published_at"], "—", ep["title"], f"({ep['duration_seconds']}s)")
+    print(ep["published_at"], "|", ep["title"], f"({ep['duration_seconds']}s)")
     # 2026-06-29T07:00:00+00:00 — Friday's Headlines (730s)
     # 2026-06-28T07:00:00+00:00 — Thursday's Headlines (708s)
     # ...
@@ -151,8 +151,8 @@ async def transcribe_live(url):
                 break
 ```
 
-Dans une prochaine version, `speed != 1.0` sur un flux en direct lèvera
-`ValueError` : on ne peut pas avancer plus vite que le direct lui-même.
+`speed != 1.0` sur un flux en direct lève `ValueError` : on ne peut pas
+avancer plus vite que le direct lui-même.
 
 ## Sources stéréo / multicanal
 

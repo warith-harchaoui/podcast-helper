@@ -1,4 +1,4 @@
-# TRIGGERS — podcast-helper
+# TRIGGERS: podcast-helper
 
 This is the user-facing, exhaustive catalogue of what `podcast-helper` can do and
 the natural-language phrasings, commands, functions, URLs, and file types that
@@ -60,12 +60,13 @@ same flags) and the browser episode browser at `GET /gui`.
 - Downloading a **video** file or video frames from a URL → `youtube-helper` /
   `video-helper`.
 - DAW-style mixing / mastering / loudness normalization.
-- **Spotify** audio is DRM-gated; podcast-helper raises with a hint — find the
+- **Spotify** audio is DRM-gated; podcast-helper raises with a hint to find the
   show's RSS feed instead. **Apple Podcasts** (`podcasts.apple.com`) links point
-  to the catalog, not the audio — use the show's RSS feed.
+  to the catalog, not the audio; use the show's RSS feed.
 
 ## See also
 
-- [`README.md`](README.md) — features, install, quick start.
-- [`EXAMPLES.md`](EXAMPLES.md) — runnable recipes.
-- [`GUI.md`](GUI.md) — the shipped minimal GUI + the roadmap for a richer one.
+- [`README.md`](README.md): features, install, quick start.
+- [`EXAMPLES.md`](EXAMPLES.md): runnable recipes.
+- [`GUI.md`](GUI.md): the design plan for an ambitious visual product on top of
+  the shipped episode browser (`GET /gui`).

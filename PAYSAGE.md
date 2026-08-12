@@ -5,13 +5,13 @@
 Bibliothèques Python voisines et concurrentes dans l'espace « consommer
 une URL de podcast / d'audio et livrer du PCM ou des métadonnées »,
 comparées à `podcast-helper`. Les notes vont de ⭐ (1) à ⭐⭐⭐⭐⭐ (5),
-évaluées sur la tâche visée par `podcast-helper` — universel URL-en-entrée
-→ PCM-en-sortie pour les pipelines d'IA (fichiers, enclosures directes,
+évaluées sur la tâche visée par `podcast-helper` : URL en entrée, PCM
+en sortie pour les pipelines d'IA (fichiers, enclosures directes,
 flux RSS / Atom, sources prises en charge par yt-dlp), avec une correction
 du traitement du signal et une ergonomie pragmatique. Une bibliothèque
-optimisée pour un tout autre usage (par ex. gestion de podcasts hors ligne,
+optimisée pour un tout autre usage (par exemple gestion de podcasts hors ligne,
 lecture RSS généraliste, montage audio façon station de travail) n'est pas
-pénalisée — la note reflète seulement l'adéquation à *ce* créneau.
+pénalisée : la note reflète seulement l'adéquation à *ce* créneau.
 
 ## En un coup d'œil
 
@@ -49,9 +49,9 @@ les fichiers, les enclosures directes et les flux RSS) et des **besoins des
 pipelines d'IA** (itérateur PCM asynchrone avec rééchantillonnage correct au
 sens de Shannon, downmix mono ou canaux natifs préservés, archive compressée
 parallèle optionnelle). Il ne cherche délibérément *pas* à concurrencer
-`podcastparser` / `feedparser` sur le terrain de l'analyse de flux — il
+`podcastparser` / `feedparser` sur le terrain de l'analyse de flux : il
 utilise les deux, avec `podcastparser` en principal et `feedparser` en
-secours pour les variantes Atom exotiques — et garde `yt-dlp` comme
+secours pour les variantes Atom exotiques et garde `yt-dlp` comme
 intégration optionnelle mais incluse pour tout ce que le routage par
 extension ne parvient pas à classer.
 
@@ -60,7 +60,7 @@ asynchrone de trames PCM**, qui laisse un consommateur en aval (ASR / VAD /
 diarisation) tirer les trames exactement au rythme de la source (ou aussi
 vite que possible) sans jamais toucher le disque. Le principal différenciateur
 face à `podcastparser` / `feedparser` est qu'une URL de flux se résout
-directement en URL porteuse d'audio — l'appelant n'a pas à parcourir
+directement en URL porteuse d'audio : l'appelant n'a pas à parcourir
 lui-même la liste des enclosures.
 
 La correction du rééchantillonnage est le détail le plus discret mais le plus
@@ -72,15 +72,15 @@ streaming, archive) à la charge de l'appelant.
 
 ## Quand choisir quoi
 
-- **`podcast-helper`** — ingestion audio pour les pipelines de podcasts d'IA :
+- **`podcast-helper`** : ingestion audio pour les pipelines de podcasts d'IA,
   transcription par lots, réglage de VAD, curation de jeux de données, ASR sur
   flux en direct, rééchantillonnage correct au sens de Shannon avec une archive
   compressée optionnelle.
-- **`yt-dlp`** — vous avez seulement besoin du fichier sur disque et vous ne
+- **`yt-dlp`** : vous avez seulement besoin du fichier sur disque et vous ne
   vous souciez ni du RSS ni du streaming asynchrone.
-- **`streamlink`** — vous avez précisément besoin de récupérer un flux HLS en
+- **`streamlink`** : vous avez précisément besoin de récupérer un flux HLS en
   direct et rien d'autre.
-- **`feedparser` / `podcastparser`** — vous avez seulement besoin de parcourir
+- **`feedparser` / `podcastparser`** : vous avez seulement besoin de parcourir
   les métadonnées d'un flux ; l'ingestion audio est hors périmètre.
-- **`pydub` / `librosa` / `audioread`** — vous avez déjà le fichier et vous
+- **`pydub` / `librosa` / `audioread`** : vous avez déjà le fichier et vous
   voulez manipuler ou décoder ses échantillons avec une bibliothèque audio mature.

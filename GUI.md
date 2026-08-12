@@ -1,21 +1,21 @@
-# GUI — Podcast Helper
+# GUI: Podcast Helper
 
 > A design plan, not a CLI mirror. The CLI already handles "one URL,
-> one operation, one PCM stream". A GUI must go further — otherwise
+> one operation, one PCM stream". A GUI must go further; otherwise
 > why build one? This document lays out an ambitious, opinionated
 > visual product for the podcast-ingest-for-AI workflow.
 
 ## North star
 
 > **A dashboard where a single URL becomes a live, auditable audio
-> pipeline — feed → episodes → PCM frames → downstream — with every
+> pipeline (feed to episodes to PCM frames to downstream) with every
 > intermediate step visible, hearable, and A/B comparable.**
 
 Podcast ingest for AI (ASR, diarisation, VAD tuning, embedding
 generation, dataset curation) is inherently a *many-URL, many-episode,
 many-model* problem. The CLI does one URL well; the GUI's job is to
-make the **fleet-wide reality** — a subscription list, a catalog of
-processed episodes, a queue of ffmpeg pulls in flight — legible and
+make the **fleet-wide reality** (a subscription list, a catalog of
+processed episodes, a queue of ffmpeg pulls in flight) legible and
 interactive.
 
 ## Three surfaces, one product
@@ -42,15 +42,15 @@ interactive.
 - **Peek waveform**: hover a card → expanded waveform + spectrogram
   in a side panel; scrub with the mouse → hear from that point. All
   handled by a local ``podcast_helper.api`` server the GUI already
-  ships alongside — no cloud roundtrip.
+  ships alongside, with no cloud roundtrip.
 - One card, three states: *raw enclosure*, *resampled 16 kHz mono*,
-  *VAD-gated speech only*. Toggle to compare visually + audibly —
+  *VAD-gated speech only*. Toggle to compare visually and audibly:
   this is the "diff view" moment the CLI cannot reproduce.
 
 ### 3. Live Broadcast Console
 
 For live streams (Twitch, YouTube Live, HLS m3u8 feeds), the GUI
-needs its own surface — a live stream is not an episode.
+needs its own surface: a live stream is not an episode.
 
 - A "Now on air" strip on top: one row per live URL the user is
   monitoring, with a scrolling waveform of the last 30 s and a
@@ -59,7 +59,7 @@ needs its own surface — a live stream is not an episode.
   ffmpeg archive to a rolling `.m4a` while the live PCM keeps flowing
   to the console.
 - Instant "chapter marker" hotkey: press ``M`` while listening to
-  stamp the current absolute time — the CLI operator writes marker
+  stamp the current absolute time. The CLI operator writes marker
   times to disk with a couple of Python lines; the GUI operator hits
   a key.
 
@@ -73,8 +73,8 @@ needs its own surface — a live stream is not an episode.
   the app. Any two waveforms on screen (raw vs resampled, past
   episode vs new one, live vs archive) scrub together.
 - **Server / client are the same binary.** The GUI is a thin JS
-  client on top of the existing ``podcast_helper.api`` server — no
-  hidden compute, no separate backend to maintain.
+  client on top of the existing ``podcast_helper.api`` server, with no
+  hidden compute and no separate backend to maintain.
 - **Explain the classification.** For any URL, the GUI shows *how*
   podcast-helper resolved it (source_kind, is_live, header count),
   so ambiguity is never buried in tooltips.
@@ -98,7 +98,7 @@ needs its own surface — a live stream is not an episode.
 ## Stack
 
 - Front end: TypeScript + Svelte 5 + WaveSurfer.js (waveforms) +
-  Vega-Lite (spectrograms). No React — matches the `front-ui`
+  Vega-Lite (spectrograms). No React: matches the `front-ui`
   companion skill's stack.
 - Back end: the FastAPI app already exists (``podcast_helper.api``).
   GUI is a client only.
@@ -115,7 +115,7 @@ needs its own surface — a live stream is not an episode.
 | M1 | Episode Grid with static waveform thumbnails + Peek waveform. | Where the value lands: seeing 200 episodes at a glance. |
 | M2 | Diff view (raw vs 16 kHz mono vs VAD-gated). | The "we can only do this in a GUI" moment for signal auditing. |
 | M3 | Live Broadcast Console + branch-record + marker hotkey. | Unlocks the live workflow (Twitch / YouTube Live). |
-| M4 | Similarity clustering: drop 500 archived episodes, cluster by MFCC / speaker embedding, click a cluster to hear a representative. | Dataset triage at pipeline scale — the true "why a GUI" case. |
+| M4 | Similarity clustering: drop 500 archived episodes, cluster by MFCC / speaker embedding, click a cluster to hear a representative. | Dataset triage at pipeline scale: the true "why a GUI" case. |
 
 ## Non-goals (recorded so we do not drift)
 
@@ -129,7 +129,7 @@ needs its own surface — a live stream is not an episode.
 > A user who owns 200 subscriptions and needs to prep a training set
 > for a speech model picks 50 relevant episodes across 20 feeds,
 > archives them at 16 kHz mono, and hands the folder to their ASR
-> pipeline — in one afternoon, in one window, without touching a
+> pipeline, in one afternoon, in one window, without touching a
 > terminal.
 
 If we ship that, we win.
