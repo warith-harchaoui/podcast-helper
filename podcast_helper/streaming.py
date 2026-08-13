@@ -736,6 +736,24 @@ async def extract_audio_stream(
     assert proc.stdout is not None
     assert proc.stderr is not None
 
+    # Drain stderr concurrently in the background. ffmpeg can write enough
+    # to stderr (warnings, reconnects — this module targets live/HLS
+    # sources) to fill the OS pipe buffer while the loop below only reads
+    # stdout; an unread full pipe blocks the child's write and deadlocks
+    # the whole stream. Reading stderr only after the loop (as before) is
+    # too late to prevent that.
+    stderr_chunks: list[bytes] = []
+
+    async def _drain_stderr() -> None:
+        assert proc.stderr is not None
+        while True:
+            chunk = await proc.stderr.read(4096)
+            if not chunk:
+                break
+            stderr_chunks.append(chunk)
+
+    stderr_task = asyncio.create_task(_drain_stderr())
+
     t_abs_s = 0.0
     seconds_per_frame = samples_per_frame / target_sample_rate
 
@@ -766,7 +784,11 @@ async def extract_audio_stream(
             except asyncio.TimeoutError:
                 proc.kill()
                 await proc.wait()
-        err = (await proc.stderr.read()).decode("utf-8", errors="replace").strip()
+        try:
+            await asyncio.wait_for(stderr_task, timeout=2.0)
+        except (asyncio.TimeoutError, Exception):
+            stderr_task.cancel()
+        err = b"".join(stderr_chunks).decode("utf-8", errors="replace").strip()
         if err and proc.returncode not in (0, None):
             osh.warning(f"podcast-helper ffmpeg stderr: {err}")
 

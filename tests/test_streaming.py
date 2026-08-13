@@ -14,6 +14,7 @@ Project maintainers.
 from __future__ import annotations
 
 import asyncio
+import sys
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
@@ -226,3 +227,56 @@ def test_extract_audio_stream_from_local_file_yields_frames(tmp_path: Path) -> N
     # Monotonic times
     times = [f["t_abs_s"] for f in frames]
     assert times == sorted(times)
+
+
+@pytest.mark.integration
+def test_extract_audio_stream_does_not_deadlock_on_flooded_stderr(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A subprocess that floods stderr before writing stdout must not hang the stream.
+
+    ffmpeg can write enough to stderr (warnings, reconnects — this module
+    targets live/HLS sources) to fill the OS pipe buffer. If stderr is only
+    read after the stdout loop exits, the child blocks on its stderr write
+    and the whole stream deadlocks. Replaces the real ffmpeg command with a
+    throwaway script that writes >1 MB to stderr *before* any stdout, then a
+    handful of silent PCM frames — this reliably reproduces the deadlock
+    against the old (buggy) implementation and must complete quickly here.
+    """
+    import podcast_helper.streaming as streaming_module
+
+    src = tmp_path / "fake.wav"
+    src.write_bytes(b"")  # never actually decoded — _build_ffmpeg_cmd is replaced below
+
+    # 25 frames of 20ms @ 16kHz mono float32 = 0.5s of silence.
+    frame_bytes = 320 * 4
+    n_frames = 25
+    script = (
+        "import sys\n"
+        "sys.stderr.write('x' * 2_000_000)\n"
+        "sys.stderr.flush()\n"
+        f"sys.stdout.buffer.write(b'\\x00' * {frame_bytes * n_frames})\n"
+        "sys.stdout.flush()\n"
+    )
+
+    def fake_build_cmd(*_args: object, **_kwargs: object) -> list[str]:
+        return [sys.executable, "-c", script]
+
+    monkeypatch.setattr(streaming_module, "_build_ffmpeg_cmd", fake_build_cmd)
+
+    async def collect() -> list[Any]:
+        out: list[Any] = []
+        async for frame in extract_audio_stream(
+            str(src),
+            target_sample_rate=16000,
+            to_mono=True,
+            realtime=False,
+            frame_ms=20,
+        ):
+            out.append(frame)
+        return out
+
+    frames = asyncio.run(asyncio.wait_for(collect(), timeout=10.0))
+    assert len(frames) == n_frames
+    for f in frames:
+        assert f["pcm"].shape == (320,)

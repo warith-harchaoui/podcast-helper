@@ -183,9 +183,13 @@ SAMPLE_FEED_URL = "https://feeds.npr.org/510289/podcast.xml"  # NPR Up First
 @pytest.mark.integration
 def test_feed_returns_episodes_sorted_newest_first() -> None:
     """A real feed returns episodes ordered newest-first by ``published_at``."""
-    from podcast_helper import feed as feed_module
+    # NOTE: `from podcast_helper import feed` binds the *function* re-exported
+    # by __init__.py (`from .feed import ..., feed, ...`), not the `feed`
+    # submodule — the package-level name shadows the submodule of the same
+    # name. Call it directly rather than via a `.feed` attribute access.
+    from podcast_helper import feed
 
-    eps = feed_module.feed(SAMPLE_FEED_URL, max_episodes=5)
+    eps = feed(SAMPLE_FEED_URL, max_episodes=5)
     assert len(eps) > 0
     assert all(e["enclosure_url"] for e in eps[:1])
     # Sorted newest first by published_at — non-empty dates should be monotonic decreasing.

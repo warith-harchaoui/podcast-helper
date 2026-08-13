@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-08-13
+
+### Fixed
+
+- **`extract_audio_stream` could deadlock on long/live sources**: stderr was
+  only drained *after* the stdout read loop exited. If ffmpeg wrote enough
+  to stderr (warnings, reconnects) to fill the OS pipe buffer, the child
+  blocked on its stderr write and the whole stream hung forever. stderr is
+  now drained concurrently in the background for the life of the stream.
+  Added a regression test that reliably reproduces the deadlock against the
+  old implementation (confirmed by manual reproduction) and must complete
+  quickly against the fix.
+- **A broken integration test** (`test_feed_returns_episodes_sorted_newest_first`)
+  always raised `AttributeError`: `from podcast_helper import feed as
+  feed_module` binds the `feed` *function* re-exported by `__init__.py`, not
+  the `feed` submodule of the same name — `feed_module.feed(...)` doesn't
+  exist. Call the function directly instead.
+
 ## [1.1.1] - 2026-08-09
 
 ### Fixed
