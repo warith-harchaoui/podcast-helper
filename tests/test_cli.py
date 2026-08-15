@@ -90,3 +90,29 @@ def test_click_subcommand_help_exits_zero(sub):
     runner = CliRunner()
     result = runner.invoke(cli, [sub, "--help"])
     assert result.exit_code == 0
+
+
+def test_argparse_main_prints_clean_error_on_a_real_library_exception(capsys):
+    """A library exception (Spotify guard) prints ``Error: ...`` + exit 1, not a traceback."""
+    from podcast_helper.cli_argparse import main
+
+    code = main(["probe", "--url", "https://open.spotify.com/episode/abc123"])
+    assert code == 1
+    err = capsys.readouterr().err
+    assert "Error:" in err
+
+
+def test_click_main_prints_clean_error_on_a_real_library_exception(capsys, monkeypatch):
+    # CliRunner.invoke (used by every test above) catches exceptions itself,
+    # so it never exercises main() -- the actual `podcast-helper-click`
+    # console-script entry point. Drive main() directly.
+    from podcast_helper.cli_click import main
+
+    monkeypatch.setattr(
+        "sys.argv",
+        ["podcast-helper-click", "probe", "--url", "https://open.spotify.com/episode/abc123"],
+    )
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 1
+    assert "Error:" in capsys.readouterr().err

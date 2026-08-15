@@ -76,7 +76,7 @@ dev = [
 # argparse-based CLI — no runtime dep beyond stdlib + core package.
 podcast-helper = "podcast_helper.cli_argparse:main"
 # click-based twin — install with the [cli] extra.
-podcast-helper-click = "podcast_helper.cli_click:cli"
+podcast-helper-click = "podcast_helper.cli_click:main"
 # HTTP API + MCP server — install with the [mcp] extra.
 podcast-helper-mcp = "podcast_helper.mcp:main"
 
