@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-08-15
+
+### Fixed
+
+- **CLI**: a library exception now prints one clean `Error: ...` line to
+  stderr and exits 1, instead of a raw Python traceback, on both CLI
+  twins. `podcast-helper-click`'s console-script entry point now points at
+  a new `cli_click.main()` wrapper (was the bare `cli` group).
+
 ## [1.1.2] - 2026-08-13
 
 ### Fixed
