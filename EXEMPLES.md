@@ -1,6 +1,8 @@
 # Exemples Podcast Helper
 
-Recettes pratiques pour transformer un flux audio de podcast en trames PCM.
+Recettes pratiques pour transformer un flux audio de podcast en trames PCM
+(modulation par impulsions codées, les échantillons audio bruts et non
+compressés qu'attendent les modèles en aval).
 Tous les extraits supposent :
 
 ```python

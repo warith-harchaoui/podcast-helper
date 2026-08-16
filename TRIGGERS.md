@@ -4,8 +4,10 @@ This is the user-facing, exhaustive catalogue of what `podcast-helper` can do an
 the natural-language phrasings, commands, functions, URLs, and file types that
 should invoke it.
 
-`podcast-helper` is **URL-in → PCM-out**: it resolves any podcast / RSS / audio /
-video URL and hands you a stream of PCM frames, plus friendly RSS helpers. It is
+`podcast-helper` is **URL-in → PCM-out** (PCM, pulse-code modulation, is the raw
+stream of uncompressed audio samples downstream models consume): it resolves any
+podcast / RSS / audio / video URL and hands you a stream of PCM frames, plus
+friendly RSS helpers. It is
 local-first, ffmpeg + yt-dlp backed. It does **not** transcribe, synthesize, or
 edit files already on disk.
 

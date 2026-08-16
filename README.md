@@ -10,7 +10,7 @@
 
 **Local-first by design.** podcast-helper runs entirely on your machine: it fetches only the episodes and feeds you ask for and processes them locally. Your data is never uploaded to a third-party service, there is no telemetry, no account, no cloud lock-in. Part of the [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) suite: sovereignty over your data through local-first open source.
 
-Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in, PCM out**, for local files, direct audio URLs (RSS enclosure MP3, M4A, Opus, WAV, HLS m3u8), RSS/Atom feed URLs (auto-picks the latest episode), and every `yt-dlp`-supported source (YouTube, Vimeo, SoundCloud, Twitch VOD or live, and more). Spotify's DRM-gated catalog and Apple Podcasts catalog URLs are refused upfront, with a clear hint toward the RSS-feed workaround.
+Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in, PCM out** (PCM, pulse-code modulation, is the raw stream of uncompressed audio samples that speech-recognition and audio-analysis models expect as input, as opposed to a compressed file like an MP3), for local files, direct audio URLs (RSS enclosure MP3, M4A, Opus, WAV, HLS m3u8), RSS/Atom feed URLs (auto-picks the latest episode), and every `yt-dlp`-supported source (YouTube, Vimeo, SoundCloud, Twitch VOD or live, and more). Spotify's DRM-gated catalog and Apple Podcasts catalog URLs are refused upfront, with a clear hint toward the RSS-feed workaround.
 
 [🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
 
@@ -26,7 +26,7 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in
 
 ## Why it exists
 
-Podcast pipelines (ASR, diarization, summarization, search indexing) usually start with the same question: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function, plus the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.
+Podcast pipelines usually start with the same question, whether the downstream step is automatic speech recognition (ASR), diarization (labeling which speaker is talking when), voice activity detection (VAD, deciding which stretches of audio have speech at all before running the heavier models on them), summarization, or search indexing: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function, plus the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.
 
 ## Installation
 
@@ -102,7 +102,7 @@ For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / mul
 
 ## Signal-processing correctness
 
-When `target_sample_rate` differs from the source rate, the conversion is performed by ffmpeg's `libswresample` (default) or `libsoxr` (`resample_quality="high"`). Both apply an **anti-aliasing low-pass filter at the new Nyquist frequency** (`target_sample_rate / 2`) before decimation, satisfying the Shannon-Nyquist sampling theorem. Naïve subsampling is never used.
+When `target_sample_rate` differs from the source rate, the conversion is performed by ffmpeg's `libswresample` (default) or `libsoxr` (`resample_quality="high"`). Both apply an **anti-aliasing low-pass filter at the new Nyquist frequency** (`target_sample_rate / 2`, the sampling theorem's ceiling on the highest frequency a given rate can represent) before decimation: any content above that ceiling gets removed first, because if it were kept it would fold back down into the audible range as spurious noise once the rate drops, an artifact called aliasing. Naïve subsampling, dropping samples without this filter, skips that step and lets the aliasing through; it is never used here.
 
 Channel handling has exactly two modes; there is no synthetic upmix:
 
@@ -199,7 +199,7 @@ For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith
 
 ## Live streams
 
-For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS `.m3u8` manifest. `extract_audio_stream` detects this (`is_live=True`) and automatically disables `-re` real-time pacing (the source paces itself). The async iterator runs indefinitely until the live stream ends; callers should `break` when they're done.
+For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS (HTTP Live Streaming, a protocol that serves audio or video as a sequence of small segment files listed in a `.m3u8` playlist) manifest. `extract_audio_stream` detects this (`is_live=True`) and automatically disables `-re` real-time pacing (the source paces itself). The async iterator runs indefinitely until the live stream ends; callers should `break` when they're done.
 
 `speed != 1.0` for live streams raises `ValueError`: you can't fast-forward beyond the live edge. Use `speed=...` on VOD only.
 

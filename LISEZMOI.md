@@ -10,7 +10,7 @@
 
 **Local d'abord, par conception.** podcast-helper s'exécute entièrement sur votre machine : il ne récupère que les épisodes et les flux que vous demandez et les traite localement. Vos données ne partent jamais vers un service tiers, il n'y a aucune télémétrie, aucun compte, aucun verrouillage propriétaire dans le cloud. Fait partie de la suite [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) : la souveraineté sur vos données grâce à l'open source local d'abord.
 
-Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée, PCM en sortie**, pour les fichiers locaux, les URL audio directes (enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8), les URL de flux RSS/Atom (le dernier épisode est sélectionné automatiquement) et toute source prise en charge par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD ou live et bien d'autres). Les URL Spotify (verrouillées par DRM) et Apple Podcasts (catalogue) sont refusées d'emblée, avec une indication claire pour contourner via le flux RSS.
+Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée, PCM en sortie** (le PCM, ou modulation par impulsions codées, est le flux brut d'échantillons audio non compressés qu'attendent les modèles de reconnaissance vocale et d'analyse audio, à la différence d'un fichier compressé comme un MP3), pour les fichiers locaux, les URL audio directes (enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8), les URL de flux RSS/Atom (le dernier épisode est sélectionné automatiquement) et toute source prise en charge par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD ou live et bien d'autres). Les URL Spotify (verrouillées par DRM) et Apple Podcasts (catalogue) sont refusées d'emblée, avec une indication claire pour contourner via le flux RSS.
 
 [🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
 
@@ -26,7 +26,7 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 ## Pourquoi cette bibliothèque
 
-Les pipelines audio de podcasts (ASR, diarisation, résumé, indexation) commencent souvent par la même demande : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là, plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
+Les pipelines audio de podcasts commencent souvent par la même demande, que l'étape suivante soit la reconnaissance vocale automatique (_Automatic Speech Recognition_ ou ASR), la diarisation (étiqueter qui parle et quand), la détection d'activité vocale (_Voice Activity Detection_ ou VAD, repérer les passages où il y a effectivement de la parole avant de lancer dessus les modèles plus lourds), le résumé ou l'indexation : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là, plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
 
 ## Installation
 
@@ -102,7 +102,7 @@ Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo /
 
 ## Correction du traitement du signal
 
-Quand `target_sample_rate` diffère du taux source, la conversion est effectuée par `libswresample` (par défaut) ou `libsoxr` (`resample_quality="high"`). Les deux appliquent un **filtre passe-bas anti-repliement à la nouvelle fréquence de Nyquist** (`target_sample_rate / 2`) avant décimation, satisfaisant le théorème d'échantillonnage de Shannon-Nyquist. Aucun sous-échantillonnage naïf n'est utilisé.
+Quand `target_sample_rate` diffère du taux source, la conversion est effectuée par `libswresample` (par défaut) ou `libsoxr` (`resample_quality="high"`). Les deux appliquent un **filtre passe-bas anti-repliement à la nouvelle fréquence de Nyquist** (`target_sample_rate / 2`, le plafond que le théorème d'échantillonnage fixe pour la fréquence la plus haute qu'un taux donné peut représenter) avant décimation : tout contenu au-dessus de ce plafond est retiré en premier, car sinon il se replierait vers le bas dans la plage audible sous forme de bruit parasite une fois le taux abaissé, un artefact appelé repliement. Le sous-échantillonnage naïf, qui se contente d'écarter des échantillons sans ce filtre, saute cette étape et laisse passer le repliement ; il n'est jamais utilisé ici.
 
 La gestion des canaux a exactement deux modes, sans upmix synthétique :
 
@@ -202,7 +202,7 @@ Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](https://github.com/w
 
 ## Flux en direct
 
-Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un manifeste HLS `.m3u8`. `extract_audio_stream` le détecte (`is_live=True`) et désactive automatiquement le pacing temps réel `-re` (la source impose son propre tempo). L'itérateur asynchrone tourne indéfiniment jusqu'à la fin du live ; à l'appelant de `break` quand il a fini.
+Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un manifeste HLS (_HTTP Live Streaming_, un protocole qui livre l'audio ou la vidéo sous forme d'une suite de petits fichiers segments listés dans une playlist `.m3u8`). `extract_audio_stream` le détecte (`is_live=True`) et désactive automatiquement le pacing temps réel `-re` (la source impose son propre tempo). L'itérateur asynchrone tourne indéfiniment jusqu'à la fin du live ; à l'appelant de `break` quand il a fini.
 
 `speed != 1.0` sur un flux live lève `ValueError` : impossible d'aller plus vite que le bord du direct. Utilisez `speed=...` uniquement en VOD.
 

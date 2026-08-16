@@ -1,9 +1,11 @@
 # GUI: Podcast Helper
 
 > A design plan, not a CLI mirror. The CLI already handles "one URL,
-> one operation, one PCM stream". A GUI must go further; otherwise
-> why build one? This document lays out an ambitious, opinionated
-> visual product for the podcast-ingest-for-AI workflow.
+> one operation, one stream of PCM (pulse-code modulation, the raw
+> uncompressed audio samples downstream models consume)". A GUI must
+> go further; otherwise why build one? This document lays out an
+> ambitious, opinionated visual product for the podcast-ingest-for-AI
+> workflow.
 
 ## North star
 
@@ -11,9 +13,12 @@
 > pipeline (feed to episodes to PCM frames to downstream) with every
 > intermediate step visible, hearable, and A/B comparable.**
 
-Podcast ingest for AI (ASR, diarisation, VAD tuning, embedding
-generation, dataset curation) is inherently a *many-URL, many-episode,
-many-model* problem. The CLI does one URL well; the GUI's job is to
+Podcast ingest for AI is inherently a *many-URL, many-episode,
+many-model* problem, whether the downstream step is automatic speech
+recognition (ASR), diarisation (labeling who is speaking when), voice
+activity detection (VAD) tuning to decide which stretches of audio
+have speech worth processing at all, embedding generation, or dataset
+curation. The CLI does one URL well; the GUI's job is to
 make the **fleet-wide reality** (a subscription list, a catalog of
 processed episodes, a queue of ffmpeg pulls in flight) legible and
 interactive.

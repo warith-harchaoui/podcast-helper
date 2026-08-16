@@ -1,7 +1,8 @@
 # Podcast Helper Examples
 
-Practical recipes for streaming podcast audio into PCM frames. All
-snippets assume:
+Practical recipes for streaming podcast audio into PCM (pulse-code
+modulation, the raw uncompressed audio samples downstream models
+consume) frames. All snippets assume:
 
 ```python
 import asyncio
