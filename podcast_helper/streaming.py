@@ -54,6 +54,7 @@ from urllib.parse import urlparse
 
 import numpy as np
 import os_helper as osh
+import requests
 from numpy.typing import NDArray
 from yt_dlp import YoutubeDL
 
@@ -350,14 +351,51 @@ def _resolve_source(
             cookies_from_browser=cookies_from_browser,
         )
 
-    # 5. Default: ask yt-dlp.
-    resolved = _resolve_via_ytdlp(url, cookies_from_browser=cookies_from_browser)
+    # 5. Default: ask yt-dlp. If it can't resolve the URL, it may still be a
+    # feed without a recognizable extension (common in the wild — Megaphone,
+    # Libsyn, and Anchor/Spotify-for-Podcasters feeds routinely serve at
+    # extension-less paths, e.g. https://feeds.megaphone.fm/SOMESHOW), so
+    # fall back to a Content-Type sniff before giving up. Only paid when
+    # yt-dlp genuinely couldn't handle the URL, so the common case (real
+    # yt-dlp media URLs) never pays this extra round-trip.
+    try:
+        resolved = _resolve_via_ytdlp(url, cookies_from_browser=cookies_from_browser)
+    except Exception:
+        if _content_type_looks_like_feed(url):
+            from .feed import latest_episode  # lazy import — avoids cycle at import time
+
+            episode = latest_episode(url)
+            return _resolve_source(
+                episode["enclosure_url"],
+                user_headers=user_headers,
+                cookies_from_browser=cookies_from_browser,
+            )
+        raise
     # User headers win over yt-dlp's (caller knows better, e.g. custom UA).
     merged = dict(resolved["headers"])
     if user_headers:
         merged.update(user_headers)
     resolved["headers"] = merged
     return resolved
+
+
+def _content_type_looks_like_feed(url: str) -> bool:
+    """Cheap ``Content-Type`` sniff for a feed URL with no recognizable extension.
+
+    Used only as a fallback when yt-dlp can't resolve a URL — many real
+    podcast feeds (Megaphone, Libsyn, Anchor/Spotify-for-Podcasters, …)
+    serve at extension-less paths, so :func:`_looks_like_feed_url`'s
+    extension-only heuristic alone misses them. A HEAD request failure
+    (blocked, timeout, non-2xx) or a non-matching ``Content-Type`` both
+    return ``False`` — never raises, so the caller's original yt-dlp
+    error always wins when this probe can't confirm a feed.
+    """
+    try:
+        resp = requests.head(url, allow_redirects=True, timeout=5.0)
+        content_type = resp.headers.get("Content-Type", "").lower()
+    except requests.RequestException:
+        return False
+    return any(sub in content_type for sub in _FEED_CONTENT_TYPE_SUBSTRINGS)
 
 
 # ---------------------------------------------------------------------------

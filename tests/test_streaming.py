@@ -280,3 +280,100 @@ def test_extract_audio_stream_does_not_deadlock_on_flooded_stderr(
     assert len(frames) == n_frames
     for f in frames:
         assert f["pcm"].shape == (320,)
+
+
+# ---------------------------------------------------------------------------
+# Extension-less feed URLs — Content-Type fallback when yt-dlp can't resolve
+# ---------------------------------------------------------------------------
+
+
+def test_extensionless_feed_url_resolves_via_content_type_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A feed URL with no .xml/.rss/.atom extension (e.g. Megaphone-style)
+    doesn't match ``_looks_like_feed_url``, so it falls to yt-dlp — which
+    can't handle raw RSS/Atom and fails. This must not surface that failure:
+    a ``Content-Type`` sniff should recognize it as a feed and recurse onto
+    the latest episode's enclosure, exactly like an .xml-suffixed feed would.
+    """
+    import sys
+
+    import podcast_helper.streaming as streaming_module
+
+    def fake_ytdlp(url: str, *, cookies_from_browser: str | None) -> dict:
+        raise RuntimeError(f"yt-dlp could not extract info for URL: {url!r}")
+
+    def fake_head(url: str, **kwargs: object) -> Any:
+        class _Resp:
+            headers = {"Content-Type": "application/rss+xml; charset=utf-8"}
+
+        return _Resp()
+
+    def fake_latest_episode(url: str) -> dict:
+        return {"enclosure_url": "https://cdn.example.com/ep1.mp3"}
+
+    monkeypatch.setattr(streaming_module, "_resolve_via_ytdlp", fake_ytdlp)
+    monkeypatch.setattr(streaming_module.requests, "head", fake_head)
+    # The lazy `from .feed import latest_episode` inside _resolve_source looks
+    # this up on the actual submodule object at call time. `podcast_helper`'s
+    # own __init__.py does `from .feed import feed, ...`, which rebinds the
+    # *package's* `feed` attribute to the `feed()` function it re-exports,
+    # shadowing the submodule reference there -- `import podcast_helper.feed`
+    # would silently hand back that function instead. Go through
+    # sys.modules['podcast_helper.feed'], which always holds the true
+    # submodule object regardless of that shadowing.
+    monkeypatch.setattr(sys.modules["podcast_helper.feed"], "latest_episode", fake_latest_episode)
+
+    resolved = streaming_module._resolve_source(
+        "https://feeds.megaphone.fm/SOMESHOW",
+        user_headers=None,
+        cookies_from_browser=None,
+    )
+    assert resolved["direct_url"] == "https://cdn.example.com/ep1.mp3"
+    assert resolved["source_kind"] == "direct_audio"
+
+
+def test_non_feed_ytdlp_failure_still_raises_the_original_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When yt-dlp fails on a URL that genuinely isn't a feed either (the
+    Content-Type probe doesn't match, e.g. an unresolvable YouTube video),
+    the original yt-dlp error must propagate unchanged — the feed fallback
+    must never mask a real resolution failure.
+    """
+    import podcast_helper.streaming as streaming_module
+
+    def fake_ytdlp(url: str, *, cookies_from_browser: str | None) -> dict:
+        raise RuntimeError("yt-dlp could not extract info for URL: private video")
+
+    def fake_head(url: str, **kwargs: object) -> Any:
+        class _Resp:
+            headers = {"Content-Type": "text/html; charset=utf-8"}
+
+        return _Resp()
+
+    monkeypatch.setattr(streaming_module, "_resolve_via_ytdlp", fake_ytdlp)
+    monkeypatch.setattr(streaming_module.requests, "head", fake_head)
+
+    with pytest.raises(RuntimeError, match="private video"):
+        streaming_module._resolve_source(
+            "https://www.youtube.com/watch?v=unavailable",
+            user_headers=None,
+            cookies_from_browser=None,
+        )
+
+
+def test_content_type_probe_never_raises_on_network_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A HEAD request that errors out (timeout, DNS failure, ...) must make
+    the probe return False, not propagate — the caller's original yt-dlp
+    error is always what the user sees when the probe itself can't confirm
+    anything either way."""
+    import podcast_helper.streaming as streaming_module
+
+    def fake_head(url: str, **kwargs: object) -> Any:
+        raise streaming_module.requests.exceptions.ConnectionError("no route to host")
+
+    monkeypatch.setattr(streaming_module.requests, "head", fake_head)
+    assert streaming_module._content_type_looks_like_feed("https://example.com/feed") is False

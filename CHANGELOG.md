@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Extension-less feed URLs now resolve correctly.** `_looks_like_feed_url`
+  only matched `.xml`/`.rss`/`.atom` extensions, so real-world feeds served at
+  extension-less paths (Megaphone, Libsyn, Anchor/Spotify-for-Podcasters —
+  e.g. `feeds.megaphone.fm/SHOWNAME`) fell through to yt-dlp resolution,
+  which can't parse raw RSS/Atom and failed with a confusing `RuntimeError` —
+  despite `_FEED_CONTENT_TYPE_SUBSTRINGS` already existing in the source,
+  unused, clearly meant for exactly this. Added a `Content-Type` HEAD-probe
+  fallback that only fires when yt-dlp couldn't resolve the URL, so the
+  common case (real yt-dlp media URLs) never pays the extra round-trip, and
+  a probe failure never masks the original yt-dlp error.
+
 ## [1.1.3] - 2026-08-15
 
 ### Fixed
