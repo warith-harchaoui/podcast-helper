@@ -24,6 +24,10 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in
 
 [📋 Examples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md)
 
+## Battle-tested
+
+`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.1.5), so a pinned range such as `podcast-helper>=1.1.0,<2` stays stable under you. Continuous integration (CI, an automated pipeline that runs the test suite and the linter on every push) is green on `main`: `pytest` and `ruff check` both have to pass before anything merges. It depends on two siblings from the same AI Helpers suite, [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) for the yt-dlp resolution step and [os-helper](https://github.com/warith-harchaoui/os-helper) for shared logging and filesystem utilities, and it is itself a dependency of [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (speaker-labelled transcription), which builds its live and offline audio ingest directly on `extract_audio_stream`.
+
 ## Why it exists
 
 Podcast pipelines usually start with the same question, whether the downstream step is automatic speech recognition (ASR), diarization (labeling which speaker is talking when), voice activity detection (VAD, deciding which stretches of audio have speech at all before running the heavier models on them), summarization, or search indexing: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function, plus the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.

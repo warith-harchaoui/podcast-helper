@@ -282,6 +282,66 @@ def test_extract_audio_stream_does_not_deadlock_on_flooded_stderr(
         assert f["pcm"].shape == (320,)
 
 
+@pytest.mark.integration
+def test_to_mono_false_mono_source_still_yields_2d_frames(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``to_mono=False`` must always yield 2-D frames, even for a mono source.
+
+    Regression test: the reshape used to key off ``n_channels > 1``, so a
+    mono source (``n_channels == 1``) consumed with ``to_mono=False`` came
+    back as a flat ``(n_samples,)`` array, indistinguishable from the
+    ``to_mono=True`` case. A downstream consumer branching on ``pcm.ndim``
+    to tell "downmixed" apart from "native channels preserved" (vocal-helper
+    does exactly this) would silently mis-handle it. The reshape now keys
+    off ``to_mono`` itself, so a mono source with ``to_mono=False`` comes
+    back as shape ``(n_samples, 1)``.
+    """
+    import podcast_helper.streaming as streaming_module
+
+    src = tmp_path / "fake.wav"
+    src.write_bytes(b"")  # never actually decoded: internals are replaced below
+
+    # 10 frames of 20ms @ 16kHz, 1 channel, float32 = 0.2s of silence.
+    frame_bytes = 320 * 1 * 4
+    n_frames = 10
+    script = (
+        "import sys\n"
+        f"sys.stdout.buffer.write(b'\\x00' * {frame_bytes * n_frames})\n"
+        "sys.stdout.flush()\n"
+    )
+
+    def fake_build_cmd(*_args: object, **_kwargs: object) -> list[str]:
+        return [sys.executable, "-c", script]
+
+    # The source is genuinely mono: ffprobe (real one, not stubbed) would
+    # report 1 channel; stub it directly so the test doesn't need ffprobe
+    # on PATH or a real audio file.
+    def fake_probe_channel_count(*_args: object, **_kwargs: object) -> int:
+        return 1
+
+    monkeypatch.setattr(streaming_module, "_build_ffmpeg_cmd", fake_build_cmd)
+    monkeypatch.setattr(streaming_module, "_probe_channel_count", fake_probe_channel_count)
+
+    async def collect() -> list[Any]:
+        out: list[Any] = []
+        async for frame in extract_audio_stream(
+            str(src),
+            target_sample_rate=16000,
+            to_mono=False,  # native channel count requested, even though it's 1
+            realtime=False,
+            frame_ms=20,
+        ):
+            out.append(frame)
+        return out
+
+    frames = asyncio.run(asyncio.wait_for(collect(), timeout=10.0))
+    assert len(frames) == n_frames
+    for f in frames:
+        # Must stay 2-D — (n_samples, 1), never flattened to (n_samples,).
+        assert f["pcm"].shape == (320, 1)
+
+
 # ---------------------------------------------------------------------------
 # Extension-less feed URLs — Content-Type fallback when yt-dlp can't resolve
 # ---------------------------------------------------------------------------

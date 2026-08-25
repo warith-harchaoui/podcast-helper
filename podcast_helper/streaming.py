@@ -77,7 +77,12 @@ class PcmFrame(TypedDict):
         - Shape ``(n_samples,)`` when ``to_mono=True`` (default).
         - Shape ``(n_samples, n_channels)`` when ``to_mono=False``, with
           samples interleaved by channel (``[L0, R0, L1, R1, ...]`` for
-          stereo, reshaped to ``(n_samples, 2)``).
+          stereo, reshaped to ``(n_samples, 2)``). This includes the case
+          where the source itself is mono and ``to_mono=False`` was still
+          requested: the array comes back 2-D, shape ``(n_samples, 1)``,
+          never flattened to ``(n_samples,)``. The ndim tells the two
+          modes apart unambiguously; downstream code should branch on it
+          rather than on the sample count.
     voiced : bool | None
         Always ``None`` here — VAD downstream fills it in if used.
     """
@@ -809,7 +814,15 @@ async def extract_audio_stream(
                     break
 
             arr = np.frombuffer(raw, dtype=np.float32).copy()
-            if n_channels > 1:
+            # Reshape on `to_mono`, not on `n_channels > 1`: a mono SOURCE
+            # consumed with to_mono=False (native channel count requested,
+            # channel count happens to be 1) must still come back as shape
+            # (n_samples, 1) per the PcmFrame contract below — downstream
+            # consumers (vocal-helper) branch on `pcm.ndim` to tell "mono
+            # downmix" apart from "native channels preserved", and a bare
+            # (n_samples,) array here would silently misreport that as the
+            # to_mono=True case.
+            if not to_mono:
                 arr = arr.reshape((-1, n_channels))
 
             yield {"t_abs_s": t_abs_s, "pcm": arr, "voiced": None}

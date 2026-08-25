@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-08-25
+
+### Fixed
+
+- **`to_mono=False` on a mono source silently produced 1-D frames.** The
+  reshape at the bottom of `extract_audio_stream` keyed off `n_channels > 1`
+  instead of the `to_mono` flag itself, so a source that happened to be
+  mono (`n_channels == 1`) consumed with `to_mono=False` came back as a
+  flat `(n_samples,)` array, exactly the shape documented for
+  `to_mono=True`. A downstream consumer branching on `pcm.ndim` to tell
+  "downmixed" apart from "native channels preserved" (vocal-helper does
+  this) would silently mis-handle that frame. The reshape now keys off
+  `to_mono`, so `to_mono=False` always yields a 2-D array, `(n_samples, 1)`
+  for a mono source, matching the `PcmFrame` docstring. Added a regression
+  test (`test_to_mono_false_mono_source_still_yields_2d_frames`).
+
 ## [1.1.4] - 2026-08-17
 
 ### Fixed

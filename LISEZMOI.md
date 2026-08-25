@@ -24,6 +24,10 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 [📋 Exemples](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXEMPLES.md)
 
+## Éprouvé en production
+
+`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.1.5), ce qui fait qu'une plage figée comme `podcast-helper>=1.1.0,<2` reste stable dans le temps. L'intégration continue (CI, une chaîne automatisée qui fait tourner les tests et le linter à chaque push) est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée. La bibliothèque dépend de deux sœurs de la même suite AI Helpers, [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) pour la résolution via yt-dlp et [os-helper](https://github.com/warith-harchaoui/os-helper) pour la journalisation et les utilitaires de fichiers partagés. Elle est elle-même une dépendance de [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (transcription avec étiquetage des locuteurs), qui construit son ingestion audio, en direct comme hors ligne, directement sur `extract_audio_stream`.
+
 ## Pourquoi cette bibliothèque
 
 Les pipelines audio de podcasts commencent souvent par la même demande, que l'étape suivante soit la reconnaissance vocale automatique (_Automatic Speech Recognition_ ou ASR), la diarisation (étiqueter qui parle et quand), la détection d'activité vocale (_Voice Activity Detection_ ou VAD, repérer les passages où il y a effectivement de la parole avant de lancer dessus les modèles plus lourds), le résumé ou l'indexation : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là, plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
