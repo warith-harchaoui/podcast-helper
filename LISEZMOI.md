@@ -220,6 +220,20 @@ Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un m
 
 Voir [CHANGELOG.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/CHANGELOG.md) pour ce qui a déjà été livré.
 
+## Version Rust
+
+Un crate compagnon, [`podcast-helper-rs`](https://github.com/warith-harchaoui/podcast-helper-rs),
+réécrit la même promesse « une URL en entrée, du PCM en sortie » en Rust :
+fichiers locaux, URLs audio directes, flux RSS/Atom décodés via `ffmpeg`,
+avec YouTube/Vimeo/SoundCloud/Twitch délégués à `youtube-helper-rs`.
+L'intérêt : un binaire statique unique, sans interpréteur Python à
+installer, utile quand l'ingestion de podcasts doit s'intégrer à un
+pipeline Rust plus large (par exemple pour alimenter un service Rust de
+reconnaissance vocale ou de diarisation) plutôt qu'un pipeline Python.
+C'est une surface v0.1 plus restreinte, pas un remplacement complet — pas
+encore d'itérateur asynchrone par trame, pas d'extraction `itunes:duration` ;
+voir son README pour les différences volontaires exactes.
+
 ## Auteur
 
  - [Warith HARCHAOUI](https://linkedin.com/in/warith-harchaoui)
