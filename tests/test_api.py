@@ -91,7 +91,8 @@ def test_record_rejects_unsupported_output_format(client):
     path outside the request's own temp directory.
     """
     r = client.post(
-        "/record", data={"url": "https://example.com/ep.mp3", "output_format": "../../../../tmp/pwned.mp3"}
+        "/record",
+        data={"url": "https://example.com/ep.mp3", "output_format": "../../../../tmp/pwned.mp3"},
     )
     assert r.status_code == 400
     assert "unsupported output_format" in r.json()["detail"]
