@@ -79,3 +79,24 @@ def test_root_redirects_to_gui(client):
     r = client.get("/")
     assert r.status_code == 200
     assert "episode browser" in r.text.lower()
+
+
+def test_record_rejects_unsupported_output_format(client):
+    """An ``output_format`` outside the known codec table is a clean 400.
+
+    This also covers path traversal: "../../../../tmp/pwned.mp3" is rejected
+    for the same reason a bogus extension like "exe" would be — neither is a
+    recognized archive codec — so the request never reaches the point where
+    the client-supplied string would otherwise be spliced into a filesystem
+    path outside the request's own temp directory.
+    """
+    r = client.post(
+        "/record", data={"url": "https://example.com/ep.mp3", "output_format": "../../../../tmp/pwned.mp3"}
+    )
+    assert r.status_code == 400
+    assert "unsupported output_format" in r.json()["detail"]
+
+    # A merely-unsupported (but otherwise well-formed) extension must be
+    # rejected too, not just a traversal attempt.
+    r2 = client.post("/record", data={"url": "https://example.com/ep.mp3", "output_format": "exe"})
+    assert r2.status_code == 400

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2026-09-03
+
+### Fixed
+
+- **`POST /record` path traversal**: the endpoint built its archive
+  filename from the client-supplied `output_format` field with no real
+  validation, so a value like `"../../../../tmp/pwned.mp3"` could make
+  ffmpeg write outside the request's own temp directory — an
+  arbitrary-file-write reachable over HTTP (the API is documented to run
+  bound to `0.0.0.0`, not just localhost). Now validates `output_format`
+  against the exact codec table the endpoint already uses, so only a
+  fixed, separator-free set of extensions (`mp3`, `m4a`, `aac`, `opus`,
+  `ogg`, `flac`, `wav`) is ever accepted.
+
 ## [1.1.5] - 2026-08-25
 
 ### Fixed

@@ -314,8 +314,27 @@ async def record(
     Archive any audio-bearing URL to a compressed file server-side, then
     return the file as the response body.
     """
+    # ``output_format`` is a client-supplied string with no character
+    # restriction. Without validating it against the codec table, a value
+    # like "../../../../tmp/pwned.mp3" would make ``tmp / f"episode.{...}"``
+    # resolve outside the request's own temp directory — an arbitrary-file-
+    # write reachable over HTTP (this API is documented to run bound to
+    # 0.0.0.0, not just localhost). Restricting to the exact extensions
+    # ``_archive_codec_args`` actually knows how to encode closes that: none
+    # of them can contain a path separator, so the join can never escape
+    # ``tmp``, and it also turns an obscure downstream ffmpeg failure into a
+    # clean 400 for an unsupported format.
+    from .streaming import _ARCHIVE_CODECS
+
+    fmt = output_format.lstrip(".").lower()
+    if fmt not in _ARCHIVE_CODECS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"unsupported output_format {output_format!r}. Supported: {sorted(_ARCHIVE_CODECS)}",
+        )
+
     tmp = _new_tmpdir()
-    dst = tmp / f"episode.{output_format.lstrip('.')}"
+    dst = tmp / f"episode.{fmt}"
     # Sink the PCM frames while ffmpeg writes the parallel archive on disk.
     try:
         async for _ in extract_audio_stream(
