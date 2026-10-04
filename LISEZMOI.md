@@ -12,13 +12,13 @@
 
 Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée, PCM en sortie** (le PCM, ou modulation par impulsions codées, est le flux brut d'échantillons audio non compressés qu'attendent les modèles de reconnaissance vocale et d'analyse audio, à la différence d'un fichier compressé comme un MP3), pour les fichiers locaux, les URL audio directes (enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8), les URL de flux RSS/Atom (le dernier épisode est sélectionné automatiquement) et toute source prise en charge par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD ou live et bien d'autres). Les URL Spotify (verrouillées par DRM) et Apple Podcasts (catalogue) sont refusées d'emblée, avec une indication claire pour contourner via le flux RSS.
 
-[🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
+[🌍 AI Helpers](https://deraison.ai/ai-helpers)
 
-[![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
+[![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://deraison.ai/ai-helpers)
 
 ## Documentation
 
-[💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
+[💻 Documentation](https://deraison.ai/ai-helpers/docs/podcast-helper-doc/)
 
 [🗺️ Paysage](https://github.com/warith-harchaoui/podcast-helper/blob/main/PAYSAGE.md)
 
@@ -40,7 +40,7 @@ Les pipelines audio de podcasts commencent souvent par la même demande, que l'�
 - 🐧 **Ubuntu/Debian** : `sudo apt update && sudo apt install -y python3 python3-pip git ffmpeg`
 - 🪟 **Windows** (PowerShell) : `winget install Python.Python.3.12 Git.Git Gyan.FFmpeg`
 
-On recommande de travailler dans un environnement Python. Si vous ne savez pas en créer un, voir [🥸 Conseils techniques](https://harchaoui.org/warith/4ml/#install).
+On recommande de travailler dans un environnement Python. Si vous ne savez pas en créer un, voir [🥸 Conseils techniques](https://deraison.ai/4ml/#install).
 
 ### Depuis PyPI (recommandé)
 

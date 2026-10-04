@@ -12,13 +12,13 @@
 
 Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in, PCM out** (PCM, pulse-code modulation, is the raw stream of uncompressed audio samples that speech-recognition and audio-analysis models expect as input, as opposed to a compressed file like an MP3), for local files, direct audio URLs (RSS enclosure MP3, M4A, Opus, WAV, HLS m3u8), RSS/Atom feed URLs (auto-picks the latest episode), and every `yt-dlp`-supported source (YouTube, Vimeo, SoundCloud, Twitch VOD or live, and more). Spotify's DRM-gated catalog and Apple Podcasts catalog URLs are refused upfront, with a clear hint toward the RSS-feed workaround.
 
-[🌍 AI Helpers](https://harchaoui.org/warith/ai-helpers)
+[🌍 AI Helpers](https://deraison.ai/ai-helpers)
 
-[![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://harchaoui.org/warith/ai-helpers)
+[![logo](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/logo.png)](https://deraison.ai/ai-helpers)
 
 ## Documentation
 
-[💻 Documentation](https://harchaoui.org/warith/ai-helpers/docs/podcast-helper-doc/)
+[💻 Documentation](https://deraison.ai/ai-helpers/docs/podcast-helper-doc/)
 
 [🗺️ Landscape](https://github.com/warith-harchaoui/podcast-helper/blob/main/LANDSCAPE.md)
 
@@ -40,7 +40,7 @@ Podcast pipelines usually start with the same question, whether the downstream s
 - 🐧 **Ubuntu/Debian**: `sudo apt update && sudo apt install -y python3 python3-pip git ffmpeg`
 - 🪟 **Windows** (PowerShell): `winget install Python.Python.3.12 Git.Git Gyan.FFmpeg`
 
-We recommend using Python environments. Check this link if you're unfamiliar with setting one up: [🥸 Tech tips](https://harchaoui.org/warith/4ml/#install).
+We recommend using Python environments. Check this link if you're unfamiliar with setting one up: [🥸 Tech tips](https://deraison.ai/4ml/#install).
 
 ### From PyPI (recommended)
 
