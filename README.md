@@ -75,10 +75,11 @@ pip install -e ".[mcp]"
 import asyncio
 import podcast_helper as ph
 
+
 async def main():
     # Pass *any* URL: file, direct mp3, RSS feed, YouTube, SoundCloud, Twitch VOD.
     async for frame in ph.extract_audio_stream(
-        "https://feeds.npr.org/510289/podcast.xml",   # ← RSS, auto-pick latest episode
+        "https://feeds.npr.org/510289/podcast.xml",  # ← RSS, auto-pick latest episode
         target_sample_rate=16000,
         to_mono=True,
         frame_ms=20,
@@ -86,6 +87,7 @@ async def main():
         # frame["pcm"]: np.float32 (320,) for 20ms @ 16kHz
         # frame["t_abs_s"]: 0.0, 0.02, 0.04, ...
         await asr.feed(frame["pcm"])
+
 
 asyncio.run(main())
 ```
@@ -133,9 +135,13 @@ print(ep["title"], "→", ep["enclosure_url"])
 
 # Then stream its audio
 import asyncio
+
+
 async def main():
     async for frame in ph.extract_audio_stream(ep["enclosure_url"]):
         ...
+
+
 asyncio.run(main())
 ```
 

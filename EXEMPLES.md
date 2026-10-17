@@ -10,7 +10,7 @@ import asyncio
 import podcast_helper as ph
 import os_helper as osh
 
-osh.verbosity(2)   # pour que les appels osh.info(...) s'affichent sur stdout
+osh.verbosity(2)  # pour que les appels osh.info(...) s'affichent sur stdout
 ```
 
 et que `ffmpeg` est sur le PATH (`brew install ffmpeg` sur macOS : installez
@@ -61,6 +61,7 @@ async def main():
         # frame["t_abs_s"] : 0.00, 0.02, 0.04, ...
         await asr.feed(frame["pcm"])
 
+
 asyncio.run(main())
 ```
 
@@ -99,10 +100,13 @@ for ep in episodes:
 # Choisir par index (l'épisode d'hier = deuxième plus récent)
 ep = ph.feed("https://feeds.npr.org/510289/podcast.xml", max_episodes=2)[1]
 
+
 # Puis diffuser son audio
 async def stream_one():
     async for frame in ph.extract_audio_stream(ep["enclosure_url"]):
         ...
+
+
 asyncio.run(stream_one())
 ```
 
@@ -131,7 +135,7 @@ contenu soumis à vérification d'âge ou réservé aux abonnés, passez
 async def youtube_premium():
     async for frame in ph.extract_audio_stream(
         "https://www.youtube.com/watch?v=...",
-        cookies_from_browser="firefox",   # ou "chrome" / "safari"
+        cookies_from_browser="firefox",  # ou "chrome" / "safari"
         target_sample_rate=16000,
     ):
         ...
@@ -195,7 +199,7 @@ Pour un travail audiophile ou sans perte, activez `libsoxr` en précision
 ph.extract_audio_stream(
     url,
     target_sample_rate=44100,
-    resample_quality="high",   # utilise aresample=...:resampler=soxr:precision=28
+    resample_quality="high",  # utilise aresample=...:resampler=soxr:precision=28
 )
 ```
 
@@ -208,7 +212,7 @@ async def transcribe(url):
     chunks = []
     async for frame in ph.extract_audio_stream(url, target_sample_rate=16000, frame_ms=20):
         chunks.append(frame["pcm"])
-        if len(chunks) * 0.02 >= 5.0:           # toutes les 5 secondes
+        if len(chunks) * 0.02 >= 5.0:  # toutes les 5 secondes
             audio = np.concatenate(chunks)
             print(whisper.transcribe(audio))
             # "And in tonight's headlines, the Senate voted..."
@@ -219,7 +223,9 @@ async def transcribe(url):
 
 ```python
 import torch
+
 vad = torch.jit.load("silero_vad.jit")
+
 
 async def vad_ingest(url):
     async for frame in ph.extract_audio_stream(url, target_sample_rate=16000, frame_ms=20):
