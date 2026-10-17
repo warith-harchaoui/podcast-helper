@@ -201,6 +201,16 @@ when *not* to reach for podcast-helper, see
 
 For an ambitious visual product on top, see [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md).
 
+### Use it as an agent skill
+
+`skills/podcast-helper/` packages podcast-helper as a **Claude Skill** *and* an **OpenCode
+skill**, so an agent can reach for it on your behalf. See
+[`skills/README.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/skills/README.md) to install it (symlink into
+`~/.claude/skills/` and `~/.opencode/skills/`), and
+[`TRIGGERS.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/TRIGGERS.md) for the exhaustive trigger catalogue —
+`scripts/check_triggers.py` keeps the skill's description in sync with it, and
+the test suite fails if a capability stops being named.
+
 ## Live streams
 
 For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS (HTTP Live Streaming, a protocol that serves audio or video as a sequence of small segment files listed in a `.m3u8` playlist) manifest. `extract_audio_stream` detects this (`is_live=True`) and automatically disables `-re` real-time pacing (the source paces itself). The async iterator runs indefinitely until the live stream ends; callers should `break` when they're done.

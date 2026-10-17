@@ -204,6 +204,17 @@ acceptées et des cas où *ne pas* utiliser podcast-helper, voir
 
 Pour un produit visuel ambitieux au-dessus, voir [`GUI.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/GUI.md).
 
+### En tant que skill d'agent
+
+`skills/podcast-helper/` empaquette podcast-helper comme **skill Claude** *et* skill
+**OpenCode**, pour qu'un agent puisse s'en saisir à votre place. Voir
+[`skills/README.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/skills/README.md) pour l'installer (liens
+symboliques vers `~/.claude/skills/` et `~/.opencode/skills/`) et
+[`TRIGGERS.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/TRIGGERS.md) pour le catalogue exhaustif des
+déclencheurs — `scripts/check_triggers.py` maintient la description du skill
+alignée dessus ; la suite de tests échoue si une capacité cesse d'être
+nommée.
+
 ## Flux en direct
 
 Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un manifeste HLS (_HTTP Live Streaming_, un protocole qui livre l'audio ou la vidéo sous forme d'une suite de petits fichiers segments listés dans une playlist `.m3u8`). `extract_audio_stream` le détecte (`is_live=True`) et désactive automatiquement le pacing temps réel `-re` (la source impose son propre tempo). L'itérateur asynchrone tourne indéfiniment jusqu'à la fin du live ; à l'appelant de `break` quand il a fini.
