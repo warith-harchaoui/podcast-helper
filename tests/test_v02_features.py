@@ -228,3 +228,59 @@ def test_extract_audio_stream_unknown_archive_extension_raises(
 
     with pytest.raises(ValueError, match="unsupported archive extension"):
         asyncio.run(_consume())
+
+
+# --- indefinite stalls ------------------------------------------------------
+# Regression cover for the suite audit: two ffmpeg children sat at 0 % CPU for six
+# minutes holding ESTABLISHED sockets that never delivered another byte. The test
+# wrapping them had its own asyncio.wait_for(90 s), which could not fire, because
+# cancelling a coroutine cannot interrupt a synchronously blocked read.
+
+
+def _cmd(url: str, **kw):
+    base = dict(
+        target_sample_rate=16000,
+        to_mono=True,
+        resample_quality="default",
+        realtime=False,
+        is_live=False,
+        headers={},
+    )
+    base.update(kw)
+    return _build_ffmpeg_cmd(url, **base)
+
+
+def test_network_reads_are_bounded():
+    """ffmpeg applies no I/O timeout unless told to."""
+    cmd = _cmd("https://example.com/audio.mp3")
+    assert "-rw_timeout" in cmd
+    value = int(cmd[cmd.index("-rw_timeout") + 1])
+    assert value > 0
+
+
+def test_the_timeout_precedes_the_input():
+    """-rw_timeout is a protocol option; after -i it would apply to nothing."""
+    cmd = _cmd("https://example.com/audio.mp3")
+    assert cmd.index("-rw_timeout") < cmd.index("-i")
+
+
+def test_local_files_are_left_alone():
+    """A path on disk cannot stall on a socket, so the flag would be noise."""
+    assert "-rw_timeout" not in _cmd("/tmp/local.wav")
+
+
+def test_live_sources_are_bounded_too():
+    """A live stream paces itself, but its socket can still go quiet forever."""
+    assert "-rw_timeout" in _cmd("https://example.com/live.m3u8", is_live=True)
+
+
+def test_the_bound_is_overridable(monkeypatch):
+    monkeypatch.setenv("PODCAST_HELPER_RW_TIMEOUT", "5")
+    cmd = _cmd("https://example.com/audio.mp3")
+    assert cmd[cmd.index("-rw_timeout") + 1] == str(5 * 1_000_000)
+
+
+def test_the_bound_can_be_disabled_deliberately(monkeypatch):
+    """Waiting forever is defensible as a choice, not as a default."""
+    monkeypatch.setenv("PODCAST_HELPER_RW_TIMEOUT", "0")
+    assert "-rw_timeout" not in _cmd("https://example.com/audio.mp3")

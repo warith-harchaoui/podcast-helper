@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-10-18
+
+### Fixed
+
+- **A stalled network read could hang the stream forever.** ffmpeg applies no I/O
+  timeout unless asked, so a connection the remote has half-closed is waited on
+  indefinitely: ffmpeg sits at 0 % CPU holding an `ESTABLISHED` socket that will
+  never deliver another byte, and the consumer waits on a pipe that will never
+  close.
+
+  Caught while auditing the suite. Two ffmpeg children stayed idle for six minutes
+  inside a vocal-helper test that wrapped them in `asyncio.wait_for(90 s)` — a
+  bound that could not fire, because cancelling a coroutine cannot interrupt a
+  synchronously blocked read. An in-process timeout is not a substitute for
+  bounding the read itself.
+
+  `_build_ffmpeg_cmd` now passes `-rw_timeout` ahead of `-i` for network sources
+  (60 s, `PODCAST_HELPER_RW_TIMEOUT` in seconds to change it, `0` to opt out).
+  Local paths are left alone: a file on disk cannot stall on a socket. The same
+  class of bug was fixed in the same sweep in `youtube-helper` and
+  `youtube-helper-rs`, which drive yt-dlp over the same kind of connection.
+
 ## [1.1.6] - 2026-09-03
 
 ### Fixed

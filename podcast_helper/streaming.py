@@ -408,6 +408,43 @@ def _content_type_looks_like_feed(url: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
+# Schemes ffmpeg reaches over a socket, and therefore the ones that can stall
+# forever on a half-closed connection. A local path is immune, and passing a
+# protocol timeout alongside it would only be noise.
+_NETWORK_SCHEMES = (
+    "http://",
+    "https://",
+    "rtmp://",
+    "rtmps://",
+    "rtsp://",
+    "tcp://",
+    "tls://",
+    "srt://",
+    "hls+http://",
+    "hls+https://",
+)
+
+
+def _is_network_source(url: str) -> bool:
+    """True when ffmpeg will read ``url`` over a socket rather than from disk."""
+    return url.lower().startswith(_NETWORK_SCHEMES)
+
+
+def _rw_timeout_s() -> float:
+    """Seconds an ffmpeg socket read may stall before it gives up.
+
+    Returns 0 when the caller has explicitly disabled the bound, which is the one
+    case where waiting forever is a deliberate choice rather than an oversight.
+    """
+    raw = os.environ.get("PODCAST_HELPER_RW_TIMEOUT", "").strip()
+    if not raw:
+        return 60.0
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        return 60.0
+
+
 # ---------------------------------------------------------------------------
 # v0.2.0 — speed= and record_to= helpers
 # ---------------------------------------------------------------------------
@@ -536,6 +573,23 @@ def _build_ffmpeg_cmd(
     # OFF for any speed != 1.0 (the user explicitly asked for non-realtime).
     if realtime and not is_live and speed == 1.0:
         cmd += ["-re"]
+
+    # Bound the socket read. ffmpeg applies no I/O timeout by default, so a
+    # connection the remote has half-closed is waited on forever: ffmpeg sits at
+    # 0 % CPU holding an ESTABLISHED socket that will never deliver another byte,
+    # and the consumer waits on a pipe that will never close. Seen while auditing
+    # the suite -- two ffmpeg children idle for six minutes inside a test whose own
+    # asyncio.wait_for(90 s) could not fire, because cancelling a coroutine cannot
+    # interrupt a synchronously blocked read.
+    #
+    # -rw_timeout is a protocol-level option and must precede -i. It is expressed in
+    # microseconds and only means anything for network inputs; a local path ignores
+    # it. 60 s is far past any healthy stall, including a slow live source, while
+    # still bounded. Override with PODCAST_HELPER_RW_TIMEOUT (seconds, 0 disables).
+    if _is_network_source(direct_url):
+        rw_timeout_us = int(_rw_timeout_s() * 1_000_000)
+        if rw_timeout_us > 0:
+            cmd += ["-rw_timeout", str(rw_timeout_us)]
 
     # HTTP headers. ffmpeg expects a single CRLF-separated string before -i.
     if headers:
