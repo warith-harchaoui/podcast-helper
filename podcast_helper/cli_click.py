@@ -76,7 +76,12 @@ def cli() -> None:
 @cli.command()
 @click.option("--url", required=True, help="Feed URL.")
 @click.option(
-    "--max-episodes", type=int, default=None, help="Cap episodes returned (default: all)."
+    # IntRange(min=0) so a negative cap fails at parse time, before the feed is
+    # fetched: episodes[:-1] would otherwise read as "drop the oldest".
+    "--max-episodes",
+    type=click.IntRange(min=0),
+    default=None,
+    help="Cap episodes returned (default: all).",
 )
 def feed_cmd(url: str, max_episodes: int | None) -> None:
     """Dump an RSS / Atom podcast feed as JSON."""

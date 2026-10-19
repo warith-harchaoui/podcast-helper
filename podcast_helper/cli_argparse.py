@@ -51,6 +51,33 @@ from . import extract_audio_stream, feed, latest_episode
 # ---------------------------------------------------------------------------
 
 
+def _non_negative_int(raw: str) -> int:
+    """argparse ``type=`` for a count that cannot be negative.
+
+    Parameters
+    ----------
+    raw : str
+        The raw command-line token.
+
+    Returns
+    -------
+    int
+        The parsed value, guaranteed ``>= 0``.
+
+    Raises
+    ------
+    argparse.ArgumentTypeError
+        If ``raw`` is not an integer, or is negative.
+    """
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"expected an integer, got {raw!r}") from exc
+    if value < 0:
+        raise argparse.ArgumentTypeError(f"must be >= 0, got {value}")
+    return value
+
+
 def _handle_feed(ns: argparse.Namespace) -> int:
     """Handle the ``feed`` subcommand: dump a podcast feed as JSON.
 
@@ -290,7 +317,10 @@ def _add_feed(sub: argparse._SubParsersAction) -> None:
     p.add_argument("--url", required=True, help="Feed URL.")
     p.add_argument(
         "--max-episodes",
-        type=int,
+        # argparse has no range type; _non_negative_int keeps the same contract
+        # the click twin gets from IntRange(min=0), so a negative cap fails at
+        # parse time rather than slicing from the end of the episode list.
+        type=_non_negative_int,
         default=None,
         dest="max_episodes",
         help="Cap the number of episodes returned (default: all).",

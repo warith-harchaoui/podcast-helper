@@ -227,6 +227,29 @@ Pour les URLs live YouTube / Twitch, l'URL directe résolue est typiquement un m
 
 `speed != 1.0` sur un flux live lève `ValueError` : impossible d'aller plus vite que le bord du direct. Utilisez `speed=...` uniquement en VOD.
 
+## Quand un flux se bloque
+
+ffmpeg n'applique aucun délai d'E/S sans qu'on le lui demande : une connexion
+que le serveur a à moitié fermée est donc attendue indéfiniment — ffmpeg reste
+à 0 % de CPU sur une socket qui ne livrera plus un octet tandis que le
+consommateur attend un tube qui ne se fermera jamais. Les sources réseau sont
+donc lues avec `-rw_timeout` (60 s par défaut), pour qu'une connexion morte
+lève une erreur au lieu de bloquer :
+
+```bash
+export PODCAST_HELPER_RW_TIMEOUT=120   # secondes ; 0 désactive la borne
+```
+
+Les fichiers locaux n'en reçoivent jamais : un chemin sur disque ne peut pas se
+bloquer sur une socket.
+
+**Cela borne la lecture, cela ne rend pas le blocage impossible.** Une exécution
+a été observée bloquée plus de quatre heures sur une URL `googlevideo.com` avec
+`-rw_timeout 60000000` sur sa ligne de commande : l'option ne couvre pas toutes
+les façons qu'a un CDN de se taire. Si votre traitement *doit* aboutir, donnez-lui
+une borne qui lui appartient — un superviseur, un chien de garde — plutôt que de
+vous reposer sur celle-ci.
+
 ## Pas encore construit
 
 - `start_instant` / `end_instant` pour le seek VOD.

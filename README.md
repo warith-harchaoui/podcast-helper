@@ -223,6 +223,26 @@ For YouTube / Twitch live URLs, the resolved direct URL is typically an HLS (HTT
 
 `speed != 1.0` for live streams raises `ValueError`: you can't fast-forward beyond the live edge. Use `speed=...` on VOD only.
 
+## When a stream stalls
+
+ffmpeg applies no I/O timeout unless asked, so a connection the remote has
+half-closed is waited on forever: ffmpeg sits at 0 % CPU holding a socket that
+will never deliver another byte, and the consumer waits on a pipe that will
+never close. Network sources are therefore read with `-rw_timeout` (60 s by
+default), so a dead connection raises instead of hanging:
+
+```bash
+export PODCAST_HELPER_RW_TIMEOUT=120   # seconds; 0 disables the bound
+```
+
+Local files are never given a timeout — a path on disk cannot stall on a socket.
+
+**This bounds the read; it does not make a stall impossible.** A run was
+observed hanging for over four hours on a `googlevideo.com` URL with
+`-rw_timeout 60000000` on its command line, so the option does not cover every
+way a CDN can go quiet. If your job *must* finish, give it a bound it owns —
+a supervisor timeout, a watchdog — rather than relying on this one.
+
 ## Not built yet
 
 - `start_instant` / `end_instant` for VOD seek.

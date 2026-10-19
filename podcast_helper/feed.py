@@ -241,13 +241,21 @@ def _parse_duration(raw: Any) -> int:
     if not isinstance(raw, str) or not raw.strip():
         return 0
     parts = raw.strip().split(":")
+    # Every branch clamps at 0, including the string ones.
+    #
+    # The numeric branch above already decided a negative duration is nonsense,
+    # but the string branches did not share that: an <itunes:duration> of
+    # "-100" returned -100 and "-1:30" returned -30, while the integer -100
+    # returned 0. Same value, different answer depending on how the feed
+    # happened to spell it, and a negative duration_s in an Episode is
+    # meaningless whichever way it arrives.
     try:
         if len(parts) == 1:
-            return int(float(parts[0]))
+            return max(0, int(float(parts[0])))
         if len(parts) == 2:  # MM:SS
-            return int(parts[0]) * 60 + int(parts[1])
+            return max(0, int(parts[0]) * 60 + int(parts[1]))
         if len(parts) == 3:  # HH:MM:SS
-            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            return max(0, int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2]))
     except (ValueError, TypeError):
         pass
     return 0
@@ -334,6 +342,20 @@ def feed(url: str, *, max_episodes: int | None = None) -> list[Episode]:
     episodes.sort(key=lambda e: e["published_at"], reverse=True)
 
     if max_episodes is not None:
+        # Reject a negative cap instead of slicing with it.
+        #
+        # episodes[:-1] is "everything but the last", so a negative value was
+        # silently reinterpreted as "drop the N oldest episodes" -- the opposite
+        # of a cap. With 5 episodes, max_episodes=-1 returned 4 and -3 returned
+        # 2, neither an error nor an empty list. Because the list is sorted
+        # newest-first the dropped ones are the oldest, so the caller gets
+        # *almost* everything, which is the hardest version of this to notice.
+        if max_episodes < 0:
+            raise ValueError(
+                f"max_episodes must be >= 0, got {max_episodes}. A negative value "
+                "would slice from the end of the list (dropping the oldest "
+                "episodes) rather than capping the count."
+            )
         episodes = episodes[:max_episodes]
     return episodes
 

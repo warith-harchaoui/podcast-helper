@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-19
+
+### Fixed
+
+- **A negative `max_episodes` silently inverted the cap.** `feed()` ended with
+  `episodes[:max_episodes]`, and in Python `episodes[:-1]` is "everything but
+  the last" — so a negative value was not a cap at all, it dropped the N
+  *oldest* episodes and returned the rest. On a 5-episode feed, `-1` returned 4
+  and `-3` returned 2: neither an error nor an empty list. Because `feed()`
+  sorts newest-first the dropped episodes are the oldest, so the caller got
+  *almost* everything, which is the hardest version of this to notice.
+
+  Reachable from every surface: the HTTP query had no lower bound, both CLIs
+  took a bare `type=int`, and MCP calls the same function. Now rejected at each
+  of them — `ValueError` in `feed()`, `ge=0` on `GET /feed` (a 422 from the
+  validation layer rather than a 502 from the broad handler, since the feed is
+  not what is broken), `click.IntRange(min=0)` in the click CLI and an
+  equivalent `type=` validator in the argparse twin, so both fail before the
+  network call. `0` stays legal: "at most zero episodes" is coherent.
+
+- **`_parse_duration` clamped negatives only for numeric input.** The numeric
+  branch did `max(0, int(raw))`; the three string branches did not, so
+  `"-100"` returned −100 and `"-1:30"` returned −30 while the integer `-5`
+  returned 0. `<itunes:duration>` is author-supplied free text, which makes the
+  string path the normal one — the function had decided a negative duration is
+  nonsense and then applied that decision on the path least likely to be taken.
+  All branches now clamp.
+
+### Documentation
+
+- **README / LISEZMOI gain a "When a stream stalls" section.**
+  `PODCAST_HELPER_RW_TIMEOUT` shipped in 1.2.0 but was documented nowhere, so
+  the one knob that helps with a stalled stream was undiscoverable. Includes the
+  caveat that a four-hour stall was observed with the bound already set.
+
 ## [1.2.0] - 2026-10-18
 
 ### Fixed

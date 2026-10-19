@@ -179,7 +179,9 @@ def gui() -> HTMLResponse:
 @app.get("/feed", tags=["reads"])
 def get_feed(
     url: str = Query(..., description="RSS / Atom feed URL."),
-    max_episodes: int | None = Query(None, description="Cap number of episodes returned."),
+    # ge=0 so a negative cap is a 422 from the validation layer, not a 502 from
+    # the broad handler below. The feed is not what is broken in that case.
+    max_episodes: int | None = Query(None, ge=0, description="Cap number of episodes returned."),
 ) -> JSONResponse:
     """Return the feed's episodes as JSON (most-recent first)."""
     try:
