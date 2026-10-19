@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   class of bug was fixed in the same sweep in `youtube-helper` and
   `youtube-helper-rs`, which drive yt-dlp over the same kind of connection.
 
+  **This bounds the read; it does not make a stall impossible.** A later run
+  stalled for over four hours on a `googlevideo.com` URL with
+  `-rw_timeout 60000000` present on its ffmpeg command line, so the option does
+  not cover every way that CDN can go quiet. Treat it as removing the common
+  case, not as a guarantee: anything that *must* finish — a scheduled job, a
+  push gate — still needs a bound it owns, outside the process.
+
 ## [1.1.6] - 2026-09-03
 
 ### Fixed
