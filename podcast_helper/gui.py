@@ -7,6 +7,16 @@ build-step-free: one string of HTML + Tailwind (via CDN) + vanilla ES-module
 JavaScript. There is no bundler, no framework, no npm — the whole page is a
 static asset the API returns verbatim.
 
+Where the words live
+--------------------
+Not here. Every human-readable string comes from ``locales/i18n.yaml``
+through :class:`os_helper.Locales`, the loader shared across the suite
+(``CODING.md`` 21.3). The markup below is tokenised — ``{{TOKEN}}`` in HTML,
+and a ``T`` object injected for the script — so one template serves every
+language and a translator never touches Python.
+
+:func:`render_gui` resolves a language and returns the finished page.
+
 Why a separate module
 ---------------------
 Keeping the (long) HTML out of :mod:`podcast_helper.api` keeps the route
@@ -38,15 +48,93 @@ Warith Harchaoui, Ph.D. — https://linkedin.com/in/warith-harchaoui/
 
 from __future__ import annotations
 
-# The entire GUI is this one HTML string. It is returned as-is by the
-# ``/gui`` route. Tailwind is pulled from a CDN so there is no build step;
-# the JavaScript is a single inline ES module talking to the existing API.
-GUI_HTML: str = r"""<!doctype html>
-<html lang="en" class="h-full">
+import functools
+import html
+import json
+from pathlib import Path
+
+import os_helper as osh
+
+# Inside the package, not beside it: a file one level up is not package data
+# and does not travel in the wheel. best-engine shipped exactly that bug —
+# `pip install` gave a package whose every GUI string raised FileNotFoundError.
+_LOCALES_PATH = Path(__file__).resolve().parent / "locales" / "i18n.yaml"
+
+#: The section of the locale file this module reads.
+_GUI_SECTION = "gui"
+
+
+@functools.lru_cache(maxsize=1)
+def _locales() -> osh.Locales:
+    """Parse ``locales/i18n.yaml`` once, through the suite's shared loader."""
+    return osh.Locales.from_path(_LOCALES_PATH)
+
+
+def supported_languages() -> tuple[str, ...]:
+    """Language codes the GUI can render, as declared by the locale file."""
+    return tuple(_locales().supported_locales)
+
+
+def default_language() -> str:
+    """The language an unknown or absent ``?lang=`` falls back to."""
+    return _locales().default_locale
+
+
+# Two vocabularies meet here: the template's tokens and the locale file's
+# semantic keys. These maps bridge them. `_HTML_TOKEN_TO_KEY` fills {{TOKEN}}
+# placeholders; `_JS_NAME_TO_KEY` builds the `const T = {...}` the script reads.
+_HTML_TOKEN_TO_KEY: dict[str, str] = {
+    "PAGE_TITLE": "page_title",
+    "HERO_TITLE": "hero_title",
+    "HERO_P": "hero_subtitle",
+    "URL_LABEL": "url_label",
+    "URL_PLACEHOLDER": "url_placeholder",
+    "LIST_BUTTON": "list_button",
+    "PROBE_BUTTON": "probe_button",
+    "EPISODES_H2": "episodes_heading",
+    "EPISODES_EMPTY": "episodes_empty",
+    "SELECTED_H2": "selected_heading",
+    "SELECTED_EMPTY": "selected_empty",
+    "PREVIEW_LABEL": "preview_label",
+    "FORMAT_LABEL": "format_label",
+    "RATE_LABEL": "rate_label",
+    "RECORD_BUTTON": "record_button",
+    "DOWNLOAD_LINK": "download_link",
+    "LANG_HREF": "lang_toggle_href",
+    "LANG_FLAG": "lang_toggle_flag",
+    "LANG_ARIA": "lang_toggle_aria",
+}
+
+_JS_NAME_TO_KEY: dict[str, str] = {
+    "needFeedUrl": "js_need_feed_url",
+    "fetchingFeed": "js_fetching_feed",
+    "errorPrefix": "js_error_prefix",
+    "noEpisodesItem": "js_no_episodes_item",
+    "feedNoEpisodes": "js_feed_no_episodes",
+    "selected": "js_selected",
+    "listed": "js_listed",
+    "requestFailed": "js_request_failed",
+    "needProbeUrl": "js_need_probe_url",
+    "probing": "js_probing",
+    "probeHeading": "js_probe_heading",
+    "classified": "js_classified",
+    "liveSuffix": "js_live_suffix",
+    "needRecordTarget": "js_need_record_target",
+    "recording": "js_recording",
+    "recordDone": "js_record_done",
+}
+
+
+# One template, every language. Human-facing text is tokenised as {{TOKEN}}
+# (HTML) or read from the injected `T` object (JavaScript); `render_gui` fills
+# both. Tailwind is pulled from a CDN so there is no build step; the JavaScript
+# is a single inline ES module talking to the existing API.
+_GUI_TEMPLATE: str = r"""<!doctype html>
+<html lang="{{LANG}}" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Podcast Helper — Episode Browser</title>
+  <title>{{PAGE_TITLE}}</title>
   <!-- Tailwind via CDN: keeps the page a single self-contained file, no build. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -57,18 +145,20 @@ GUI_HTML: str = r"""<!doctype html>
 <body class="h-full bg-slate-50 text-slate-900 antialiased">
   <div class="mx-auto max-w-5xl px-4 py-8">
     <header class="mb-6">
-      <h1 class="text-2xl font-semibold tracking-tight">Podcast Helper — Episode Browser</h1>
+      <!-- Language toggle: a flag that links to the other locale of this page. -->
+      <a href="{{LANG_HREF}}" aria-label="{{LANG_ARIA}}"
+         class="float-right text-xl hover:opacity-70">{{LANG_FLAG}}</a>
+      <h1 class="text-2xl font-semibold tracking-tight">{{HERO_TITLE}}</h1>
       <p class="mt-1 text-sm text-slate-600">
-        Paste a feed / RSS / audio / YouTube URL, list its episodes, preview one
-        inline, and archive it to a file — all on your local machine.
+        {{HERO_P}}
       </p>
     </header>
 
     <!-- 1) URL box + the three primary actions. -->
     <section class="mb-5">
-      <label for="url" class="block text-sm font-medium mb-1">Feed / RSS / audio / yt-dlp URL</label>
+      <label for="url" class="block text-sm font-medium mb-1">{{URL_LABEL}}</label>
       <div class="flex flex-col gap-2 sm:flex-row">
-        <input id="url" type="url" placeholder="https://feeds.npr.org/510289/podcast.xml"
+        <input id="url" type="url" placeholder="{{URL_PLACEHOLDER}}"
                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
                       focus:outline-none focus:ring-2 focus:ring-blue-500" />
         <div class="flex gap-2">
@@ -77,14 +167,14 @@ GUI_HTML: str = r"""<!doctype html>
                   class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white
                          hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500
                          disabled:opacity-50">
-            List episodes
+            {{LIST_BUTTON}}
           </button>
           <!-- Probe: classify any URL (file / direct / rss / yt-dlp-<extractor>). -->
           <button id="probe"
                   class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold
                          text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2
                          focus:ring-blue-500 disabled:opacity-50">
-            Probe
+            {{PROBE_BUTTON}}
           </button>
         </div>
       </div>
@@ -94,29 +184,29 @@ GUI_HTML: str = r"""<!doctype html>
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <!-- 2) Left column: the episode list (populated by /feed). -->
       <section class="rounded-xl border border-slate-200 bg-white p-4">
-        <h2 class="mb-2 text-sm font-medium">Episodes</h2>
+        <h2 class="mb-2 text-sm font-medium">{{EPISODES_H2}}</h2>
         <ul id="episodes" class="max-h-96 space-y-2 overflow-y-auto text-sm">
-          <li class="text-slate-400">List a feed to see its episodes here.</li>
+          <li class="text-slate-400">{{EPISODES_EMPTY}}</li>
         </ul>
       </section>
 
       <!-- 3) Right column: selected episode metadata + inline player + record. -->
       <section class="rounded-xl border border-slate-200 bg-white p-4">
-        <h2 class="mb-2 text-sm font-medium">Selected</h2>
+        <h2 class="mb-2 text-sm font-medium">{{SELECTED_H2}}</h2>
         <div id="meta" class="text-sm text-slate-500">
-          Pick an episode on the left, or probe / record a raw URL directly.
+          {{SELECTED_EMPTY}}
         </div>
 
         <!-- Inline preview: browser plays the enclosure_url directly. -->
         <div class="mt-3">
-          <label class="block text-xs font-medium mb-1">Preview</label>
+          <label class="block text-xs font-medium mb-1">{{PREVIEW_LABEL}}</label>
           <audio id="player" controls class="w-full"></audio>
         </div>
 
         <!-- Record controls: archive the selected episode (or the URL box). -->
         <div class="mt-4 grid grid-cols-2 gap-3">
           <div>
-            <label for="fmt" class="block text-xs font-medium mb-1">record format</label>
+            <label for="fmt" class="block text-xs font-medium mb-1">{{FORMAT_LABEL}}</label>
             <select id="fmt"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
               <option value="mp3">mp3</option>
@@ -128,7 +218,7 @@ GUI_HTML: str = r"""<!doctype html>
             </select>
           </div>
           <div>
-            <label for="rate" class="block text-xs font-medium mb-1">sample rate (Hz)</label>
+            <label for="rate" class="block text-xs font-medium mb-1">{{RATE_LABEL}}</label>
             <input id="rate" type="number" value="16000"
                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </div>
@@ -138,16 +228,21 @@ GUI_HTML: str = r"""<!doctype html>
                   class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white
                          hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500
                          disabled:opacity-50">
-            Record to file
+            {{RECORD_BUTTON}}
           </button>
           <a id="download" class="inline-block text-sm font-medium text-blue-600 hover:underline"
-             hidden download>Download archive</a>
+             hidden download>{{DOWNLOAD_LINK}}</a>
         </div>
       </section>
     </div>
   </div>
 
   <script type="module">
+    // Every human-readable string the script writes comes from the locale
+    // file, injected as JSON — the one encoding an apostrophe cannot break
+    // out of, and French copy is full of them.
+    const T = {{T_JSON}};
+
     // --- tiny DOM helpers -------------------------------------------------
     const $ = (id) => document.getElementById(id);
     const status = (msg) => { $("status").textContent = msg; };
@@ -187,14 +282,14 @@ GUI_HTML: str = r"""<!doctype html>
     // --- List episodes: GET /feed?url=... --------------------------------
     $("list").addEventListener("click", async () => {
       const url = $("url").value.trim();
-      if (!url) { status("Enter a feed URL first."); return; }
-      status("Fetching feed…");
+      if (!url) { status(T.needFeedUrl); return; }
+      status(T.fetchingFeed);
       $("list").disabled = true;
       try {
         const res = await fetch("/feed?url=" + encodeURIComponent(url));
         if (!res.ok) {
           const txt = await res.text();
-          status("Error " + res.status + ": " + txt.slice(0, 200));
+          status(T.errorPrefix + res.status + ": " + txt.slice(0, 200));
           return;
         }
         const data = await res.json();
@@ -202,8 +297,13 @@ GUI_HTML: str = r"""<!doctype html>
         const ul = $("episodes");
         ul.innerHTML = "";
         if (!episodes.length) {
-          ul.innerHTML = '<li class="text-slate-400">No episodes found in this feed.</li>';
-          status("Feed parsed but no episodes.");
+          // Built as a node rather than spliced into innerHTML: the text comes
+          // from the locale file, and a translation is copy, never markup.
+          const empty = document.createElement("li");
+          empty.className = "text-slate-400";
+          empty.textContent = T.noEpisodesItem;
+          ul.appendChild(empty);
+          status(T.feedNoEpisodes);
           return;
         }
         // Render one clickable card per episode. Clicking selects it: loads its
@@ -236,13 +336,15 @@ GUI_HTML: str = r"""<!doctype html>
                   esc(ep.description).slice(0, 800) + "</div>"
                 : "")
             );
-            status("Selected: " + ep.title);
+            status(T.selected.replace("{title}", ep.title));
           });
           ul.appendChild(li);
         }
-        status("Listed " + episodes.length + " episode(s).");
+        // Named fields, not concatenation: a translator can reorder the
+        // sentence instead of inheriting the order JavaScript glued it in.
+        status(T.listed.replace("{count}", episodes.length));
       } catch (err) {
-        status("Request failed: " + err);
+        status(T.requestFailed.replace("{error}", err));
       } finally {
         $("list").disabled = false;
       }
@@ -251,14 +353,14 @@ GUI_HTML: str = r"""<!doctype html>
     // --- Probe: GET /probe?url=... ---------------------------------------
     $("probe").addEventListener("click", async () => {
       const url = $("url").value.trim();
-      if (!url) { status("Enter a URL to probe first."); return; }
-      status("Probing…");
+      if (!url) { status(T.needProbeUrl); return; }
+      status(T.probing);
       $("probe").disabled = true;
       try {
         const res = await fetch("/probe?url=" + encodeURIComponent(url));
         if (!res.ok) {
           const txt = await res.text();
-          status("Error " + res.status + ": " + txt.slice(0, 200));
+          status(T.errorPrefix + res.status + ": " + txt.slice(0, 200));
           return;
         }
         const j = await res.json();
@@ -269,12 +371,14 @@ GUI_HTML: str = r"""<!doctype html>
           $("player").src = url;
         }
         $("meta").innerHTML =
-          '<div class="font-medium">Probe result</div>' +
+          '<div class="font-medium">' + esc(T.probeHeading) + "</div>" +
           '<pre class="mt-2 rounded bg-slate-100 p-2 text-xs">' +
           esc(JSON.stringify(j, null, 2)) + "</pre>";
-        status("Classified as " + j.source_kind + (j.is_live ? " (live)" : "") + ".");
+        status(T.classified
+          .replace("{kind}", j.source_kind)
+          .replace("{live}", j.is_live ? T.liveSuffix : ""));
       } catch (err) {
-        status("Request failed: " + err);
+        status(T.requestFailed.replace("{error}", err));
       } finally {
         $("probe").disabled = false;
       }
@@ -284,21 +388,21 @@ GUI_HTML: str = r"""<!doctype html>
     $("record").addEventListener("click", async () => {
       // Prefer the selected episode; fall back to the raw URL box.
       const target = selectedUrl || $("url").value.trim();
-      if (!target) { status("Select an episode or enter a URL to record."); return; }
+      if (!target) { status(T.needRecordTarget); return; }
       const fmt = $("fmt").value;
       const rate = $("rate").value;
       const fd = new FormData();
       fd.append("url", target);
       fd.append("output_format", fmt);
       fd.append("sample_rate", rate);
-      status("Recording (server-side ffmpeg)… this can take a while for long episodes.");
+      status(T.recording);
       $("record").disabled = true;
       $("download").hidden = true;
       try {
         const res = await fetch("/record", { method: "POST", body: fd });
         if (!res.ok) {
           const txt = await res.text();
-          status("Error " + res.status + ": " + txt.slice(0, 200));
+          status(T.errorPrefix + res.status + ": " + txt.slice(0, 200));
           return;
         }
         // The response body is the archive file: wrap it in an object URL.
@@ -307,9 +411,9 @@ GUI_HTML: str = r"""<!doctype html>
         dl.href = URL.createObjectURL(blob);
         dl.download = "episode." + fmt;
         dl.hidden = false;
-        status("Done — archive ready to download.");
+        status(T.recordDone);
       } catch (err) {
-        status("Request failed: " + err);
+        status(T.requestFailed.replace("{error}", err));
       } finally {
         $("record").disabled = false;
       }
@@ -318,3 +422,58 @@ GUI_HTML: str = r"""<!doctype html>
 </body>
 </html>
 """
+
+
+def render_gui(lang: str = "") -> str:
+    """Render the single-page GUI in the requested language.
+
+    Parameters
+    ----------
+    lang : str
+        Two-letter language code. Anything outside the locale file's
+        ``meta.supported_locales`` — including the empty string — falls back
+        to ``meta.default_locale``, so an unknown ``?lang=`` never 500s.
+
+    Returns
+    -------
+    str
+        The complete HTML document for that language.
+
+    Examples
+    --------
+    >>> "<!doctype html>" in render_gui("en")
+    True
+    >>> render_gui("tlh") == render_gui(default_language())
+    True
+    """
+    resolved = lang if lang in supported_languages() else default_language()
+    loc = _locales()
+
+    page = _GUI_TEMPLATE.replace("{{LANG}}", html.escape(resolved, quote=True))
+    for token, key in _HTML_TOKEN_TO_KEY.items():
+        # Escape every value: these land in attributes (placeholder, aria,
+        # href) as readily as in text nodes, and a stray quote would break out
+        # of the attribute it sits in.
+        value = html.escape(loc.text(_GUI_SECTION, key, resolved), quote=True)
+        page = page.replace("{{" + token + "}}", value)
+
+    # The script's strings go in as JSON rather than as substituted text: it is
+    # the encoding that cannot be broken out of by an apostrophe, and French
+    # copy is full of them.
+    table = {name: loc.text(_GUI_SECTION, key, resolved) for name, key in _JS_NAME_TO_KEY.items()}
+    return page.replace("{{T_JSON}}", json.dumps(table, ensure_ascii=False))
+
+
+def __getattr__(name: str) -> str:
+    """Serve ``GUI_HTML`` on first access rather than building it at import.
+
+    The module-level constant used to BE the page, and importers still reach
+    for it. Assigning it eagerly would read and parse the locale file on every
+    import of this module, including in callers that never serve the GUI — and
+    a module-level ``__getattr__`` only fires for names that are NOT otherwise
+    defined, so the name is deliberately left unbound rather than set to a
+    placeholder.
+    """
+    if name == "GUI_HTML":
+        return render_gui()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

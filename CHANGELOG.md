@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-21
+
+### Added
+
+- **The episode-browser GUI speaks French and English.** Every string it shows
+  now comes from `podcast_helper/locales/i18n.yaml` through
+  `os_helper.Locales`, the loader shared across the suite (CODING.md 21.3),
+  instead of being written into the markup. `GET /gui?lang=fr|en` picks the
+  language; anything the file does not carry — including a mistyped code and
+  the empty default — falls back to the declared default locale, so a bad
+  `?lang=` returns a page rather than a 500. A flag in the header toggles
+  between the two.
+
+  The template is tokenised (`{{TOKEN}}` in HTML, a `T` object for the
+  script), so one piece of markup serves both languages and a translator never
+  opens a Python file. The script's strings are injected as JSON rather than
+  substituted as text: it is the encoding an apostrophe cannot break out of,
+  and French copy is full of them. Six of them carry named fields (`{title}`,
+  `{count}`, `{error}`, `{kind}`, `{live}`) rather than being concatenated, so
+  a translator can reorder the sentence.
+
+  `GUI_HTML` still resolves, via a module-level `__getattr__` that renders on
+  access — importers that predate this keep working, and the locale file is
+  not read by callers that never serve the GUI.
+
+### Fixed
+
+- **CI had been red since 2026-10-19 on a lint error no local check could
+  see.** `pyproject.toml` excluded `tests` from ruff while the CI workflow
+  lint step named `tests` explicitly — and an explicitly-passed path overrides
+  the exclusion. So CI was strictly stricter than the `ruff check .` that the
+  pre-push hook and every developer run: a `C408` in `tests/test_v02_features.py`
+  failed every build while the working tree reported "All checks passed".
+
+  Fixed in both directions, so there is one definition of clean: the `dict()`
+  call became a literal, `tests` is no longer excluded (it costs exactly that
+  one finding — measured, not assumed), and the workflow now runs `ruff check .`
+  like everything else, reading its scope from `pyproject.toml` rather than
+  from a hand-written file list that can drift away from it.
+
+- **Two GUI tests asserted the default language rather than the page's
+  identity.** They looked for the literal `"episode browser"`, which is no
+  longer what a French default renders. They now ask the locale file what the
+  page is called — escaped the way the page escapes it, since the French title
+  carries an apostrophe.
+
+### Notes
+
+- `[tool.setuptools.package-data]` did not exist in this project; the locale
+  file is the first non-`.py` file the package ships, and it is declared there
+  now. Verified the way the sibling defect was found: the built wheel was
+  opened and the file found inside it. best-engine-ai-helper published wheels
+  containing none of its five data files until 1.6.1 because its patterns
+  resolved against the repository root rather than against a package.
+
 ## [1.3.0] - 2026-10-19
 
 ### Fixed

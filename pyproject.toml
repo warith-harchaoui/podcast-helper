@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "podcast-helper"
-version = "1.3.0"
+version = "1.4.0"
 description = "Podcast Helper — universal audio stream consumer exposed as library, argparse CLI, click CLI, and FastAPI HTTP surface. URL-in → PCM-out for local files, direct audio URLs, RSS feed enclosures, and yt-dlp-supported sources (YouTube, Vimeo, Twitch, SoundCloud, …). Built on youtube-helper + ffmpeg + feedparser + podcastparser; Shannon-correct resampling, mono downmix or native channels preserved."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -88,6 +88,13 @@ Issues = "https://github.com/warith-harchaoui/podcast-helper/issues"
 include = ["podcast_helper*"]
 exclude = ["tests*", "assets*"]
 
+# setuptools ships `.py` files on its own; anything else needs declaring here,
+# and the patterns resolve relative to a PACKAGE directory, never to the repo
+# root. best-engine declared five data files beside its package and published
+# wheels that contained none of them.
+[tool.setuptools.package-data]
+"podcast_helper" = ["locales/*.yaml"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 markers = [
@@ -98,7 +105,11 @@ addopts = "-m 'not integration'"
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-extend-exclude = ["assets", "tests"]
+# `tests` is NOT excluded: CI lints it by naming it explicitly, so excluding
+# it here made `ruff check .` — what the pre-push hook and developers run —
+# greener than the gate. That skew is what let a C408 in a test file sit in
+# a red CI from 2026-10-19 while every local check passed.
+extend-exclude = ["assets"]
 
 [tool.ruff.lint]
 # Conservative starter set: pyflakes (F), pycodestyle errors (E), warnings (W),

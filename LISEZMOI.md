@@ -204,6 +204,14 @@ n'importe quelle URL. Rien n'est téléversé : la lecture diffuse
 l'enclosure directement dans votre navigateur ; l'archivage exécute
 ffmpeg sur votre propre machine.
 
+La page parle **français et anglais**. `GET /gui?lang=fr|en` choisit la langue,
+un drapeau dans l'en-tête bascule de l'une à l'autre, et un code que le fichier
+de locales ne porte pas retombe sur la langue par défaut au lieu d'échouer.
+Toutes les chaînes vivent dans
+[`podcast_helper/locales/i18n.yaml`](https://github.com/warith-harchaoui/podcast-helper/blob/main/podcast_helper/locales/i18n.yaml),
+lu par `os_helper.Locales` — le chargeur partagé par la suite — si bien que
+traduire la page n'oblige jamais à ouvrir un fichier Python.
+
 Pour le catalogue exhaustif des déclencheurs, formulations, URLs
 acceptées et des cas où *ne pas* utiliser podcast-helper, voir
 [`TRIGGERS.md`](https://github.com/warith-harchaoui/podcast-helper/blob/main/TRIGGERS.md).

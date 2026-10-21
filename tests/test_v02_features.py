@@ -238,14 +238,14 @@ def test_extract_audio_stream_unknown_archive_extension_raises(
 
 
 def _cmd(url: str, **kw):
-    base = dict(
-        target_sample_rate=16000,
-        to_mono=True,
-        resample_quality="default",
-        realtime=False,
-        is_live=False,
-        headers={},
-    )
+    base = {
+        "target_sample_rate": 16000,
+        "to_mono": True,
+        "resample_quality": "default",
+        "realtime": False,
+        "is_live": False,
+        "headers": {},
+    }
     base.update(kw)
     return _build_ffmpeg_cmd(url, **base)
 
