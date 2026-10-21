@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-10-21
+
+### Changed
+
+- **`POST /stream` and `POST /record` rename `mono` to `stereo`, and the old
+  name is now a 400.** FastAPI **0.147.0** (2026-10-19) changed how omitted
+  boolean form fields resolve: they are read as `False` "matching unchecked
+  HTML checkboxes", explicitly "including required fields and fields with
+  defaults of `True` or `None`" (PR #16523).
+
+  `mono` was declared `bool = Form(True)` on both endpoints. Every client that
+  left it out got `mono=False` instead, so the PCM came back with the source's
+  native channel count: frames of shape `(n, channels)` where a downstream VAD
+  or ASR frontend expects `(n,)`, and an archive at two channels where one was
+  asked for. `/stream` even advertised the wrong answer in its own
+  `X-Channels` header.
+
+  Declaring the field `bool | None = Form(None)` does not escape it — the
+  upstream note names that case too. An off-by-default flag is the only shape
+  the new semantics cannot invert, so the wire field is now `stereo`, matching
+  the CLI's existing `--mono/--stereo` pair. Omitting it still means mono, as
+  documented.
+
+  Sending the retired `mono` is a **400** naming the replacement, rather than
+  being ignored: FastAPI drops unknown form fields, so a client asking for
+  `mono=false` would otherwise have been silently downmixed.
+
+  MINOR rather than MAJOR deliberately: `extract_audio_stream(..., to_mono=)`
+  in the Python API is untouched and no default behaviour is reversed; the
+  change restores the documented default upstream had inverted. Only HTTP
+  callers that named the flag explicitly are affected, and loudly.
+
 ## [1.4.1] - 2026-10-21
 
 ### Fixed

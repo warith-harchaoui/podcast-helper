@@ -125,6 +125,51 @@ def _cleanup(*paths: Path | str) -> None:
             pass
 
 
+def _reject_retired_flag(old: str, new: str, sent: str | None) -> None:
+    """
+    Fail loudly when a client sends a form flag that checkbox semantics retired.
+
+    FastAPI 0.147.0 made an omitted ``bool`` form field evaluate to ``False``
+    ("matching unchecked HTML checkboxes", PR #16523) regardless of the
+    declared default. An on-by-default flag such as the old ``mono=True``
+    therefore inverted for every client that simply left it out, so the flag
+    was renamed to its off-by-default form -- which matches both the new
+    semantics and the CLI's own ``--mono/--stereo`` spelling.
+
+    The rename on its own would be worse than the bug it fixes: FastAPI
+    ignores unknown form fields, so a client still sending the old name would
+    be silently switched to the opposite behaviour. This turns that silent
+    flip into a 400 the caller cannot miss.
+
+    Parameters
+    ----------
+    old : str
+        The retired field name, spelled as a stale client would still send it.
+    new : str
+        The field name that replaced it.
+    sent : str or None
+        The raw value received for ``old``; ``None`` when absent, which is the
+        expected case for an up-to-date client.
+
+    Raises
+    ------
+    HTTPException
+        With status 400 when ``sent`` is anything other than ``None``.
+    """
+    if sent is None:
+        return
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            f"The `{old}` form field was retired in favour of `{new}`. "
+            "FastAPI 0.147 reads an omitted boolean form field as False "
+            f"(unchecked-checkbox semantics), which silently inverted `{old}`, "
+            f"so the flag is now expressed off-by-default: send `{new}=true` "
+            f"for what used to be `{old}=false`, and omit it otherwise."
+        ),
+    )
+
+
 def _new_tmpdir() -> Path:
     """Create a request-scoped temp directory under the system temp root."""
     return Path(tempfile.mkdtemp(prefix="podcast-helper-"))
@@ -286,7 +331,24 @@ async def _pcm_iterator(
 def stream(
     url: str = Form(..., description="Audio-bearing URL."),
     sample_rate: int = Form(16000),
-    mono: bool = Form(True),
+    stereo: bool = Form(
+        False,
+        description=(
+            "Preserve the source's native channel count instead of "
+            "downmixing. Mirrors the CLI's --stereo; omit it to downmix to "
+            "mono, which stays the default."
+        ),
+    ),
+    # Declared, not hidden: `include_in_schema` is only honoured for query,
+    # path and header parameters, so a Form field cannot be kept out of the
+    # generated body model. Declaring it is also the only public way to see
+    # that a stale client sent it -- hence `deprecated`, which is the signal
+    # OpenAPI actually has for "present, but do not use".
+    mono: str | None = Form(
+        None,
+        description="Retired -- send `stereo` instead.",
+        deprecated=True,
+    ),
     frame_ms: int = Form(20),
     speed: float = Form(1.0),
 ) -> StreamingResponse:
@@ -297,13 +359,15 @@ def stream(
     frontend. The Content-Type is ``application/octet-stream``; sample
     rate / channels / format are conveyed via headers below.
     """
+    _reject_retired_flag("mono", "stereo", mono)
+    to_mono = not stereo
     headers = {
         "X-Sample-Rate": str(sample_rate),
-        "X-Channels": "1" if mono else "auto",
+        "X-Channels": "1" if to_mono else "auto",
         "X-Format": "f32le",
     }
     return StreamingResponse(
-        _pcm_iterator(url, sample_rate, mono, frame_ms, speed),
+        _pcm_iterator(url, sample_rate, to_mono, frame_ms, speed),
         media_type="application/octet-stream",
         headers=headers,
     )
@@ -315,7 +379,24 @@ async def record(
     url: str = Form(..., description="Audio-bearing URL."),
     output_format: str = Form("mp3", description="Archive container (mp3/m4a/opus/ogg/flac/wav)."),
     sample_rate: int = Form(16000),
-    mono: bool = Form(True),
+    stereo: bool = Form(
+        False,
+        description=(
+            "Preserve the source's native channel count instead of "
+            "downmixing. Mirrors the CLI's --stereo; omit it to downmix to "
+            "mono, which stays the default."
+        ),
+    ),
+    # Declared, not hidden: `include_in_schema` is only honoured for query,
+    # path and header parameters, so a Form field cannot be kept out of the
+    # generated body model. Declaring it is also the only public way to see
+    # that a stale client sent it -- hence `deprecated`, which is the signal
+    # OpenAPI actually has for "present, but do not use".
+    mono: str | None = Form(
+        None,
+        description="Retired -- send `stereo` instead.",
+        deprecated=True,
+    ),
     frame_ms: int = Form(20),
     speed: float = Form(1.0),
 ) -> FileResponse:
@@ -323,6 +404,8 @@ async def record(
     Archive any audio-bearing URL to a compressed file server-side, then
     return the file as the response body.
     """
+    _reject_retired_flag("mono", "stereo", mono)
+    to_mono = not stereo
     # ``output_format`` is a client-supplied string with no character
     # restriction. Without validating it against the codec table, a value
     # like "../../../../tmp/pwned.mp3" would make ``tmp / f"episode.{...}"``
@@ -349,7 +432,7 @@ async def record(
         async for _ in extract_audio_stream(
             url,
             target_sample_rate=sample_rate,
-            to_mono=mono,
+            to_mono=to_mono,
             realtime=False,
             frame_ms=frame_ms,
             speed=speed,

@@ -17,6 +17,8 @@ Warith Harchaoui, Ph.D. — https://linkedin.com/in/warith-harchaoui/
 
 from __future__ import annotations
 
+import pathlib
+
 import pytest
 
 # FastAPI + httpx live in the ``[api]`` / ``[dev]`` optional extras.
@@ -119,3 +121,79 @@ def test_record_rejects_unsupported_output_format(client):
     # rejected too, not just a traversal attempt.
     r2 = client.post("/record", data={"url": "https://example.com/ep.mp3", "output_format": "exe"})
     assert r2.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# Channel flag on /stream and /record -- FastAPI 0.147 checkbox semantics.
+# ---------------------------------------------------------------------------
+#
+# FastAPI 0.147 reads an omitted boolean form field as False whatever default
+# is declared, so the on-by-default ``mono=True`` could not survive on the
+# wire. The flag is now the off-by-default ``stereo``, and the retired name
+# earns a 400 rather than silently inverting a caller's intent.
+
+
+def test_stream_downmixes_to_mono_when_the_flag_is_omitted(client):
+    """An omitted flag must still mean mono.
+
+    ``X-Channels`` reports the resolved choice, so the header is a real
+    assertion on the decision without needing ffmpeg or the network: the
+    response body is a lazy generator that is never consumed here.
+    """
+    r = client.post("/stream", data={"url": "https://example.com/ep.mp3"})
+    assert r.status_code == 200
+    assert r.headers["X-Channels"] == "1"
+
+
+def test_stream_stereo_preserves_native_channels(client):
+    """``stereo=true`` must switch the resolved choice away from mono."""
+    r = client.post("/stream", data={"url": "https://example.com/ep.mp3", "stereo": "true"})
+    assert r.status_code == 200
+    assert r.headers["X-Channels"] == "auto"
+
+
+def test_stream_rejects_the_retired_mono_flag(client):
+    """A client still sending ``mono`` gets a 400, never a silent flip."""
+    r = client.post("/stream", data={"url": "https://example.com/ep.mp3", "mono": "false"})
+    assert r.status_code == 400
+    detail = r.json()["detail"]
+    assert "`mono`" in detail
+    assert "`stereo`" in detail
+
+
+def test_record_rejects_the_retired_mono_flag(client):
+    """``/record`` guards the same flag, before it validates anything else.
+
+    The guard runs ahead of the ``output_format`` check and ahead of ffmpeg,
+    so this costs no encoder and no network.
+    """
+    r = client.post(
+        "/record",
+        data={"url": "https://example.com/ep.mp3", "output_format": "mp3", "mono": "true"},
+    )
+    assert r.status_code == 400
+    assert "`stereo`" in r.json()["detail"]
+
+
+def test_record_forwards_the_resolved_channel_choice(client, monkeypatch, tmp_path):
+    """``/record`` must pass ``to_mono=True`` when the flag is omitted."""
+    import podcast_helper.api as api_mod
+
+    captured = {}
+
+    async def fake_stream(
+        url, *, target_sample_rate, to_mono, realtime, frame_ms, speed, record_to
+    ):
+        captured["to_mono"] = to_mono
+        pathlib.Path(record_to).write_bytes(b"stub")
+        return
+        yield  # pragma: no cover - makes this an async generator
+
+    monkeypatch.setattr(api_mod, "extract_audio_stream", fake_stream)
+    r = client.post("/record", data={"url": "https://example.com/ep.mp3"})
+    assert r.status_code == 200
+    assert captured["to_mono"] is True
+
+    r = client.post("/record", data={"url": "https://example.com/ep.mp3", "stereo": "true"})
+    assert r.status_code == 200
+    assert captured["to_mono"] is False
