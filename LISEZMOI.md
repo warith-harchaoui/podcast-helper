@@ -208,8 +208,9 @@ La page parle **français et anglais**. `GET /gui?lang=fr|en` choisit la langue,
 un drapeau dans l'en-tête bascule de l'une à l'autre, et un code que le fichier
 de locales ne porte pas retombe sur la langue par défaut au lieu d'échouer.
 Toutes les chaînes vivent dans
-[`podcast_helper/locales/i18n.yaml`](https://github.com/warith-harchaoui/podcast-helper/blob/main/podcast_helper/locales/i18n.yaml),
-lu par `os_helper.Locales` — le chargeur partagé par la suite — si bien que
+[`podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po`](https://github.com/warith-harchaoui/podcast-helper/blob/main/podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po),
+un catalogue `gettext` standard lu par `os_helper.Catalog` — le chargeur
+partagé par la suite — si bien que
 traduire la page n'oblige jamais à ouvrir un fichier Python.
 
 Pour le catalogue exhaustif des déclencheurs, formulations, URLs

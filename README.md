@@ -204,8 +204,9 @@ ffmpeg on your own machine.
 The page speaks **French and English**. `GET /gui?lang=fr|en` picks one, a flag
 in the header toggles between them, and a code the locale file does not carry
 falls back to the default rather than failing. Every string lives in
-[`podcast_helper/locales/i18n.yaml`](https://github.com/warith-harchaoui/podcast-helper/blob/main/podcast_helper/locales/i18n.yaml),
-read through `os_helper.Locales` — the loader shared across the suite — so
+[`podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po`](https://github.com/warith-harchaoui/podcast-helper/blob/main/podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po),
+a standard `gettext` catalogue read through `os_helper.Catalog` — the loader
+shared across the suite — so
 translating the page never means opening a Python file.
 
 For the exhaustive catalog of triggers, phrasings, accepted URLs and

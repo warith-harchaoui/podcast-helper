@@ -1,0 +1,102 @@
+# fr catalogue for podcast-helper.
+#
+# msgid is the English source string as it appears in the code, so a
+# reworded source needs its entry reworded too — os_helper.Catalog.problems
+# reports the mismatch rather than letting the page half-revert to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: podcast-helper\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid " (live)"
+msgstr " (direct)"
+
+msgid "Classified as {kind}{live}."
+msgstr "Classé comme {kind}{live}."
+
+msgid "Done — archive ready to download."
+msgstr "Terminé — archive prête à télécharger."
+
+msgid "Download archive"
+msgstr "Télécharger l'archive"
+
+msgid "Enter a URL to probe first."
+msgstr "Saisissez d'abord une URL à sonder."
+
+msgid "Enter a feed URL first."
+msgstr "Saisissez d'abord une URL de flux."
+
+msgid "Episodes"
+msgstr "Épisodes"
+
+msgid "Error "
+msgstr "Erreur "
+
+msgid "Feed / RSS / audio / yt-dlp URL"
+msgstr "URL de flux / RSS / audio / yt-dlp"
+
+msgid "Feed parsed but no episodes."
+msgstr "Flux analysé, mais aucun épisode."
+
+msgid "Fetching feed…"
+msgstr "Récupération du flux…"
+
+msgid "List a feed to see its episodes here."
+msgstr "Listez un flux pour voir ses épisodes ici."
+
+msgid "List episodes"
+msgstr "Lister les épisodes"
+
+msgid "Listed {count} episode(s)."
+msgstr "{count} épisode(s) listé(s)."
+
+msgid "No episodes found in this feed."
+msgstr "Aucun épisode trouvé dans ce flux."
+
+msgid "Paste a feed / RSS / audio / YouTube URL, list its episodes, preview one inline, and archive it to a file — all on your local machine."
+msgstr "Collez une URL de flux / RSS / audio / YouTube, listez ses épisodes, écoutez-en un sur place et archivez-le dans un fichier — tout sur votre machine."
+
+msgid "Pick an episode on the left, or probe / record a raw URL directly."
+msgstr "Choisissez un épisode à gauche ou sondez / enregistrez directement une URL brute."
+
+msgid "Podcast Helper — Episode Browser"
+msgstr "Podcast Helper — Explorateur d'épisodes"
+
+msgid "Preview"
+msgstr "Écoute"
+
+msgid "Probe"
+msgstr "Sonder"
+
+msgid "Probe result"
+msgstr "Résultat du sondage"
+
+msgid "Probing…"
+msgstr "Sondage…"
+
+msgid "Record to file"
+msgstr "Enregistrer dans un fichier"
+
+msgid "Recording (server-side ffmpeg)… this can take a while for long episodes."
+msgstr "Enregistrement (ffmpeg côté serveur)… cela peut être long sur un épisode étendu."
+
+msgid "Request failed: {error}"
+msgstr "Échec de la requête : {error}"
+
+msgid "Select an episode or enter a URL to record."
+msgstr "Choisissez un épisode ou saisissez une URL à enregistrer."
+
+msgid "Selected"
+msgstr "Sélection"
+
+msgid "Selected: {title}"
+msgstr "Sélection : {title}"
+
+msgid "record format"
+msgstr "format d'enregistrement"
+
+msgid "sample rate (Hz)"
+msgstr "fréquence d'échantillonnage (Hz)"

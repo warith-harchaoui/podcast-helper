@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-21
+
+### Changed
+
+- **The GUI's strings moved from `locales/i18n.yaml` to a `gettext`
+  catalogue**, the suite-wide mechanism as of os-helper 2.6.0. The English is
+  now the source, written in the markup itself as `{{_("…")}}`; the French
+  lives in `podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po` and is
+  read through `os_helper.Catalog`.
+
+  A string the French catalogue has not caught up with renders as **readable
+  English** instead of as a key. The cost is the mirror image — rewording the
+  English orphans its French entry, and gettext would quietly serve the
+  English — so `tests/test_gui_i18n.py` hands every source string to
+  `Catalog.problems`, which names both halves of that fault.
+
+  The feed URL placeholder is written in the markup directly: it is the same
+  example in every language. The language toggle is computed rather than
+  translated — its three parts all mean "the other language", which is data,
+  not copy.
+
+- `tests/test_api.py` read the page's name through the old loader; it now takes
+  it from the rendered `<title>`, which arrives already escaped the way the
+  page escapes it — the French title carries an apostrophe.
+
 ## [1.4.2] - 2026-10-21
 
 ### Changed

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "podcast-helper"
-version = "1.4.2"
+version = "1.5.0"
 description = "Podcast Helper — universal audio stream consumer exposed as library, argparse CLI, click CLI, and FastAPI HTTP surface. URL-in → PCM-out for local files, direct audio URLs, RSS feed enclosures, and yt-dlp-supported sources (YouTube, Vimeo, Twitch, SoundCloud, …). Built on youtube-helper + ffmpeg + feedparser + podcastparser; Shannon-correct resampling, mono downmix or native channels preserved."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "youtube-helper>=2.0.0,<3",
-    "os-helper>=2.4.0,<3",
+    "os-helper>=2.6.0,<3",
     "feedparser>=6.0,<7",
     "podcastparser>=0.6,<1",
     "requests>=2.28,<3",
@@ -93,7 +93,7 @@ exclude = ["tests*", "assets*"]
 # root. best-engine declared five data files beside its package and published
 # wheels that contained none of them.
 [tool.setuptools.package-data]
-"podcast_helper" = ["locales/*.yaml"]
+"podcast_helper" = ["locales/*/LC_MESSAGES/*.po", "locales/*/LC_MESSAGES/*.mo"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

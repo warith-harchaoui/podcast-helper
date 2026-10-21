@@ -64,16 +64,20 @@ def test_docs_endpoint_is_served(client):
 def _page_name() -> str:
     """The GUI's own name, in whatever language it renders by default.
 
-    Escaped the way the page escapes it: the French title carries an
-    apostrophe, and `render_gui` writes it as `&#x27;` — correct HTML that a
-    browser renders as an apostrophe, and not the literal the locale file
-    holds.
+    Taken from the rendered page rather than from a catalogue lookup, so this
+    says "the page shows its own title" without naming a language. It also
+    arrives already escaped the way the page escapes it: the French title
+    carries an apostrophe, which `render_gui` writes as `&#x27;` — correct
+    HTML that a browser renders as an apostrophe, and not the literal the
+    catalogue holds.
     """
-    import html
+    import re
 
     from podcast_helper import gui
 
-    return html.escape(gui._locales().text("gui", "hero_title"), quote=True).lower()
+    title = re.search(r"<title>([^<]*)</title>", gui.render_gui())
+    assert title, "the default page has no <title>"
+    return title.group(1).lower()
 
 
 def test_gui_returns_200_html(client):
