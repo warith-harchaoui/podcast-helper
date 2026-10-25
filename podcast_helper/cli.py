@@ -1,20 +1,19 @@
 """
-Podcast Helper — click-based command-line interface.
+Podcast Helper — command-line interface.
 
-Twin of :mod:`podcast_helper.cli_argparse`: same public surface (identical
-subcommand names, identical flag semantics), but implemented with
-:mod:`click` so users who already have a click-native shell setup
-(bash / zsh completion via ``click.shell_completion``, colored ``--help``,
-nested command groups) can plug it in without friction. Installed as
-the ``podcast-helper-click`` entry point in ``pyproject.toml``.
+The package's one command line: every public function reachable as a
+subcommand under ``podcast-helper``. Built with :mod:`click`, so
+bash / zsh completion (``click.shell_completion``), colored ``--help``
+and nested groups come for free. Installed as the ``podcast-helper``
+entry point in ``pyproject.toml``.
 
 Design notes
 ------------
-- Subcommands mirror ``podcast-helper`` (the argparse twin) so both CLIs
-  can be introspected identically by higher layers (FastAPI).
-- Flags reuse the argparse names (``--url`` / ``--output`` / …) rather
-  than a more idiomatic click positional style — consistency across
-  the two CLIs beats micro-idiomaticity here.
+- Subcommand names and flag names match the FastAPI / MCP surfaces, so a
+  recipe written for one door transposes to the others by copy-paste.
+- Flags are long options (``--url`` / ``--output`` / …) rather than click
+  positionals: the HTTP surface names its fields the same way, and the
+  symmetry is worth more than the few saved keystrokes.
 - A library exception is caught by the ``main()`` entry point (not
   click's own error handling, which only special-cases
   ``ClickException``/``Abort``) and printed as a clean ``Error: ...``
@@ -22,11 +21,11 @@ Design notes
 
 Usage Example
 -------------
->>> #   podcast-helper-click feed    --url https://feeds.npr.org/510289/podcast.xml
->>> #   podcast-helper-click latest  --url https://feeds.npr.org/510289/podcast.xml --json
->>> #   podcast-helper-click stream  --url ep.mp3 --output ep.wav --sample-rate 16000
->>> #   podcast-helper-click record  --url https://feeds.npr.org/510289/podcast.xml --output ep.mp3
->>> #   podcast-helper-click probe   --url https://youtu.be/dQw4w9WgXcQ
+>>> #   podcast-helper feed    --url https://feeds.npr.org/510289/podcast.xml
+>>> #   podcast-helper latest  --url https://feeds.npr.org/510289/podcast.xml --json
+>>> #   podcast-helper stream  --url ep.mp3 --output ep.wav --sample-rate 16000
+>>> #   podcast-helper record  --url https://feeds.npr.org/510289/podcast.xml --output ep.mp3
+>>> #   podcast-helper probe   --url https://youtu.be/dQw4w9WgXcQ
 
 Author
 ------
@@ -39,31 +38,36 @@ import asyncio
 import json
 import sys
 
-try:
-    import click
-except ImportError as exc:  # pragma: no cover
-    raise ImportError(
-        "The click CLI requires the [cli] extra. Install with: pip install 'podcast-helper[cli]'"
-    ) from exc
+import click
 
-# Same underlying functions as the argparse twin — one source of truth.
+# The library functions themselves — every subcommand is a thin dispatch on
+# top of them, with no logic of its own.
 from . import extract_audio_stream, feed, latest_episode
 
 # ---------------------------------------------------------------------------
 # Top-level group
 #
-# ``invoke_without_command=False`` forces the user to name a subcommand;
-# ``context_settings`` widens the help output so long option lists stay
-# readable on modern terminals.
+# A bare ``podcast-helper`` prints the help rather than doing anything: click
+# groups require a subcommand unless told otherwise, and that is what we want.
+# ``max_content_width`` widens the help so the long option lists on ``stream``
+# and ``record`` stay readable on a modern terminal.
 # ---------------------------------------------------------------------------
 
 
 @click.group(
     context_settings={"help_option_names": ["-h", "--help"], "max_content_width": 100},
 )
-@click.version_option(package_name="podcast-helper", prog_name="podcast-helper-click")
+# ``-V`` beside ``--version``: the capital is the suite's convention, leaving
+# ``-v`` free for a future ``--verbose``. ``package_name`` because the package
+# exposes no ``__version__`` of its own, so the distribution metadata is the
+# only place the number lives.
+@click.version_option(None, "-V", "--version", package_name="podcast-helper")
 def cli() -> None:
-    """Podcast Helper — click twin of the argparse CLI. Same subcommands."""
+    """Podcast Helper — any audio URL in, PCM frames or an archive out.
+
+    Feeds, direct audio links, local files and every yt-dlp source
+    (YouTube, SoundCloud, Twitch, ...) go in through the same --url.
+    """
     # Nothing to do at the group level — every subcommand carries its
     # own arguments and side effects.
 
@@ -291,7 +295,7 @@ def probe(url: str, show_url: bool) -> None:
 
 
 def main() -> None:
-    """Console entry point (``podcast-helper-click``).
+    """Console entry point (``podcast-helper``).
 
     click's own ``main()`` only special-cases ``ClickException``/``Abort``
     (and a broken pipe); a plain library exception would otherwise

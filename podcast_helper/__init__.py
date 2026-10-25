@@ -21,10 +21,10 @@ Multi-surface exposure
 ----------------------
 The same public functions are surfaced as:
 
-- ``podcast-helper`` — argparse CLI (:mod:`podcast_helper.cli_argparse`).
-- ``podcast-helper-click`` — click CLI (:mod:`podcast_helper.cli_click`);
-  needs the ``[cli]`` extra.
+- ``podcast-helper`` — the command line (:mod:`podcast_helper.cli`).
 - FastAPI HTTP app (:mod:`podcast_helper.api`); needs the ``[api]`` extra.
+- ``podcast-helper-mcp`` — MCP server (:mod:`podcast_helper.mcp`); needs
+  the ``[mcp]`` extra.
 
 Usage Example
 -------------

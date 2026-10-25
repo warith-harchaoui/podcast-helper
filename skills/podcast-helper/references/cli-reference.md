@@ -1,8 +1,7 @@
 # podcast-helper CLI reference
 
-Two CLIs over the same five verbs. `podcast-helper` (argparse) ships with the
-core package; `podcast-helper-click` (needs `[cli]`) is the click twin with the
-same flags.
+One CLI over five verbs: `podcast-helper`, which ships with the core package —
+no extra to install. `-h` / `--help` on any verb, `-V` for the version.
 
 ## `feed` — list a feed's episodes
 

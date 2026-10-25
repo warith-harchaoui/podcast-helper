@@ -48,8 +48,7 @@ We recommend using Python environments. Check this link if you're unfamiliar wit
 # Core library
 pip install podcast-helper
 
-# Optional surfaces
-pip install "podcast-helper[cli]"
+# Optional surfaces (the command line ships with the core)
 pip install "podcast-helper[api]"
 pip install "podcast-helper[mcp]"
 ```
@@ -63,8 +62,7 @@ git clone https://github.com/warith-harchaoui/podcast-helper.git
 cd podcast-helper
 pip install -e .
 
-# Optional surfaces
-pip install -e ".[cli]"
+# Optional surfaces (the command line ships with the core)
 pip install -e ".[api]"
 pip install -e ".[mcp]"
 ```
@@ -161,8 +159,7 @@ interchangeable surfaces; pick the one that fits the caller.
 | Surface | Entry point | Extra | Best for |
 |---|---|---|---|
 | Library (async iterator) | `import podcast_helper as ph` | none | Python code, notebooks, downstream ASR / VAD / summarization |
-| argparse CLI | `podcast-helper` | none (stdlib only) | shell scripts, CI, ffmpeg pipelines |
-| click CLI | `podcast-helper-click` | `[cli]` | click-native shells (bash / zsh completion, colored help) |
+| CLI | `podcast-helper` | none | shell scripts, CI, ffmpeg pipelines; bash / zsh completion, colored help |
 | FastAPI HTTP | `uvicorn podcast_helper.api:app` | `[api]` | HTTP microservices, cross-language callers |
 | Browser GUI | `GET /gui` (served by the API) | `[api]` | drop-a-URL episode browser: list · preview · archive, no terminal |
 | MCP | `podcast-helper-mcp` | `[mcp]` | any MCP-aware agent host (calls the same endpoints as tools) |
@@ -170,10 +167,10 @@ interchangeable surfaces; pick the one that fits the caller.
 Install any combination of extras:
 
 ```bash
-pip install 'podcast-helper[cli]'          # + click twin
+pip install podcast-helper                 # library + CLI
 pip install 'podcast-helper[api]'          # + FastAPI HTTP surface
 pip install 'podcast-helper[mcp]'          # + MCP tools (needs [api] too, pulled in automatically)
-pip install 'podcast-helper[cli,api,mcp]'  # everything
+pip install 'podcast-helper[api,mcp]'      # everything
 ```
 
 Every surface publishes the same verbs, `feed`, `latest`, `stream`,

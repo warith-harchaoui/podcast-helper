@@ -23,9 +23,9 @@ The generator is **infinite on a live source**; the caller breaks out.
 
 Logging and file management route through `os_helper` — the suite convention.
 
-## 2. CLIs — argparse (core) and click (`[cli]`)
+## 2. CLI — `podcast-helper` (core)
 
-`podcast-helper` and `podcast-helper-click`. See `cli-reference.md`.
+One command line, no extra to install. See `cli-reference.md`.
 
 ## 3. HTTP API — FastAPI (`[api]`)
 

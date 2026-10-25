@@ -24,8 +24,8 @@ edit files already on disk.
 | Archive any URL to a compressed file | `podcast-helper record` | `extract_audio_stream(record_to=…)` | `POST /record` |
 | Classify a URL (file/direct/rss/yt-dlp, live?) | `podcast-helper probe` | `_resolve_source` | `GET /probe` |
 
-Every verb is also reachable through the click CLI (`podcast-helper-click …`,
-same flags) and the browser episode browser at `GET /gui`.
+Every verb is also reachable through the MCP server (`podcast-helper-mcp`,
+same tool names) and the browser episode browser at `GET /gui`.
 
 ## Natural-language phrasings that should fire
 

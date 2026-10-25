@@ -38,7 +38,7 @@ not transcribe, synthesize, or edit files already on disk.
 ## Before anything: verify it is installed
 
 ```bash
-podcast-helper --help                # argparse CLI (ships with the package)
+podcast-helper --help                # the CLI (ships with the package)
 python -c "import podcast_helper"    # library import check
 ffmpeg -version                      # hard system dependency for decoding
 ```
@@ -46,8 +46,7 @@ ffmpeg -version                      # hard system dependency for decoding
 Install:
 
 ```bash
-pip install podcast-helper                 # core: library + argparse CLI
-pip install 'podcast-helper[cli]'          # + the click twin
+pip install podcast-helper                 # core: library + CLI
 pip install 'podcast-helper[api]'          # + FastAPI HTTP surface and GUI
 pip install 'podcast-helper[mcp]'          # + MCP tools over the same app
 ```

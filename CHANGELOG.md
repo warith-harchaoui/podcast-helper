@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-25
+
+### Changed
+
+- **One command line, built with click.** `podcast-helper` now runs the click
+  implementation; the argparse CLI and the `podcast-helper-click` twin are gone,
+  along with the `[cli]` extra. `click` moves into the core `dependencies`: the
+  CLI is no longer optional, so its dependency cannot be either.
+
+  Parity was verified before the removal by introspecting the two objects rather
+  than by diffing help text — the `ArgumentParser` from `cli_argparse` loaded
+  out of git, against the live `click.Group`. Both doors carried the same five
+  verbs (`feed`, `latest`, `stream`, `record`, `probe`) and the same 22 flags
+  across them, with zero mismatch; the only difference was in click's favour
+  (`-V`, which argparse did not offer).
+
+- `cli_click.py` is now `cli.py`, and `cli_argparse.py` is deleted. The module
+  no longer guards `import click` behind a try/except install hint, and its
+  docstring no longer describes itself as a twin of something that is gone.
+- `os-helper` cap widened to `<4` (os-helper 3.0.0 dropped its own CLI).
+
+### Fixed
+
+Three help-text defects, none of them visible by reading the source — they only
+showed up by running the command:
+
+- `--help` described the tool as the "click twin of the argparse CLI. Same
+  subcommands.", an architecture that no longer exists. It now says what the
+  tool does.
+- `-V` had no short form, though the argparse door offered `--version`.
+- The rewritten group docstring first used RST markup (` ``--url`` `), which
+  click prints verbatim: the double backticks reached the terminal as
+  characters. Caught by reading the rendered help, not the file.
+
+### Tests
+
+`tests/test_cli.py` was rewritten rather than patched. The argparse half was
+pure duplication — every scenario on that side had a click mirror, so nothing
+was lost by dropping it — but the file grew five guards for faults this flip
+could have introduced silently, each proven by breaking the property and
+watching the test go red:
+
+- `stream` with no `--output` writes **exactly** the concatenated raw f32le
+  bytes to stdout and nothing else; with `--output`, stdout stays empty and the
+  archive path goes to stderr. A single `click.echo` on the wrong stream
+  corrupts the audio of every shell pipeline, and only a byte-level assertion
+  sees it. These two drive `main()` with a replaced `sys.argv` and read the
+  stream back with `capsysbinary`: `CliRunner` captures stdout as *text* and
+  would re-encode the PCM it is supposed to be checking.
+- `-h` produces byte-identical output to `--help`, and `-V` to `--version`.
+- No subcommand's help leaks a numpydoc `Parameters` block: click renders the
+  whole docstring, so such a section reaches users as one reflowed paragraph.
+
+### Migration
+
+`podcast-helper-click <verb>` becomes `podcast-helper <verb>` — same verbs, same
+flags, same output. `pip install "podcast-helper[cli]"` now fails on an unknown
+extra; plain `pip install podcast-helper` carries the CLI.
+
 ## [1.5.0] - 2026-10-21
 
 ### Changed

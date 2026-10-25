@@ -48,8 +48,7 @@ On recommande de travailler dans un environnement Python. Si vous ne savez pas e
 # Bibliothèque de base
 pip install podcast-helper
 
-# Surfaces optionnelles
-pip install "podcast-helper[cli]"
+# Surfaces optionnelles (la ligne de commande vient avec la base)
 pip install "podcast-helper[api]"
 pip install "podcast-helper[mcp]"
 ```
@@ -63,8 +62,7 @@ git clone https://github.com/warith-harchaoui/podcast-helper.git
 cd podcast-helper
 pip install -e .
 
-# Surfaces optionnelles
-pip install -e ".[cli]"
+# Surfaces optionnelles (la ligne de commande vient avec la base)
 pip install -e ".[api]"
 pip install -e ".[mcp]"
 ```
@@ -161,8 +159,7 @@ surfaces interchangeables ; choisissez celle qui convient à l'appelant.
 | Surface | Point d'entrée | Extra | Idéal pour |
 |---|---|---|---|
 | Bibliothèque (itérateur async) | `import podcast_helper as ph` | aucun | code Python, notebooks, ASR / VAD / résumé en aval |
-| CLI argparse | `podcast-helper` | aucun (stdlib uniquement) | scripts shell, CI, pipelines ffmpeg |
-| CLI click | `podcast-helper-click` | `[cli]` | shells click-native (auto-complétion bash / zsh, aide colorée) |
+| CLI | `podcast-helper` | aucun | scripts shell, CI, pipelines ffmpeg ; auto-complétion bash / zsh, aide colorée |
 | API FastAPI | `uvicorn podcast_helper.api:app` | `[api]` | microservices HTTP, appelants multi-langages |
 | GUI navigateur | `GET /gui` (servi par l'API) | `[api]` | explorateur d'épisodes glisser-une-URL : lister · prévisualiser · archiver, sans terminal |
 | MCP | `podcast-helper-mcp` | `[mcp]` | tout hôte agentique compatible MCP (appelle les mêmes points d'accès comme outils) |
@@ -170,10 +167,10 @@ surfaces interchangeables ; choisissez celle qui convient à l'appelant.
 Installez la combinaison d'extras qui vous convient :
 
 ```bash
-pip install 'podcast-helper[cli]'          # + le jumeau click
+pip install podcast-helper                 # bibliothèque + CLI
 pip install 'podcast-helper[api]'          # + la surface HTTP FastAPI
 pip install 'podcast-helper[mcp]'          # + les outils MCP (inclut [api] automatiquement)
-pip install 'podcast-helper[cli,api,mcp]'  # tout
+pip install 'podcast-helper[api,mcp]'      # tout
 ```
 
 Chaque surface publie les mêmes verbes, `feed`, `latest`, `stream`,
