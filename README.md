@@ -26,7 +26,7 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in
 
 ## Battle-tested
 
-`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.1.5), so a pinned range such as `podcast-helper>=1.1.0,<2` stays stable under you. Continuous integration (CI, an automated pipeline that runs the test suite and the linter on every push) is green on `main`: `pytest` and `ruff check` both have to pass before anything merges. It depends on two siblings from the same AI Helpers suite, [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) for the yt-dlp resolution step and [os-helper](https://github.com/warith-harchaoui/os-helper) for shared logging and filesystem utilities, and it is itself a dependency of [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (speaker-labelled transcription), which builds its live and offline audio ingest directly on `extract_audio_stream`.
+`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.0), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration (CI, an automated pipeline that runs the test suite and the linter on every push) is green on `main`: `pytest` and `ruff check` both have to pass before anything merges. Two siblings from the same AI Helpers suite are declared dependencies: [os-helper](https://github.com/warith-harchaoui/os-helper), which the code calls directly for logging and filesystem checks, and [youtube-helper](https://github.com/warith-harchaoui/youtube-helper), which is what brings the `yt-dlp` + ffmpeg chain into the environment — the URL-resolution code imports `yt_dlp` itself rather than going through youtube-helper's API. In the other direction, [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (speaker-labelled transcription) depends on podcast-helper through its `[stream]` extra, where `sources.from_url` wraps `extract_audio_stream` for every URL it ingests.
 
 ## Why it exists
 
@@ -71,6 +71,8 @@ pip install -e ".[mcp]"
 
 ```python
 import asyncio
+
+import numpy as np
 import podcast_helper as ph
 
 
@@ -84,11 +86,15 @@ async def main():
     ):
         # frame["pcm"]: np.float32 (320,) for 20ms @ 16kHz
         # frame["t_abs_s"]: 0.0, 0.02, 0.04, ...
-        await asr.feed(frame["pcm"])
+        level = float(np.sqrt(np.mean(frame["pcm"] ** 2)))
+        print(f"{frame['t_abs_s']:6.2f}s  rms={level:.3f}")
 
 
 asyncio.run(main())
 ```
+
+Replace the `print` with a call into your own ASR, VAD or diarization
+stage and nothing else about the loop changes.
 
 For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / multichannel, anti-aliasing, downstream ASR / VAD / summarization pipelines), see [📋 EXAMPLES.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md).
 

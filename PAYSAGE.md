@@ -84,3 +84,43 @@ streaming, archive) à la charge de l'appelant.
   les métadonnées d'un flux ; l'ingestion audio est hors périmètre.
 - **`pydub` / `librosa` / `audioread`** : vous avez déjà le fichier et vous
   voulez manipuler ou décoder ses échantillons avec une bibliothèque audio mature.
+- **`ffmpeg-python` ou `requests` + `ffmpeg` à la main** : vous ne voulez que
+  le décodage et rien d'autre, puis vous acceptez d'assumer vous-même le
+  routage d'URL, le parcours des flux et le découpage en trames. C'est l'alternative
+  honnête à ce paquet : `podcast-helper` est précisément ces trois soucis-là
+  plus un itérateur asynchrone, pas un meilleur décodeur.
+
+## Sources et date de relevé
+
+Relevé le **27 octobre 2026**.
+
+La ligne `podcast-helper` est notée d'après le code de ce dépôt en
+**v1.6.0** : `podcast_helper/streaming.py` pour la classification d'URL, la
+commande ffmpeg puis l'archive parallèle ; `podcast_helper/feed.py` pour
+l'analyse RSS et Atom (podcastparser d'abord, feedparser en secours) ; enfin
+les cinq surfaces que liste le README.
+
+Quatre des autres lignes ont été relevées sur les versions réellement
+installées dans l'environnement de ce dépôt à cette date, plutôt que dans un
+journal de versions : `yt-dlp 2026.6.9`, `feedparser 6.0.12`,
+`podcastparser 0.6.11` puis `ffmpeg-python 0.2.0`. Le comportement de
+décodage a été vérifié avec `ffmpeg 8.1.2`.
+
+Les lignes restantes — `streamlink`, `pytube`, `pydub`, `librosa`,
+`audioread` — ne sont **pas installées ici**. Elles sont notées d'après le
+périmètre que revendique leur propre documentation, aucune version ne leur
+est attribuée et rien n'a été mesuré contre elles. Les étoiles sont un
+jugement d'adéquation à un créneau, pas une mesure ; un désaccord mérite une
+issue, pas la correction d'un chiffre.
+
+Deux réserves accompagnent le tableau plutôt qu'elles ne le suivent :
+
+- Les cinq étoiles en « Rééchantillonnage correct » sont héritées de
+  `libswresample` de ffmpeg, qui fait le travail réel. Le chemin optionnel
+  `resample_quality="high"` exige un ffmpeg compilé avec
+  `--enable-libsoxr`, que le build Homebrew standard n'embarque pas : mesuré
+  ici, il rend zéro trame.
+- « Multi-surface » compte des portes, pas de la maturité : bibliothèque,
+  CLI, API FastAPI, GUI navigateur puis MCP existent toutes et sont testées,
+  mais une bibliothèque monotâche notée une étoile n'en fait pas moins bien
+  son propre travail.

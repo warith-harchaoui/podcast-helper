@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Documentation
+
+Brought the three document pairs onto the suite spine (CODING.md 16-18) and
+re-checked every claim in them against the code rather than preserving it.
+
+- `LISEZMOI.md`: `## Démarrage rapide` renamed `## Prise en main rapide`, two
+  writing-charter commas before a clause-joining `et` / `ou` removed, and the
+  "catalogue complet d'exemples" link repointed at `EXEMPLES.md` instead of the
+  English `EXAMPLES.md`.
+- `LANDSCAPE.md` / `PAYSAGE.md`: added `## Sources and as-of date` /
+  `## Sources et date de relevé`. It separates the rows read from versions
+  actually installed here (yt-dlp, feedparser, podcastparser, ffmpeg-python,
+  ffmpeg) from the rows scored only against their own published scope, and
+  attributes no version or benchmark to the latter. `## When to pick what`
+  gained the honest alternative it was missing: `ffmpeg-python`, or
+  `requests` + `ffmpeg` by hand.
+- `EXAMPLES.md` / `EXEMPLES.md`: rewritten onto the rule-18 spine — language
+  switch, `## Table of Contents`, `## Setup`, `## 1.`-numbered scenarios,
+  `## Command line`, `## Troubleshooting` — and every snippet made to run. The
+  previous version leaned on an `asr` / `vad` / `whisper` object that was never
+  defined, and pasted episode titles and durations as if they had been
+  measured. Snippets needing only ffmpeg and a local file are now executed and
+  carry their real output; the ones needing the network say so and carry none.
+- Both READMEs: the PyPI version was still advertised as v1.1.5, and the
+  dependency prose claimed youtube-helper performed the yt-dlp resolution step.
+  It does not — `streaming.py` imports `yt_dlp` directly, and youtube-helper is
+  what pulls that chain into the environment. The vocal-helper relationship is
+  now stated as what it is: a dependency of vocal-helper's `[stream]` extra,
+  consumed through `sources.from_url`. The quick-start snippet no longer calls
+  into an undefined `asr` object.
+- Three behaviours found while checking the examples are written up under
+  `## Troubleshooting`, because a reader will hit them: a source ffmpeg cannot
+  open yields zero frames without raising; `resample_quality="high"` needs an
+  ffmpeg built with `--enable-libsoxr` and fails the same silent way without
+  it; and leaving a `realtime=False` loop early can hang at generator close.
+
 ## [1.6.0] - 2026-10-25
 
 ### Changed

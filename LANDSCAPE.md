@@ -81,3 +81,42 @@ concern (routing, feeds, streaming iterator, archive) to the caller.
 - **`pydub` / `librosa` / `audioread`**: you already have the file
   and want to manipulate or decode its samples with a mature audio
   library.
+- **`ffmpeg-python` or plain `requests` + `ffmpeg`**: you want the
+  decode and nothing else, and you are happy to own the URL routing,
+  the feed walking and the framing yourself. That is the honest
+  alternative to this package — `podcast-helper` is those three
+  concerns plus an async iterator, not a better decoder.
+
+## Sources and as-of date
+
+Read on **2026-10-27**.
+
+The `podcast-helper` row is scored against the code in this repository at
+**v1.6.0**: `podcast_helper/streaming.py` for URL classification, the
+ffmpeg command and the parallel archive; `podcast_helper/feed.py` for RSS
+and Atom parsing (podcastparser first, feedparser as fallback); and the
+five surfaces the README lists.
+
+Four of the other rows were read from the versions actually installed in
+this repository's environment on that date rather than from a changelog:
+`yt-dlp 2026.6.9`, `feedparser 6.0.12`, `podcastparser 0.6.11` and
+`ffmpeg-python 0.2.0`. Decoding behaviour was checked against
+`ffmpeg 8.1.2`.
+
+The remaining rows — `streamlink`, `pytube`, `pydub`, `librosa`,
+`audioread` — are **not installed here**. They are scored from the scope
+their own documentation claims, no version is attributed to them, and
+nothing was benchmarked against them. The stars are a judgement of fit to
+one niche, not a measurement; a disagreement is worth an issue, not a
+correction to a number.
+
+Two caveats belong with the table rather than under it:
+
+- The five stars on "Correct resampling" are inherited from ffmpeg's
+  `libswresample`, which does the actual work. The optional
+  `resample_quality="high"` path needs an ffmpeg built with
+  `--enable-libsoxr`, which a stock Homebrew build does not carry —
+  measured here, where it yields zero frames.
+- "Multi-surface" counts doors, not maturity: library, CLI, FastAPI HTTP,
+  browser GUI and MCP all exist and are tested, but a single-purpose
+  library scoring one star is not thereby worse at its own job.

@@ -10,7 +10,7 @@
 
 **Local d'abord, par conception.** podcast-helper s'exécute entièrement sur votre machine : il ne récupère que les épisodes et les flux que vous demandez et les traite localement. Vos données ne partent jamais vers un service tiers, il n'y a aucune télémétrie, aucun compte, aucun verrouillage propriétaire dans le cloud. Fait partie de la suite [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) : la souveraineté sur vos données grâce à l'open source local d'abord.
 
-Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée, PCM en sortie** (le PCM, ou modulation par impulsions codées, est le flux brut d'échantillons audio non compressés qu'attendent les modèles de reconnaissance vocale et d'analyse audio, à la différence d'un fichier compressé comme un MP3), pour les fichiers locaux, les URL audio directes (enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8), les URL de flux RSS/Atom (le dernier épisode est sélectionné automatiquement) et toute source prise en charge par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD ou live et bien d'autres). Les URL Spotify (verrouillées par DRM) et Apple Podcasts (catalogue) sont refusées d'emblée, avec une indication claire pour contourner via le flux RSS.
+Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée, PCM en sortie** (le PCM — modulation par impulsions codées — est le flux brut d'échantillons audio non compressés qu'attendent les modèles de reconnaissance vocale et d'analyse audio, à la différence d'un fichier compressé comme un MP3), pour les fichiers locaux, les URL audio directes (enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8), les URL de flux RSS/Atom (le dernier épisode est sélectionné automatiquement) et toute source prise en charge par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD ou live et bien d'autres). Les URL Spotify (verrouillées par DRM) et Apple Podcasts (catalogue) sont refusées d'emblée, avec une indication claire pour contourner via le flux RSS.
 
 [🌍 AI Helpers](https://deraison.ai/ai-helpers)
 
@@ -26,7 +26,7 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 ## Éprouvé en production
 
-`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.1.5), ce qui fait qu'une plage figée comme `podcast-helper>=1.1.0,<2` reste stable dans le temps. L'intégration continue (CI, une chaîne automatisée qui fait tourner les tests et le linter à chaque push) est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée. La bibliothèque dépend de deux sœurs de la même suite AI Helpers, [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) pour la résolution via yt-dlp et [os-helper](https://github.com/warith-harchaoui/os-helper) pour la journalisation et les utilitaires de fichiers partagés. Elle est elle-même une dépendance de [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (transcription avec étiquetage des locuteurs), qui construit son ingestion audio, en direct comme hors ligne, directement sur `extract_audio_stream`.
+`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.0), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue (CI, une chaîne automatisée qui fait tourner les tests et le linter à chaque push) est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée. Deux sœurs de la même suite AI Helpers sont des dépendances déclarées : [os-helper](https://github.com/warith-harchaoui/os-helper), que le code appelle directement pour la journalisation et les vérifications de fichiers, puis [youtube-helper](https://github.com/warith-harchaoui/youtube-helper), qui amène la chaîne `yt-dlp` + ffmpeg dans l'environnement — le code de résolution d'URL importe `yt_dlp` lui-même plutôt que de passer par l'API de youtube-helper. Dans l'autre sens, [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (transcription avec étiquetage des locuteurs) dépend de podcast-helper via son extra `[stream]`, où `sources.from_url` enveloppe `extract_audio_stream` pour chaque URL qu'il ingère.
 
 ## Pourquoi cette bibliothèque
 
@@ -67,10 +67,12 @@ pip install -e ".[api]"
 pip install -e ".[mcp]"
 ```
 
-## Démarrage rapide
+## Prise en main rapide
 
 ```python
 import asyncio
+
+import numpy as np
 import podcast_helper as ph
 
 
@@ -84,13 +86,18 @@ async def main():
     ):
         # frame["pcm"] : np.float32 (320,) pour 20ms @ 16kHz
         # frame["t_abs_s"] : 0.0, 0.02, 0.04, ...
-        await asr.feed(frame["pcm"])
+        level = float(np.sqrt(np.mean(frame["pcm"] ** 2)))
+        print(f"{frame['t_abs_s']:6.2f}s  rms={level:.3f}")
 
 
 asyncio.run(main())
 ```
 
-Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo / multicanal, anti-aliasing, pipelines ASR / VAD / résumé downstream), voir [📋 EXAMPLES.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXAMPLES.md).
+Remplacez le `print` par un appel vers votre propre étage de reconnaissance
+vocale, de détection d'activité vocale ou de diarisation : rien d'autre ne
+change dans la boucle.
+
+Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo / multicanal, anti-repliement, pipelines ASR / VAD / résumé en aval), voir [📋 EXEMPLES.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/EXEMPLES.md).
 
 ## URLs acceptées
 
@@ -202,7 +209,7 @@ l'enclosure directement dans votre navigateur ; l'archivage exécute
 ffmpeg sur votre propre machine.
 
 La page parle **français et anglais**. `GET /gui?lang=fr|en` choisit la langue,
-un drapeau dans l'en-tête bascule de l'une à l'autre, et un code que le fichier
+un drapeau dans l'en-tête bascule de l'une à l'autre ; un code que le fichier
 de locales ne porte pas retombe sur la langue par défaut au lieu d'échouer.
 Toutes les chaînes vivent dans
 [`podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po`](https://github.com/warith-harchaoui/podcast-helper/blob/main/podcast_helper/locales/fr/LC_MESSAGES/podcast_helper.po),
