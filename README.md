@@ -32,6 +32,10 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in
 
 Podcast pipelines usually start with the same question, whether the downstream step is automatic speech recognition (ASR), diarization (labeling which speaker is talking when), voice activity detection (VAD, deciding which stretches of audio have speech at all before running the heavier models on them), summarization, or search indexing: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function, plus the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.
 
+## How it works
+
+![How podcast-helper works: any audio source in, one PCM stream out](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/diagrams/how-it-works.png)
+
 ## Installation
 
 **Prerequisites:** **Python 3.10-3.13**, **git**, and **ffmpeg**, cross-platform:

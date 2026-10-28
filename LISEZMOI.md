@@ -32,6 +32,10 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 Les pipelines audio de podcasts commencent souvent par la même demande, que l'étape suivante soit la reconnaissance vocale automatique (_Automatic Speech Recognition_ ou ASR), la diarisation (étiqueter qui parle et quand), la détection d'activité vocale (_Voice Activity Detection_ ou VAD, repérer les passages où il y a effectivement de la parole avant de lancer dessus les modèles plus lourds), le résumé ou l'indexation : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là, plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
 
+## Comment ça marche
+
+![Comment podcast-helper fonctionne : n'importe quelle source audio en entrée, un seul flux PCM en sortie](https://raw.githubusercontent.com/warith-harchaoui/podcast-helper/main/assets/diagrams/comment-ca-marche.png)
+
 ## Installation
 
 **Prérequis :** **Python 3.10-3.13**, **git** et **ffmpeg**, multiplateforme :

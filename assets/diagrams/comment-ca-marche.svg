@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1451 432" width="1451" height="432" role="img" aria-labelledby="ph-title ph-desc" font-family="Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="ph-title">Comment podcast-helper fonctionne : n'importe quelle source audio en entrée, un seul flux PCM en sortie</title>
+  <desc id="ph-desc">Une plaque de gauche à droite. Entrée : un fichier local, une URL audio directe, une pièce jointe de flux RSS, ou tout ce que yt-dlp prend en charge. Le travail, en trois étapes numérotées : reconnaître laquelle de ces quatre formes est l'entrée et la résoudre, en analysant le flux avec feedparser quand c'est un élément RSS et en déléguant à youtube-helper quand c'est une vidéo hébergée ; décoder le résultat par ffmpeg ; émettre des trames PCM au taux d'échantillonnage et à la disposition de canaux demandés. Sortie : un seul flux PCM, de forme identique quelle qu'ait été la source.</desc>
+  <style>
+    .panel      { fill: #ffffff; stroke: #d6d6d6; stroke-width: 1.5; }
+    .panel-label{ fill: #6b6b6b; font-size: 13px; font-weight: 600; letter-spacing: .08em; }
+    .io         { fill: #F8F8F8; stroke: #9a9a9a; stroke-width: 1.5; }
+    .stage      { fill: #FFF4E0; stroke: #FF9500; stroke-width: 1.5; }
+    .core       { fill: #007AFF; stroke: #0062CC; stroke-width: 1.5; }
+    .surface    { fill: #EAF3FF; stroke: #007AFF; stroke-width: 1.5; }
+    .n-title    { font-size: 15px; font-weight: 600; fill: #111111; }
+    .n-sub      { font-size: 12px; fill: #5a5a5a; }
+    .on-dark    { fill: #ffffff; font-size: 15px; font-weight: 600; }
+    .on-dark-sub{ fill: #d8e8ff; font-size: 12px; }
+    .flow       { fill: none; stroke: #9a9a9a; stroke-width: 2; }
+    .tie        { fill: none; stroke: #007AFF; stroke-width: 1.5; }
+    .caption    { font-size: 12.5px; fill: #5a5a5a; font-style: italic; }
+    .step       { font-size: 11px; font-weight: 700; fill: #B26A00;
+                  font-family: 'Roboto Mono', ui-monospace, monospace; }
+    .surf-label { font-size: 13px; font-weight: 600; fill: #0062CC; }
+
+    @media (prefers-color-scheme: dark) {
+      .panel      { fill: #1b1b1d; stroke: #3a3a3d; }
+      .panel-label{ fill: #a0a0a6; }
+      .io         { fill: #2a2a2e; stroke: #6f6f76; }
+      .stage      { fill: #3a2d12; stroke: #FF9500; }
+      .surface    { fill: #10243d; stroke: #4da2ff; }
+      .n-title    { fill: #f2f2f4; }
+      .n-sub      { fill: #b4b4ba; }
+      .flow       { stroke: #7a7a82; }
+      .tie        { stroke: #4da2ff; }
+      .caption    { fill: #a0a0a6; }
+      .step       { fill: #FFCC00; }
+      .surf-label { fill: #4da2ff; }
+    }
+  </style>
+  <defs><marker id="ah-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9a9a9a"/></marker></defs>
+  <text class="panel-label" x="28" y="40">ENTRÉE</text>
+  <rect class="io" x="28" y="87" width="186" height="78" rx="10"/>
+  <text class="n-title" x="121" y="120" text-anchor="middle">fichier, URL, RSS</text>
+  <text class="n-sub" x="121" y="139" text-anchor="middle">ou toute source yt-dlp</text>
+  <path class="flow" d="M220 126 H236" marker-end="url(#ah-arrow)"/>
+  <rect class="panel" x="240" y="54" width="887" height="144" rx="12"/>
+  <text class="panel-label" x="260" y="76">CE QU'ELLE FAIT</text>
+  <rect class="stage" x="260" y="94" width="269" height="78" rx="10"/>
+  <text class="n-title" x="395" y="127" text-anchor="middle">résoudre la source</text>
+  <text class="n-sub" x="395" y="146" text-anchor="middle">feedparser / youtube-helper / direct</text>
+  <text class="step" x="271" y="110">1</text>
+  <path class="flow" d="M533 133 H549" marker-end="url(#ah-arrow)"/>
+  <rect class="stage" x="555" y="94" width="256" height="78" rx="10"/>
+  <text class="n-title" x="684" y="127" text-anchor="middle">décoder</text>
+  <text class="n-sub" x="684" y="146" text-anchor="middle">ffmpeg, quel que soit le conteneur</text>
+  <text class="step" x="566" y="110">2</text>
+  <path class="flow" d="M816 133 H832" marker-end="url(#ah-arrow)"/>
+  <rect class="stage" x="838" y="94" width="269" height="78" rx="10"/>
+  <text class="n-title" x="973" y="127" text-anchor="middle">émettre du PCM</text>
+  <text class="n-sub" x="973" y="146" text-anchor="middle">au taux et à la disposition demandés</text>
+  <text class="step" x="849" y="110">3</text>
+  <path class="flow" d="M1133 126 H1149" marker-end="url(#ah-arrow)"/>
+  <text class="panel-label" x="1153" y="40">SORTIE</text>
+  <rect class="io" x="1153" y="87" width="269" height="78" rx="10"/>
+  <text class="n-title" x="1288" y="120" text-anchor="middle">un seul flux PCM</text>
+  <text class="n-sub" x="1288" y="139" text-anchor="middle">même forme, quelle que soit l'entrée</text>
+  <rect class="core" x="515" y="232" width="420" height="54" rx="10"/>
+  <text class="on-dark" x="725" y="253" text-anchor="middle">une bibliothèque, appelée pareil partout</text>
+  <text class="on-dark-sub" x="725" y="272" text-anchor="middle">os-helper dessous pour la journalisation et les fichiers</text>
+  <path class="tie" d="M725 286 V314 H461 V332"/>
+  <path class="tie" d="M725 314 H989 V332"/>
+  <path class="tie" d="M461 314 V332"/>
+  <rect class="surface" x="386" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="461" y="360" text-anchor="middle">API Python</text>
+  <path class="tie" d="M637 314 V332"/>
+  <rect class="surface" x="562" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="637" y="360" text-anchor="middle">CLI (click)</text>
+  <path class="tie" d="M813 314 V332"/>
+  <rect class="surface" x="738" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="813" y="360" text-anchor="middle">FastAPI + MCP</text>
+  <path class="tie" d="M989 314 V332"/>
+  <rect class="surface" x="914" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="989" y="360" text-anchor="middle">skill d'agent</text>
+  <text class="caption" x="725" y="412" text-anchor="middle">Tout l'intérêt de la plaque est la boîte de droite : quatre formes d'entrée, une seule forme de sortie, donc le consommateur n'a jamais à savoir d'où vient l'audio.</text>
+</svg>
