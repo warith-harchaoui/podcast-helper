@@ -124,3 +124,15 @@ Deux réserves accompagnent le tableau plutôt qu'elles ne le suivent :
   CLI, API FastAPI, GUI navigateur puis MCP existent toutes et sont testées,
   mais une bibliothèque monotâche notée une étoile n'en fait pas moins bien
   son propre travail.
+
+## Idées à reprendre
+
+Étudié plutôt que deviné : ce que chaque voisin fait mieux, puis ce que cette bibliothèque devrait changer pour l'égaler. Rien ici n'est un engagement : c'est la liste de lecture dont part la version suivante.
+
+- **L'espace de noms Podcast 2.0 — chapitres, transcriptions, financement, extraits** — `feedparser` lit le RSS avec l'espace de noms iTunes ; c'est dans l'espace Podcast 2.0 que vivent les chapitres puis les transcriptions publiées, or une transcription déjà présente dans le flux est un travail que cette suite refait sinon avec un GPU.
+
+- **`podcastparser` — un analyseur en flux taillé pour les flux de podcast** — Il analyse au fil de l'eau puis vise spécifiquement les flux de podcast, là où `feedparser` construit tout le document. Pour un gros flux lu seulement afin de trouver le dernier épisode, c'est la forme la moins chère.
+
+- **`streamlink` — un épisode en direct n'est pas un fichier** — Même leçon que celle déjà inscrite dans le jumeau Rust : résoudre vers une adresse pour un média sans fin, plutôt que d'essayer de le télécharger.
+
+- **OPML — un abonnement est une liste, puis la liste a un format** — Importer puis exporter de l'OPML est la façon dont tout client de podcast déplace un jeu d'abonnements. Une bibliothèque qui résout les flux un par un n'est qu'à une fonction de traiter l'ensemble.

@@ -120,3 +120,15 @@ Two caveats belong with the table rather than under it:
 - "Multi-surface" counts doors, not maturity: library, CLI, FastAPI HTTP,
   browser GUI and MCP all exist and are tested, but a single-purpose
   library scoring one star is not thereby worse at its own job.
+
+## Ideas worth stealing
+
+Researched rather than guessed: what each neighbour does better, and what this library would have to change to match it. Nothing here is a commitment — it is the reading list the next version starts from.
+
+- **The Podcast 2.0 namespace — chapters, transcripts, funding, soundbites** — `feedparser` reads RSS and the iTunes namespace; the Podcast 2.0 namespace is where chapters and published transcripts live, and a transcript already in the feed is work this suite otherwise does again with a GPU.
+
+- **`podcastparser` — a streaming parser sized for feeds** — It parses incrementally and is built for podcast feeds specifically, where `feedparser` builds the whole document. For a large feed read only to find the latest episode, that is the cheaper shape.
+
+- **`streamlink` — a live episode is not a file** — Same lesson the Rust twin already encodes: resolve to an address for media that has no end, rather than trying to download it.
+
+- **OPML — subscriptions are a list, and the list has a format** — Importing and exporting OPML is how every podcast client moves a subscription set. A library that resolves feeds one at a time is one function away from handling the set.
