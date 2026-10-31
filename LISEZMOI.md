@@ -148,7 +148,13 @@ Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo /
 
 ## Correction du traitement du signal
 
-Quand `target_sample_rate` diffère du taux source, la conversion est effectuée par `libswresample` (par défaut) ou `libsoxr` (`resample_quality="high"`). Les deux appliquent un **filtre passe-bas anti-repliement à la nouvelle fréquence de Nyquist** (`target_sample_rate / 2`, le plafond que le théorème d'échantillonnage fixe pour la fréquence la plus haute qu'un taux donné peut représenter) avant décimation : tout contenu au-dessus de ce plafond est retiré en premier, car sinon il se replierait vers le bas dans la plage audible sous forme de bruit parasite une fois le taux abaissé, un artefact appelé repliement. Le sous-échantillonnage naïf, qui se contente d'écarter des échantillons sans ce filtre, saute cette étape et laisse passer le repliement ; il n'est jamais utilisé ici.
+Quand `target_sample_rate` diffère du taux source, la conversion est effectuée par `libswresample` (par défaut) ou `libsoxr` (`resample_quality="high"`).
+
+Les deux appliquent un **filtre passe-bas anti-repliement à la nouvelle fréquence de Nyquist** avant décimation. Cette fréquence vaut `target_sample_rate / 2` : le plafond que le théorème d'échantillonnage fixe pour la fréquence la plus haute qu'un taux donné peut représenter.
+
+Pourquoi le filtre doit venir d'abord : tout contenu au-dessus de ce plafond est retiré *avant* que le taux ne baisse, car sinon il se replierait vers le bas dans la plage audible sous forme de bruit parasite. Cet artefact porte un nom, le repliement.
+
+Le sous-échantillonnage naïf — écarter des échantillons sans ce filtre — saute cette étape puis laisse passer le repliement. Il n'est jamais utilisé ici.
 
 La gestion des canaux a exactement deux modes, sans upmix synthétique :
 
@@ -310,17 +316,11 @@ Voir [CHANGELOG.md](https://github.com/warith-harchaoui/podcast-helper/blob/main
 
 ## Version Rust
 
-Un crate compagnon, [`podcast-helper-rs`](https://github.com/warith-harchaoui/podcast-helper-rs),
-réécrit la même promesse « une URL en entrée, du PCM en sortie » en Rust :
-fichiers locaux, URLs audio directes, flux RSS/Atom décodés via `ffmpeg`,
-avec YouTube/Vimeo/SoundCloud/Twitch délégués à `youtube-helper-rs`.
-L'intérêt : un binaire statique unique, sans interpréteur Python à
-installer, utile quand l'ingestion de podcasts doit s'intégrer à un
-pipeline Rust plus large (par exemple pour alimenter un service Rust de
-reconnaissance vocale ou de diarisation) plutôt qu'un pipeline Python.
-C'est une surface v0.1 plus restreinte, pas un remplacement complet — pas
-encore d'itérateur asynchrone par trame, pas d'extraction `itunes:duration` ;
-voir son README pour les différences volontaires exactes.
+Un crate compagnon, [`podcast-helper-rs`](https://github.com/warith-harchaoui/podcast-helper-rs), réécrit la même promesse « une URL en entrée, du PCM en sortie » en Rust : fichiers locaux, URLs audio directes, flux RSS/Atom décodés via `ffmpeg`, avec YouTube/Vimeo/SoundCloud/Twitch délégués à `youtube-helper-rs`.
+
+L'intérêt est un binaire statique unique, sans interpréteur Python à installer — utile quand l'ingestion de podcasts doit s'intégrer à un pipeline Rust plus large, par exemple pour alimenter un service Rust de reconnaissance vocale, plutôt qu'à un pipeline Python.
+
+C'est une surface v0.1 plus restreinte, pas un remplacement complet : pas encore d'itérateur asynchrone par trame, pas d'extraction `itunes:duration`. Son README donne les différences volontaires exactes.
 
 ## Auteur
 

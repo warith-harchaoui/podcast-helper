@@ -147,7 +147,13 @@ For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / mul
 
 ## Signal-processing correctness
 
-When `target_sample_rate` differs from the source rate, the conversion is performed by ffmpeg's `libswresample` (default) or `libsoxr` (`resample_quality="high"`). Both apply an **anti-aliasing low-pass filter at the new Nyquist frequency** (`target_sample_rate / 2`, the sampling theorem's ceiling on the highest frequency a given rate can represent) before decimation: any content above that ceiling gets removed first, because if it were kept it would fold back down into the audible range as spurious noise once the rate drops, an artifact called aliasing. Naïve subsampling, dropping samples without this filter, skips that step and lets the aliasing through; it is never used here.
+When `target_sample_rate` differs from the source rate, the conversion is performed by ffmpeg's `libswresample` (default) or `libsoxr` (`resample_quality="high"`).
+
+Both apply an **anti-aliasing low-pass filter at the new Nyquist frequency** before decimation. That frequency is `target_sample_rate / 2` — the sampling theorem's ceiling on the highest frequency a given rate can represent.
+
+Why the filter has to come first: any content above that ceiling is removed *before* the rate drops, because if it were kept it would fold back down into the audible range as spurious noise. That artifact is called aliasing.
+
+Naïve subsampling — dropping samples without this filter — skips that step and lets the aliasing through. It is never used here.
 
 Channel handling has exactly two modes; there is no synthetic upmix:
 
@@ -301,16 +307,11 @@ See [CHANGELOG.md](https://github.com/warith-harchaoui/podcast-helper/blob/main/
 
 ## Rust rewrite
 
-A companion crate, [`podcast-helper-rs`](https://github.com/warith-harchaoui/podcast-helper-rs),
-rewrites the same "URL in, PCM out" promise in Rust: local files, direct
-audio URLs, and RSS/Atom feeds decoded via `ffmpeg`, with
-YouTube/Vimeo/SoundCloud/Twitch delegated to `youtube-helper-rs`. The
-interest: a single static binary with no Python interpreter to install,
-useful when podcast ingestion needs to run as part of a larger Rust
-pipeline (for example, feeding a Rust speech-recognition or diarization
-service) rather than a Python one. It's a smaller v0.1 surface, not a full
-replacement — no async frame iterator yet, no `itunes:duration` parsing;
-see its README for the exact deliberate differences.
+A companion crate, [`podcast-helper-rs`](https://github.com/warith-harchaoui/podcast-helper-rs), rewrites the same "URL in, PCM out" promise in Rust: local files, direct audio URLs and RSS/Atom feeds decoded via `ffmpeg`, with YouTube/Vimeo/SoundCloud/Twitch delegated to `youtube-helper-rs`.
+
+The interest is a single static binary with no Python interpreter to install — useful when podcast ingestion has to run as part of a larger Rust pipeline, feeding a Rust speech-recognition or diarization service, rather than a Python one.
+
+It is a smaller v0.1 surface, not a full replacement: no async frame iterator yet, no `itunes:duration` parsing. Its README lists the exact deliberate differences.
 
 ## Author
 
