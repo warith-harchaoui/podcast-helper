@@ -10,7 +10,20 @@
 
 **Local-first by design.** podcast-helper runs entirely on your machine: it fetches only the episodes and feeds you ask for and processes them locally. Your data is never uploaded to a third-party service, there is no telemetry, no account, no cloud lock-in. Part of the [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) suite: sovereignty over your data through local-first open source.
 
-Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in, PCM out** (PCM, pulse-code modulation, is the raw stream of uncompressed audio samples that speech-recognition and audio-analysis models expect as input, as opposed to a compressed file like an MP3), for local files, direct audio URLs (RSS enclosure MP3, M4A, Opus, WAV, HLS m3u8), RSS/Atom feed URLs (auto-picks the latest episode), and every `yt-dlp`-supported source (YouTube, Vimeo, SoundCloud, Twitch VOD or live, and more). Spotify's DRM-gated catalog and Apple Podcasts catalog URLs are refused upfront, with a clear hint toward the RSS-feed workaround.
+Universal audio stream consumer for podcasts and any audio-bearing URL: **URL in, PCM out**.
+
+PCM — pulse-code modulation — is the raw stream of uncompressed audio samples that speech-recognition and audio-analysis models expect as input, as opposed to a compressed file like an MP3.
+
+Four families of source go in:
+
+| Source | Examples |
+|---|---|
+| **Local file** | a path on disk |
+| **Direct audio URL** | RSS enclosure MP3, M4A, Opus, WAV, HLS m3u8 |
+| **RSS or Atom feed** | the latest episode is picked automatically |
+| **Anything `yt-dlp` supports** | YouTube, Vimeo, SoundCloud, Twitch VOD or live, and more |
+
+Two are refused upfront, with a clear hint rather than an obscure failure: Spotify (DRM-gated) and Apple Podcasts (a catalogue page). The way round both is the show's RSS feed.
 
 [🌍 AI Helpers](https://deraison.ai/ai-helpers)
 
@@ -26,11 +39,29 @@ Universal audio stream consumer for podcasts and any audio-bearing URL. **URL in
 
 ## Battle-tested
 
-`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.0), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration (CI, an automated pipeline that runs the test suite and the linter on every push) is green on `main`: `pytest` and `ruff check` both have to pass before anything merges. Two siblings from the same AI Helpers suite are declared dependencies: [os-helper](https://github.com/warith-harchaoui/os-helper), which the code calls directly for logging and filesystem checks, and [youtube-helper](https://github.com/warith-harchaoui/youtube-helper), which is what brings the `yt-dlp` + ffmpeg chain into the environment — the URL-resolution code imports `yt_dlp` itself rather than going through youtube-helper's API. In the other direction, [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (speaker-labelled transcription) depends on podcast-helper through its `[stream]` extra, where `sources.from_url` wraps `extract_audio_stream` for every URL it ingests.
+`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.0), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration is green on `main`: `pytest` and `ruff check` both have to pass before anything merges.
+
+Two siblings from the same AI Helpers suite are declared dependencies:
+
+- [os-helper](https://github.com/warith-harchaoui/os-helper) — called directly for logging and filesystem checks;
+- [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) — what brings the `yt-dlp` + ffmpeg chain into the environment. Note that the URL-resolution code imports `yt_dlp` itself rather than going through youtube-helper's API.
+
+In the other direction, [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (transcription with speaker labelling) depends on podcast-helper through its `[stream]` extra, where `sources.from_url` wraps `extract_audio_stream` for every URL it ingests.
 
 ## Why it exists
 
-Podcast pipelines usually start with the same question, whether the downstream step is automatic speech recognition (ASR), diarization (labeling which speaker is talking when), voice activity detection (VAD, deciding which stretches of audio have speech at all before running the heavier models on them), summarization, or search indexing: *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."* This library is that one function, plus the small extras around it (`feed`, `latest_episode`) that make working with RSS sources friendly.
+Podcast pipelines usually start with the same request, whatever the downstream step is:
+
+> *"give me a stream of PCM frames from this URL, never mind whether it's a `.mp3` link, a feed, a YouTube video, or a podcast hosted on a CDN I've never heard of."*
+
+That downstream step is typically one of:
+
+- **automatic speech recognition** (ASR) — turning the speech into text;
+- **diarization** — labelling which speaker is talking when;
+- **voice activity detection** (VAD) — deciding which stretches have speech at all, before the heavier models run on them;
+- **summarisation**, or **search indexing**.
+
+This library is that one request, answered: `extract_audio_stream`, plus the small extras around it (`feed`, `latest_episode`) that make RSS sources friendly to work with.
 
 ## How it works
 

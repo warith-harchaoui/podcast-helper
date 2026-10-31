@@ -10,7 +10,20 @@
 
 **Local d'abord, par conception.** podcast-helper s'exécute entièrement sur votre machine : il ne récupère que les épisodes et les flux que vous demandez et les traite localement. Vos données ne partent jamais vers un service tiers, il n'y a aucune télémétrie, aucun compte, aucun verrouillage propriétaire dans le cloud. Fait partie de la suite [AI Helpers](https://github.com/warith-harchaoui/ai-helpers) : la souveraineté sur vos données grâce à l'open source local d'abord.
 
-Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'audio. **URL en entrée, PCM en sortie** (le PCM — modulation par impulsions codées — est le flux brut d'échantillons audio non compressés qu'attendent les modèles de reconnaissance vocale et d'analyse audio, à la différence d'un fichier compressé comme un MP3), pour les fichiers locaux, les URL audio directes (enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8), les URL de flux RSS/Atom (le dernier épisode est sélectionné automatiquement) et toute source prise en charge par `yt-dlp` (YouTube, Vimeo, SoundCloud, Twitch VOD ou live et bien d'autres). Les URL Spotify (verrouillées par DRM) et Apple Podcasts (catalogue) sont refusées d'emblée, avec une indication claire pour contourner via le flux RSS.
+Consommateur universel de flux audio, pour les podcasts puis toute URL porteuse d'audio : **URL en entrée, PCM en sortie**.
+
+Le PCM — modulation par impulsions codées — est le flux brut d'échantillons audio non compressés qu'attendent les modèles de reconnaissance vocale puis d'analyse audio, à la différence d'un fichier compressé comme un MP3.
+
+Quatre familles de sources entrent :
+
+| Source | Exemples |
+|---|---|
+| **Fichier local** | un chemin sur le disque |
+| **URL audio directe** | enclosure RSS MP3, M4A, Opus, WAV, HLS m3u8 |
+| **Flux RSS ou Atom** | le dernier épisode est sélectionné automatiquement |
+| **Tout ce que `yt-dlp` sait lire** | YouTube, Vimeo, SoundCloud, Twitch VOD ainsi que live, parmi beaucoup d'autres |
+
+Deux sont refusées d'emblée, avec une indication claire plutôt qu'un échec obscur : Spotify (verrouillé par DRM) puis Apple Podcasts (une page de catalogue). Le contournement, dans les deux cas, est le flux RSS de l'émission.
 
 [🌍 AI Helpers](https://deraison.ai/ai-helpers)
 
@@ -26,11 +39,29 @@ Consommateur universel de flux audio, pour les podcasts et toute URL porteuse d'
 
 ## Éprouvé en production
 
-`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.0), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue (CI, une chaîne automatisée qui fait tourner les tests et le linter à chaque push) est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée. Deux sœurs de la même suite AI Helpers sont des dépendances déclarées : [os-helper](https://github.com/warith-harchaoui/os-helper), que le code appelle directement pour la journalisation et les vérifications de fichiers, puis [youtube-helper](https://github.com/warith-harchaoui/youtube-helper), qui amène la chaîne `yt-dlp` + ffmpeg dans l'environnement — le code de résolution d'URL importe `yt_dlp` lui-même plutôt que de passer par l'API de youtube-helper. Dans l'autre sens, [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (transcription avec étiquetage des locuteurs) dépend de podcast-helper via son extra `[stream]`, où `sources.from_url` enveloppe `extract_audio_stream` pour chaque URL qu'il ingère.
+`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.0), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée.
+
+Deux sœurs de la même suite AI Helpers sont des dépendances déclarées :
+
+- [os-helper](https://github.com/warith-harchaoui/os-helper) — appelée directement pour la journalisation puis les vérifications de fichiers ;
+- [youtube-helper](https://github.com/warith-harchaoui/youtube-helper) — ce qui amène la chaîne `yt-dlp` + ffmpeg dans l'environnement. À noter : le code de résolution d'URL importe `yt_dlp` lui-même plutôt que de passer par l'API de youtube-helper.
+
+Dans l'autre sens, [vocal-helper](https://github.com/warith-harchaoui/vocal-helper) (transcription avec étiquetage des locuteurs) dépend de podcast-helper via son extra `[stream]`, où `sources.from_url` enveloppe `extract_audio_stream` pour chaque URL qu'il ingère.
 
 ## Pourquoi cette bibliothèque
 
-Les pipelines audio de podcasts commencent souvent par la même demande, que l'étape suivante soit la reconnaissance vocale automatique (_Automatic Speech Recognition_ ou ASR), la diarisation (étiqueter qui parle et quand), la détection d'activité vocale (_Voice Activity Detection_ ou VAD, repérer les passages où il y a effectivement de la parole avant de lancer dessus les modèles plus lourds), le résumé ou l'indexation : *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*. Cette bibliothèque, c'est cette fonction-là, plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
+Les pipelines audio de podcasts commencent souvent par la même demande, quelle que soit l'étape suivante :
+
+> *« donne-moi un flux de frames PCM depuis cette URL, que ce soit un lien `.mp3`, un flux RSS, une vidéo YouTube ou un podcast hébergé sur un CDN inconnu »*
+
+Cette étape suivante est généralement l'une de celles-ci :
+
+- la **reconnaissance vocale automatique** (_Automatic Speech Recognition_, ASR) — mettre la parole en texte ;
+- la **diarisation** — étiqueter qui parle puis quand ;
+- la **détection d'activité vocale** (_Voice Activity Detection_, VAD) — repérer les passages où il y a effectivement de la parole, avant de lancer dessus les modèles plus lourds ;
+- le **résumé** ou l'**indexation** pour la recherche.
+
+Cette bibliothèque, c'est cette demande-là, satisfaite : `extract_audio_stream`, plus les petits utilitaires autour (`feed`, `latest_episode`) qui rendent les sources RSS agréables à manipuler.
 
 ## Comment ça marche
 
