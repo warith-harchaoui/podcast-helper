@@ -727,7 +727,11 @@ async def extract_audio_stream(
         For Spotify-protected URLs (DRM) and Apple Podcasts catalog URLs
         (point to the show's RSS feed instead).
     RuntimeError
-        If yt-dlp can't resolve the URL (private / removed / geo-blocked).
+        If yt-dlp can't resolve the URL (private / removed / geo-blocked),
+        or if ffmpeg exits non-zero (missing file, HTTP error, a fired
+        ``-rw_timeout``, undecodable input). Frames already yielded stay
+        valid; the exception says the stream stopped short. Breaking out
+        of the loop yourself never raises.
     FileNotFoundError
         If ffmpeg is not on PATH.
     ValueError
@@ -881,20 +885,52 @@ async def extract_audio_stream(
 
             yield {"t_abs_s": t_abs_s, "pcm": arr, "voiced": None}
             t_abs_s += seconds_per_frame
+
+        # stdout closed on its own. That is the end of the episode only if
+        # ffmpeg says so: a missing file, an HTTP error, a fired -rw_timeout or
+        # an undecodable input also close stdout, and the caller must not take
+        # a truncated (or empty) stream for a complete one.
+        await proc.wait()
+        if proc.returncode != 0:
+            try:
+                await asyncio.wait_for(stderr_task, timeout=2.0)
+            except (asyncio.TimeoutError, Exception):
+                stderr_task.cancel()
+            err = b"".join(stderr_chunks).decode("utf-8", errors="replace").strip()
+            stderr_chunks.clear()  # reported in the exception, not logged twice
+            raise RuntimeError(
+                f"ffmpeg exited with code {proc.returncode} after {t_abs_s:.2f}s "
+                f"of audio from {url!r}: {err[-800:] or '(no stderr)'}"
+            )
     finally:
-        if proc.returncode is None:
+        stopped_by_us = proc.returncode is None
+        if stopped_by_us:
+            # The consumer left early. Keep reading stdout while ffmpeg dies:
+            # once the unread pipe has filled, asyncio pauses it, never sees its
+            # EOF, and proc.wait() (which waits for the pipes as well as the
+            # exit) would then block forever, even after a kill.
+            async def _discard_stdout() -> None:
+                assert proc.stdout is not None
+                while await proc.stdout.read(1 << 16):
+                    pass
+
+            discard_task = asyncio.create_task(_discard_stdout())
             proc.terminate()
             try:
                 await asyncio.wait_for(proc.wait(), timeout=2.0)
             except asyncio.TimeoutError:
                 proc.kill()
-                await proc.wait()
+                try:
+                    await asyncio.wait_for(proc.wait(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    osh.warning(f"podcast-helper: ffmpeg (pid {proc.pid}) did not exit after kill")
+            discard_task.cancel()
         try:
             await asyncio.wait_for(stderr_task, timeout=2.0)
         except (asyncio.TimeoutError, Exception):
             stderr_task.cancel()
         err = b"".join(stderr_chunks).decode("utf-8", errors="replace").strip()
-        if err and proc.returncode not in (0, None):
+        if err and not stopped_by_us and proc.returncode not in (0, None):
             osh.warning(f"podcast-helper ffmpeg stderr: {err}")
 
 

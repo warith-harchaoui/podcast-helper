@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-11-04
+
+### Fixed
+
+- **A failing ffmpeg ended the stream as if the episode were over.** A missing
+  file, an HTTP error, a fired `-rw_timeout`, an undecodable input or a
+  `resample_quality="high"` on an ffmpeg without libsoxr all close ffmpeg's
+  stdout exactly like a normal end does, and `extract_audio_stream` stopped
+  there with one log line: the caller got an empty or truncated stream and no
+  way to tell it from a complete one. The README's "a dead connection raises
+  instead of hanging" was therefore untrue. The iterator now raises
+  `RuntimeError` (exit code, seconds delivered, ffmpeg's last stderr lines)
+  after the frames it did deliver; `podcast-helper record` / `stream` exit 1
+  with an `Error:` line, `POST /record` answers 502. Leaving the loop with
+  `break` never raises.
+- **Leaving the loop early could hang forever.** With `realtime=False` ffmpeg
+  runs ahead of the consumer; the unread stdout pipe filled, asyncio paused it
+  and never saw its EOF, so `proc.wait()` (which waits for the pipes as well as
+  the exit) blocked even after the kill. Measured: a `break` after the first
+  frame of a ten-minute WAV wedged the interpreter at shutdown. stdout is now
+  drained while ffmpeg is stopped, and the kill is itself bounded.
+  EXAMPLES / EXEMPLES documented both defects as known; those caveats are gone.
+
+### Documentation
+
+- The skill (`SKILL.md`, `references/cli-reference.md`,
+  `references/surfaces.md`) described a CLI that does not exist: positional
+  URLs, `--limit`, `--channels`, `-o`, `--json` on `feed` and `probe`. Every verb
+  takes `--url`, `feed` always prints JSON, `record` takes `--output`. Its
+  Python examples read `Episode` as an object (`ep.title`) and iterated the
+  async generator with a plain `for`; both now run as written.
+
 ## [1.6.1] - 2026-11-01
 
 ### Fixed

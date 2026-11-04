@@ -343,6 +343,77 @@ def test_to_mono_false_mono_source_still_yields_2d_frames(
 
 
 # ---------------------------------------------------------------------------
+# A failing ffmpeg must not pass for the end of the episode
+# ---------------------------------------------------------------------------
+
+
+def _fake_child(monkeypatch: pytest.MonkeyPatch, script: str) -> None:
+    """Swap the ffmpeg command for ``python -c script`` (no ffmpeg needed)."""
+    import podcast_helper.streaming as streaming_module
+
+    def fake_build_cmd(*_args: object, **_kwargs: object) -> list[str]:
+        return [sys.executable, "-c", script]
+
+    monkeypatch.setattr(streaming_module, "_build_ffmpeg_cmd", fake_build_cmd)
+
+
+def test_ffmpeg_failure_raises_after_the_frames_it_did_deliver(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A non-zero ffmpeg exit raises instead of ending the stream quietly.
+
+    A missing file, an HTTP error or a fired ``-rw_timeout`` all close
+    ffmpeg's stdout exactly like the end of the episode does. Before 1.6.2 the
+    iterator stopped there with a log line, so a caller got a truncated (or
+    empty) stream and no way to tell it from a complete one.
+    """
+    src = tmp_path / "fake.wav"
+    src.write_bytes(b"")
+    _fake_child(
+        monkeypatch,
+        "import sys\n"
+        f"sys.stdout.buffer.write(b'\\x00' * {320 * 4 * 3})\n"
+        "sys.stdout.flush()\n"
+        "sys.stderr.write('Connection timed out')\n"
+        "sys.exit(1)\n",
+    )
+
+    frames: list[Any] = []
+
+    async def collect() -> None:
+        async for frame in extract_audio_stream(str(src), realtime=False):
+            frames.append(frame)
+
+    with pytest.raises(RuntimeError, match=r"code 1 after 0\.06s.*Connection timed out"):
+        asyncio.run(asyncio.wait_for(collect(), timeout=10.0))
+    assert len(frames) == 3
+
+
+def test_consumer_break_never_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Leaving the loop early terminates ffmpeg; that kill is not a failure."""
+    src = tmp_path / "fake.wav"
+    src.write_bytes(b"")
+    _fake_child(
+        monkeypatch,
+        "import sys, time\n"
+        "while True:\n"
+        f"    sys.stdout.buffer.write(b'\\x00' * {320 * 4})\n"
+        "    sys.stdout.flush()\n"
+        "    time.sleep(0.01)\n",
+    )
+
+    async def take_two() -> int:
+        n = 0
+        async for _ in extract_audio_stream(str(src), realtime=False):
+            n += 1
+            if n == 2:
+                break
+        return n
+
+    assert asyncio.run(asyncio.wait_for(take_two(), timeout=10.0)) == 2
+
+
+# ---------------------------------------------------------------------------
 # Extension-less feed URLs — Content-Type fallback when yt-dlp can't resolve
 # ---------------------------------------------------------------------------
 
@@ -437,3 +508,33 @@ def test_content_type_probe_never_raises_on_network_failure(
 
     monkeypatch.setattr(streaming_module.requests, "head", fake_head)
     assert streaming_module._content_type_looks_like_feed("https://example.com/feed") is False
+
+
+def test_early_close_does_not_hang_on_a_full_stdout_pipe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Closing the stream while ffmpeg is far ahead of the consumer must return.
+
+    With ``realtime=False`` ffmpeg fills the stdout pipe at once; asyncio then
+    pauses that pipe, never sees its EOF, and ``proc.wait()`` blocked forever
+    even after the kill. Measured on a ten-minute WAV before 1.6.2: a ``break``
+    after the first frame wedged the process at interpreter shutdown.
+    """
+    src = tmp_path / "fake.wav"
+    src.write_bytes(b"")
+    _fake_child(
+        monkeypatch,
+        # ffmpeg traps SIGTERM to flush its outputs, so only the kill stops it.
+        "import signal, sys, time\n"
+        "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
+        "sys.stdout.buffer.write(b'\\x00' * 4_000_000)\n"
+        "sys.stdout.flush()\n"
+        "time.sleep(60)\n",
+    )
+
+    async def first_frame_then_close() -> None:
+        agen = extract_audio_stream(str(src), realtime=False)
+        await agen.__anext__()
+        await asyncio.wait_for(agen.aclose(), timeout=10.0)
+
+    asyncio.run(first_frame_then_close())

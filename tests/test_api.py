@@ -137,19 +137,35 @@ def test_record_rejects_unsupported_output_format(client):
 # earns a 400 rather than silently inverting a caller's intent.
 
 
-def test_stream_downmixes_to_mono_when_the_flag_is_omitted(client):
+@pytest.fixture
+def no_decode(monkeypatch):
+    """Replace the decoder with an empty stream.
+
+    The TestClient drains the response body, so without this the two tests
+    below reached example.com through ffmpeg (and, since 1.6.2, failed on its
+    error instead of ending silently).
+    """
+    import podcast_helper.api as api_mod
+
+    async def empty_stream(url, **_kwargs):
+        return
+        yield  # pragma: no cover - makes this an async generator
+
+    monkeypatch.setattr(api_mod, "extract_audio_stream", empty_stream)
+
+
+def test_stream_downmixes_to_mono_when_the_flag_is_omitted(client, no_decode):
     """An omitted flag must still mean mono.
 
     ``X-Channels`` reports the resolved choice, so the header is a real
-    assertion on the decision without needing ffmpeg or the network: the
-    response body is a lazy generator that is never consumed here.
+    assertion on the decision without needing ffmpeg or the network.
     """
     r = client.post("/stream", data={"url": "https://example.com/ep.mp3"})
     assert r.status_code == 200
     assert r.headers["X-Channels"] == "1"
 
 
-def test_stream_stereo_preserves_native_channels(client):
+def test_stream_stereo_preserves_native_channels(client, no_decode):
     """``stereo=true`` must switch the resolved choice away from mono."""
     r = client.post("/stream", data={"url": "https://example.com/ep.mp3", "stereo": "true"})
     assert r.status_code == 200
@@ -201,3 +217,24 @@ def test_record_forwards_the_resolved_channel_choice(client, monkeypatch, tmp_pa
     r = client.post("/record", data={"url": "https://example.com/ep.mp3", "stereo": "true"})
     assert r.status_code == 200
     assert captured["to_mono"] is False
+
+
+def test_record_answers_502_when_ffmpeg_fails(client, monkeypatch, tmp_path):
+    """A source ffmpeg cannot read is a 502 carrying its reason, not an empty file."""
+    import sys
+
+    import podcast_helper.streaming as streaming_mod
+
+    def failing_cmd(*_args, **_kwargs):
+        return [
+            sys.executable,
+            "-c",
+            "import sys; sys.stderr.write('Server returned 404'); sys.exit(8)",
+        ]
+
+    monkeypatch.setattr(streaming_mod, "_build_ffmpeg_cmd", failing_cmd)
+    src = tmp_path / "ep.mp3"
+    src.write_bytes(b"")
+    r = client.post("/record", data={"url": str(src)})
+    assert r.status_code == 502
+    assert "Server returned 404" in r.json()["detail"]

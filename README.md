@@ -39,7 +39,7 @@ Two are refused upfront, with a clear hint rather than an obscure failure: Spoti
 
 ## Battle-tested
 
-`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.0), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration is green on `main`: `pytest` and `ruff check` both have to pass before anything merges.
+`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.2), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration is green on `main`: `pytest` and `ruff check` both have to pass before anything merges.
 
 Two siblings from the same AI Helpers suite are declared dependencies:
 

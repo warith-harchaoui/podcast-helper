@@ -114,8 +114,8 @@ ph.extract_audio_stream("https://www.youtube.com/watch?v=YE7VzlLtp-4")  # source
 
 `realtime` vaut `True` par défaut, ce qui cale le décodage sur l'horloge
 murale (le `-re` de ffmpeg). Passez `realtime=False` pour du traitement par
-lots ; lisez le [Dépannage](#dépannage) avant de sortir d'une boucle
-`realtime=False` par un `break`.
+lots. Sortir de l'une ou l'autre boucle par un `break` est sûr : le
+décodeur est arrêté, rien ne traîne derrière.
 
 ## 2. Les flux RSS et le dictionnaire Episode
 
@@ -227,12 +227,10 @@ Deux contraintes sont ici réelles, pas stylistiques :
 - `speed != 1.0` sur une source en direct lève `ValueError`. On ne peut pas
   dépasser le bord du direct ; ralentir laisserait le consommateur
   décrocher sans borne.
-- Sortir en avance est la seule façon de quitter une source en direct ; il
-  existe un défaut de nettoyage sur ce chemin qui mérite d'être connu. Il a
-  été mesuré sur de la VOD décodée avec `realtime=False`, là où ffmpeg prend
-  de l'avance et où le tube non lu s'accumule ; une source en direct livre à
-  son propre rythme, donc l'accumulation qui déclenche le défaut ne se forme
-  pas. Le [Dépannage](#dépannage) donne la reproduction.
+- Sortir en avance est la seule façon de quitter une source en direct. Un
+  `break` arrête ffmpeg puis rend la main aussitôt ; jusqu'à la 1.6.1, il
+  pouvait rester coincé à la fermeture du générateur quand ffmpeg avait pris
+  de l'avance sur le consommateur.
 
 ## 5. Stéréo et multicanal
 
@@ -243,8 +241,6 @@ et rend un tableau 2-D de forme `(n_samples, n_channels)` :
 ```python
 async def keep_channels():
     first = True
-    # Volontairement épuisé jusqu'au bout plutôt qu'interrompu — le
-    # Dépannage explique pourquoi cela compte avec realtime=False.
     async for frame in ph.extract_audio_stream(
         "tone.wav",
         to_mono=False,
@@ -312,13 +308,12 @@ asyncio.run(audiophile())
 
 **Vérifiez d'abord votre build de ffmpeg.** `libsoxr` est une option de
 compilation que le ffmpeg de Homebrew n'embarque pas. Sur la machine où
-ces exemples ont tourné, l'extrait ci-dessus a affiché `frames: 0` et une
-erreur ffmpeg dans le journal, sans lever d'exception :
+ces exemples ont tourné, l'extrait ci-dessus a levé avant sa première
+trame, avec la raison donnée par ffmpeg dans le message :
 
 ```text
-podcast-helper ffmpeg stderr: [Parsed_aresample_0 @ 0x...] [SWR @ 0x...] Requested resampling engine is unavailable
+RuntimeError: ffmpeg exited with code 234 after 0.00s of audio from 'tone.wav': ... [SWR @ 0x...] Requested resampling engine is unavailable
 ...
-frames: 0
 ```
 
 Avant de recourir à `resample_quality="high"`, confirmez donc que le moteur
@@ -467,8 +462,6 @@ from vocal_helper.sources import from_url
 
 
 async def ingest(url):
-    # realtime laissé à sa valeur par défaut : voir le Dépannage sur le fait
-    # de quitter une boucle realtime=False en avance.
     async for frame in from_url(url, record_to="episode.mp3"):
         print(frame["t_abs_s"], frame["pcm"].shape)
         break
@@ -566,43 +559,36 @@ podcast_helper.api:app`, GUI navigateur sur `/gui`) et comme outils MCP avec
 
 ## Dépannage
 
-**Une source décode zéro trame sans que rien ne lève.** Quand ffmpeg
-n'arrive pas à ouvrir l'entrée, l'itérateur se termine vide et la raison
-part dans le journal plutôt que dans une exception. Vérifiez le compte de
-trames :
+**Une source impossible à décoder lève `RuntimeError`.** Quand ffmpeg
+n'arrive pas à ouvrir ou à décoder l'entrée, ou qu'une lecture réseau
+expire, l'itérateur lève après les trames qu'il a bien livrées, avec les
+dernières lignes d'erreur de ffmpeg dans le message :
 
 ```python
 async def main():
     count = 0
-    async for _frame in ph.extract_audio_stream("broken.mp3", realtime=False):
-        count += 1
-    print("frames:", count)
+    try:
+        async for _frame in ph.extract_audio_stream("broken.mp3", realtime=False):
+            count += 1
+    except RuntimeError as err:
+        print(f"stopped after {count} frames: {err}")
 
 
 asyncio.run(main())
 ```
 
 ```text
-podcast-helper ffmpeg stderr: [in#0 @ 0x...] Failed to find two consecutive MPEG audio frames.
+stopped after 0 frames: ffmpeg exited with code 183 after 0.00s of audio from 'broken.mp3': [in#0 @ 0x...] Failed to find two consecutive MPEG audio frames.
 [in#0 @ 0x...] Error opening input: Invalid data found when processing input
 Error opening input file broken.mp3.
 Error opening input files: Invalid data found when processing input
-frames: 0
 ```
 
-`resample_quality="high"` sur un ffmpeg sans `libsoxr` échoue de la même
-façon silencieuse — voir la [section 6](#6-le-rééchantillonneur-haute-précision).
-
-**Sortir en avance d'une boucle `realtime=False` peut bloquer.** Mesuré sur
-un fichier local de 44,1 kHz d'une seconde : un `break` après la première
-trame avec `realtime=False` a laissé le processus coincé à la fermeture du
-générateur jusqu'à ce qu'on le tue, alors que le même code avec
-`realtime=True` (le défaut) s'est terminé proprement, de même qu'une
-consommation du flux jusqu'au bout. ffmpeg prend de l'avance sur le
-consommateur ; le tube de sortie non lu laisse le nettoyage attendre une
-fin de fichier qui n'arrive jamais. En attendant un correctif : épuisez
-l'itérateur ou gardez le `realtime=True` par défaut si vous comptez vous
-arrêter en avance.
+Jusqu'à la 1.6.1, l'itérateur se terminait sans bruit : un flux vide ou
+tronqué pouvait passer pour complet. `resample_quality="high"` sur un
+ffmpeg sans `libsoxr` lève de la même façon — voir la
+[section 6](#6-le-rééchantillonneur-haute-précision). Sortir soi-même de
+la boucle par un `break` ne lève jamais.
 
 **Les URL Spotify et Apple Podcasts sont refusées.** Délibérément et avant
 toute requête réseau, avec le contournement dans le message :

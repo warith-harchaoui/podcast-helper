@@ -39,7 +39,7 @@ Deux sont refusées d'emblée, avec une indication claire plutôt qu'un échec o
 
 ## Éprouvé en production
 
-`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.0), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée.
+`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.2), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée.
 
 Deux sœurs de la même suite AI Helpers sont des dépendances déclarées :
 

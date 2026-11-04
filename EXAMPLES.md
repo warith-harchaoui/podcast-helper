@@ -111,9 +111,8 @@ ph.extract_audio_stream("https://www.youtube.com/watch?v=YE7VzlLtp-4")  # yt-dlp
 ```
 
 `realtime` defaults to `True`, which paces the decode at wall-clock
-speed (ffmpeg's `-re`). Pass `realtime=False` for batch work, and read
-[Troubleshooting](#troubleshooting) before you `break` out of a
-`realtime=False` loop.
+speed (ffmpeg's `-re`). Pass `realtime=False` for batch work. Leaving either kind of loop with
+`break` is safe: the decoder is stopped and nothing is left behind.
 
 ## 2. RSS feeds and the Episode dict
 
@@ -224,12 +223,9 @@ Two constraints here are real, not stylistic:
 - `speed != 1.0` on a live source raises `ValueError`. You cannot
   fast-forward past the live edge, and slowing down lets the consumer
   fall behind without bound.
-- Stopping the loop early is the only way out of a live source, and
-  there is a cleanup defect in that path worth knowing about. It was
-  measured on a VOD decoded with `realtime=False`, where ffmpeg runs
-  ahead and the unread pipe backs up; a live source delivers at its own
-  rate, so the backlog that triggers it does not build.
-  [Troubleshooting](#troubleshooting) has the reproduction.
+- Stopping the loop early is the only way out of a live source. `break`
+  stops ffmpeg and returns at once; up to 1.6.1 it could wedge at
+  generator close when ffmpeg had run ahead of the consumer.
 
 ## 5. Stereo and multichannel
 
@@ -240,8 +236,6 @@ gives a 2-D array of shape `(n_samples, n_channels)`:
 ```python
 async def keep_channels():
     first = True
-    # Drained to the end on purpose rather than broken out of — see
-    # Troubleshooting for why that matters with realtime=False.
     async for frame in ph.extract_audio_stream(
         "tone.wav",
         to_mono=False,
@@ -308,13 +302,12 @@ asyncio.run(audiophile())
 
 **Check your ffmpeg build first.** `libsoxr` is a compile-time option,
 and a stock Homebrew ffmpeg does not carry it. On the machine these
-examples were run on, the snippet above printed `frames: 0` plus an
-ffmpeg error on the log, rather than raising:
+examples were run on, the snippet above raised before its first frame,
+with ffmpeg's reason in the message:
 
 ```text
-podcast-helper ffmpeg stderr: [Parsed_aresample_0 @ 0x...] [SWR @ 0x...] Requested resampling engine is unavailable
+RuntimeError: ffmpeg exited with code 234 after 0.00s of audio from 'tone.wav': ... [SWR @ 0x...] Requested resampling engine is unavailable
 ...
-frames: 0
 ```
 
 So before reaching for `resample_quality="high"`, confirm the engine is
@@ -458,8 +451,6 @@ from vocal_helper.sources import from_url
 
 
 async def ingest(url):
-    # realtime left at its default: see Troubleshooting on leaving a
-    # realtime=False loop early.
     async for frame in from_url(url, record_to="episode.mp3"):
         print(frame["t_abs_s"], frame["pcm"].shape)
         break
@@ -554,41 +545,36 @@ podcast_helper.api:app`, browser GUI at `/gui`) and as MCP tools with
 
 ## Troubleshooting
 
-**A source decodes to zero frames and nothing raises.** When ffmpeg
-cannot open the input, the iterator ends empty and the reason goes to
-the log rather than to an exception. Check the frame count:
+**A source that cannot be decoded raises `RuntimeError`.** When ffmpeg
+cannot open or decode the input, or a network read times out, the
+iterator raises after the frames it did deliver, with ffmpeg's last
+stderr lines in the message:
 
 ```python
 async def main():
     count = 0
-    async for _frame in ph.extract_audio_stream("broken.mp3", realtime=False):
-        count += 1
-    print("frames:", count)
+    try:
+        async for _frame in ph.extract_audio_stream("broken.mp3", realtime=False):
+            count += 1
+    except RuntimeError as err:
+        print(f"stopped after {count} frames: {err}")
 
 
 asyncio.run(main())
 ```
 
 ```text
-podcast-helper ffmpeg stderr: [in#0 @ 0x...] Failed to find two consecutive MPEG audio frames.
+stopped after 0 frames: ffmpeg exited with code 183 after 0.00s of audio from 'broken.mp3': [in#0 @ 0x...] Failed to find two consecutive MPEG audio frames.
 [in#0 @ 0x...] Error opening input: Invalid data found when processing input
 Error opening input file broken.mp3.
 Error opening input files: Invalid data found when processing input
-frames: 0
 ```
 
-`resample_quality="high"` on an ffmpeg without `libsoxr` fails the same
-silent way — see [section 6](#6-the-high-precision-resampler).
-
-**Stopping early on a `realtime=False` loop can hang.** Measured on a
-one-second 44.1 kHz local file: `break`ing after the first frame with
-`realtime=False` left the process wedged at generator close until it was
-killed, while the identical code with `realtime=True` (the default)
-exited cleanly, and so did consuming the stream to exhaustion. ffmpeg
-races ahead of the consumer, and the unread stdout pipe leaves cleanup
-waiting on an end-of-file that never arrives. Until it is fixed: exhaust
-the iterator, or keep the default `realtime=True` when you intend to
-stop early.
+Up to 1.6.1 the iterator ended quietly instead, so an empty or truncated
+stream could pass for a complete one. `resample_quality="high"` on an
+ffmpeg without `libsoxr` raises the same way — see
+[section 6](#6-the-high-precision-resampler). Leaving the loop yourself
+with `break` never raises.
 
 **Spotify and Apple Podcasts URLs are refused.** Deliberately, and
 before any network request, with the workaround in the message:
