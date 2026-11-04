@@ -55,29 +55,36 @@ pip install 'podcast-helper[mcp]'          # + MCP tools over the same app
 
 | Intent | CLI | Library |
 |---|---|---|
-| List a feed's episodes | `podcast-helper feed URL` | `feed` |
-| The latest episode + its enclosure URL | `podcast-helper latest URL` | `latest_episode` |
-| Classify a URL (feed / direct / yt-dlp / live) | `podcast-helper probe URL` | — |
-| Decode any URL to PCM | `podcast-helper stream URL` | `extract_audio_stream` |
-| Archive any URL to a file | `podcast-helper record URL` | `extract_audio_stream(record_to=…)` |
+| List a feed's episodes | `podcast-helper feed --url URL` | `feed` |
+| The latest episode + its enclosure URL | `podcast-helper latest --url URL` | `latest_episode` |
+| Classify a URL (feed / direct / yt-dlp / live) | `podcast-helper probe --url URL` | — |
+| Decode any URL to PCM | `podcast-helper stream --url URL` | `extract_audio_stream` |
+| Archive any URL to a file | `podcast-helper record --url URL --output F` | `extract_audio_stream(record_to=…)` |
 
 Quick examples:
 
 ```bash
-podcast-helper feed "https://example.com/feed.xml" --json
-podcast-helper latest "https://example.com/feed.xml"
-podcast-helper record "https://example.com/feed.xml" -o episode.mp3
-podcast-helper probe "https://youtu.be/YE7VzlLtp-4"
+podcast-helper feed --url "https://example.com/feed.xml" --max-episodes 5   # JSON
+podcast-helper latest --url "https://example.com/feed.xml"                   # enclosure URL
+podcast-helper record --url "https://example.com/feed.xml" --output episode.mp3
+podcast-helper probe --url "https://youtu.be/YE7VzlLtp-4"
 ```
 
 ```python
+import asyncio
+
 import podcast_helper as ph
 
-ep = ph.latest_episode("https://example.com/feed.xml")  # Episode
-print(ep.title, ep.published, ep.duration, ep.url)
+ep = ph.latest_episode("https://example.com/feed.xml")  # Episode, a TypedDict
+print(ep["title"], ep["published_at"], ep["duration_seconds"], ep["enclosure_url"])
 
-for chunk in ph.extract_audio_stream(ep.url):  # PcmFrame, like a live mic
-    ...  # break to stop
+
+async def main():
+    async for frame in ph.extract_audio_stream(ep["enclosure_url"]):  # PcmFrame, like a live mic
+        ...  # frame["pcm"], frame["t_abs_s"]; break to stop
+
+
+asyncio.run(main())
 ```
 
 A **feed URL** is handled end to end: pointed at an RSS feed, `stream` and

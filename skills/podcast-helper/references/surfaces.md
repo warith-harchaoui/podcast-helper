@@ -15,11 +15,14 @@ yields `PcmFrame`s — decoded samples plus their timing — and takes
 `record_to=` when you want the bytes kept as well as consumed.
 
 ```python
-for chunk in ph.extract_audio_stream(url, sample_rate=16000, channels=1):
-    ...  # same shape as capture_helper.iter_mic_audio
+async for frame in ph.extract_audio_stream(url, target_sample_rate=16000, to_mono=True):
+    pcm = frame["pcm"]  # float32, (320,) per 20 ms at 16 kHz, as capture_helper.iter_mic_audio
 ```
 
-The generator is **infinite on a live source**; the caller breaks out.
+It is an **async** generator, **infinite on a live source**; the caller breaks
+out, and breaking never raises. A source that fails (unreachable, undecodable,
+a fired read timeout) raises `RuntimeError` after the frames it did deliver,
+so a truncated stream is never mistaken for a complete one.
 
 Logging and file management route through `os_helper` — the suite convention.
 
@@ -31,7 +34,7 @@ One command line, no extra to install. See `cli-reference.md`.
 
 ```bash
 pip install 'podcast-helper[api]'
-python -m podcast_helper.api        # 127.0.0.1:8000, OpenAPI docs at /docs
+uvicorn podcast_helper.api:app --port 8000   # OpenAPI docs at /docs
 ```
 
 | Method | Route | Purpose |
@@ -40,8 +43,8 @@ python -m podcast_helper.api        # 127.0.0.1:8000, OpenAPI docs at /docs
 | GET | `/feed` | episodes of a feed |
 | GET | `/latest` | the newest episode |
 | GET | `/probe` | classify a URL |
-| POST | `/stream` | decode to PCM / WAV |
-| POST | `/record` | archive to a file |
+| POST | `/stream` | decode to raw `f32le` PCM |
+| POST | `/record` | archive to a file (`output_format`: mp3/m4a/opus/ogg/flac/wav), returned as the body |
 
 ## 4. MCP — `fastapi-mcp` over the *same* app (`[mcp]`)
 
