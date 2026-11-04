@@ -560,8 +560,8 @@ podcast_helper.api:app`, GUI navigateur sur `/gui`) et comme outils MCP avec
 ## Dépannage
 
 **Une source impossible à décoder lève `RuntimeError`.** Quand ffmpeg
-n'arrive pas à ouvrir ou à décoder l'entrée, ou qu'une lecture réseau
-expire, l'itérateur lève après les trames qu'il a bien livrées, avec les
+n'arrive pas à ouvrir ou à décoder l'entrée (ou qu'une lecture réseau
+expire), l'itérateur lève après les trames qu'il a bien livrées, avec les
 dernières lignes d'erreur de ffmpeg dans le message :
 
 ```python
