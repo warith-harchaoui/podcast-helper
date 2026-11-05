@@ -175,7 +175,7 @@ _GUI_TEMPLATE: str = r"""<!doctype html>
                          disabled:opacity-50">
             {{_("List episodes")}}
           </button>
-          <!-- Probe: classify any URL (file / direct / rss / yt-dlp-<extractor>). -->
+          <!-- Probe: classify any URL (file / direct_audio / ytdlp:<extractor>). -->
           <button id="probe"
                   class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold
                          text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2

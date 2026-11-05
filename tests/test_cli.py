@@ -195,3 +195,13 @@ def test_stream_with_output_keeps_stdout_clean_and_names_the_file_on_stderr(
     captured = capsysbinary.readouterr()
     assert captured.out == b""
     assert captured.err.strip() == str(archive).encode()
+
+
+def test_record_output_help_lists_every_archive_format() -> None:
+    """``record --output`` help names each extension the codec table accepts."""
+    from podcast_helper.streaming import _ARCHIVE_CODECS
+
+    result = CliRunner().invoke(cli_mod.cli, ["record", "--help"])
+    text = " ".join(result.output.split())
+    for ext in _ARCHIVE_CODECS:
+        assert ext in text.split("Output archive (")[1].split(")")[0].split("/"), ext

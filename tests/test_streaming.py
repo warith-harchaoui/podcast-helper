@@ -538,3 +538,11 @@ def test_early_close_does_not_hang_on_a_full_stdout_pipe(
         await asyncio.wait_for(agen.aclose(), timeout=10.0)
 
     asyncio.run(first_frame_then_close())
+
+
+def test_apple_podcasts_guard_names_no_stale_version() -> None:
+    """The hint must not promise the resolver for a version long shipped."""
+    with pytest.raises(NotImplementedError) as info:
+        _apple_podcasts_guard("https://podcasts.apple.com/us/podcast/x/id1")
+    assert "v0.3.0" not in str(info.value)
+    assert "not built yet" in str(info.value)

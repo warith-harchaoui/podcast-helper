@@ -6,8 +6,8 @@ endpoint so ``podcast-helper`` can be dropped behind any reverse proxy
 and consumed by other services. Kept intentionally minimal:
 
 - ``/feed`` and ``/latest``: JSON responses over an RSS / Atom URL.
-- ``/probe``: JSON classification of any URL (file / direct / rss /
-  yt-dlp-<extractor>) — invaluable for operators debugging podcast
+- ``/probe``: JSON classification of any URL (file / direct_audio /
+  ytdlp:<extractor>; a feed resolves to its latest enclosure) — invaluable for operators debugging podcast
   ingest.
 - ``/stream``: chunked ``StreamingResponse`` of raw f32le PCM bytes
   for any audio-bearing URL. Downstream ASR services can pipe the
@@ -377,7 +377,9 @@ def stream(
 async def record(
     background: BackgroundTasks,
     url: str = Form(..., description="Audio-bearing URL."),
-    output_format: str = Form("mp3", description="Archive container (mp3/m4a/opus/ogg/flac/wav)."),
+    output_format: str = Form(
+        "mp3", description="Archive container (mp3/m4a/aac/opus/ogg/flac/wav)."
+    ),
     sample_rate: int = Form(16000),
     stereo: bool = Form(
         False,

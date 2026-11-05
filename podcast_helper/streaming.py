@@ -234,8 +234,8 @@ def _apple_podcasts_guard(url: str) -> None:
             "audio. Find the show's RSS feed (linked on the show's website, "
             "or via getrssfeed.com / Podcast Index) and pass the .mp3 "
             "enclosure URL — or the RSS URL directly (podcast-helper auto-picks "
-            "the latest episode from a feed). An Apple→RSS resolver is on "
-            "the roadmap for podcast-helper v0.3.0. "
+            "the latest episode from a feed). An Apple→RSS resolver is not "
+            "built yet. "
             f"URL was: {url!r}"
         )
 
@@ -251,7 +251,8 @@ class _ResolvedSource(TypedDict):
     direct_url: str
     headers: dict[str, str]
     is_live: bool
-    source_kind: str  # "file" / "direct_audio" / "rss" / "ytdlp:<extractor>"
+    # A feed resolves to its latest enclosure and reports that enclosure's kind.
+    source_kind: str  # "file" / "direct_audio" / "ytdlp:<extractor>"
 
 
 def _resolve_via_ytdlp(

@@ -232,7 +232,10 @@ def stream(
 @cli.command()
 @click.option("--url", required=True, help="Audio-bearing URL.")
 @click.option(
-    "--output", required=True, type=click.Path(), help="Output archive (mp3/m4a/opus/ogg/flac/wav)."
+    "--output",
+    required=True,
+    type=click.Path(),
+    help="Output archive (mp3/m4a/aac/opus/ogg/flac/wav).",
 )
 @click.option("--sample-rate", type=int, default=16000, show_default=True)
 @click.option("--mono/--stereo", default=True, show_default=True)

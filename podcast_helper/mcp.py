@@ -43,7 +43,8 @@ mcp = FastApiMCP(
     description=(
         "podcast-helper MCP tools: a universal audio stream consumer. "
         "Introspect RSS/Atom feeds (feed, latest), classify any URL "
-        "(probe: file / direct / rss / yt-dlp-<extractor>), stream raw f32le "
+        "(probe: file / direct_audio / ytdlp:<extractor>; a feed resolves to its "
+        "latest enclosure), stream raw f32le "
         "PCM from any audio-bearing source, or archive one to a compressed "
         "file server-side (record) — local files, direct audio URLs, RSS "
         "enclosures, and any yt-dlp-supported source (YouTube, Vimeo, Twitch, "

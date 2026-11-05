@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `podcast-helper record --output` help and the `POST /record`
+  `output_format` description listed `mp3/m4a/opus/ogg/flac/wav` and left out
+  `aac`, which the codec table accepts.
+- The MCP tool description (and the `/probe` docstring, the GUI comment)
+  announced probe kinds `direct`, `rss` and `yt-dlp-<extractor>`. `probe`
+  returns `file`, `direct_audio` or `ytdlp:<extractor>`; a feed resolves to its
+  latest enclosure and reports that enclosure's kind.
+- The Apple Podcasts refusal promised a resolver "for podcast-helper v0.3.0",
+  a version long past; it now says the resolver is not built yet.
+- `docker-compose.yml` tagged the image `podcast-helperocal`; it is now
+  `podcast-helper:local`.
+
 ## [1.6.2] - 2026-11-04
 
 ### Fixed

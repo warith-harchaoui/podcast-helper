@@ -11,7 +11,7 @@
 services:
   podcast-helper:
     build: .
-    image: podcast-helperocal
+    image: podcast-helper:local
     ports:
       - "${PODCAST_HELPER_PORT:-8000}:8000"
     environment:

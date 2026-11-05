@@ -29,3 +29,12 @@ def test_api_still_served_next_to_mcp() -> None:
     client = starlette_testclient.TestClient(mcp_module.app)
     res = client.get("/health")
     assert res.status_code == 200 and res.json()["status"] == "ok"
+
+
+def test_mcp_description_names_the_kinds_probe_returns() -> None:
+    """The tool description must use probe's real ``source_kind`` values."""
+    desc = mcp_module.mcp.description
+    for kind in ("file", "direct_audio", "ytdlp:<extractor>"):
+        assert kind in desc, kind
+    assert "yt-dlp-<extractor>" not in desc
+    assert "/ rss /" not in desc
