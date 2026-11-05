@@ -22,10 +22,11 @@ edit files already on disk.
 | Get the latest episode / enclosure URL | `podcast-helper latest` | `latest_episode` | `GET /latest` |
 | Decode any URL to raw PCM (stdout / WAV) | `podcast-helper stream` | `extract_audio_stream` | `POST /stream` |
 | Archive any URL to a compressed file | `podcast-helper record` | `extract_audio_stream(record_to=…)` | `POST /record` |
-| Classify a URL (file/direct/rss/yt-dlp, live?) | `podcast-helper probe` | `_resolve_source` | `GET /probe` |
+| Classify a URL (file/direct/yt-dlp, live?) | `podcast-helper probe` | `_resolve_source` | `GET /probe` |
 
 Every verb is also reachable through the MCP server (`podcast-helper-mcp`,
-same tool names) and the browser episode browser at `GET /gui`.
+one tool per HTTP route, named after FastAPI's operation ids such as
+`get_feed_feed_get` or `record_record_post`) and the browser episode browser at `GET /gui`.
 
 ## Natural-language phrasings that should fire
 

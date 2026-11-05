@@ -115,8 +115,9 @@ Two caveats belong with the table rather than under it:
 - The five stars on "Correct resampling" are inherited from ffmpeg's
   `libswresample`, which does the actual work. The optional
   `resample_quality="high"` path needs an ffmpeg built with
-  `--enable-libsoxr`, which a stock Homebrew build does not carry —
-  measured here, where it yields zero frames.
+  `--enable-libsoxr`, which a stock Homebrew build does not carry.
+  Measured here: since 1.6.2 it raises `RuntimeError` before the first
+  frame, where 1.6.1 and earlier silently yielded zero frames.
 - "Multi-surface" counts doors, not maturity: library, CLI, FastAPI HTTP,
   browser GUI and MCP all exist and are tested, but a single-purpose
   library scoring one star is not thereby worse at its own job.
@@ -127,7 +128,7 @@ Researched rather than guessed: what each neighbour does better, and what this l
 
 - **The Podcast 2.0 namespace — chapters, transcripts, funding, soundbites** — `feedparser` reads RSS and the iTunes namespace; the Podcast 2.0 namespace is where chapters and published transcripts live, and a transcript already in the feed is work this suite otherwise does again with a GPU.
 
-- **`podcastparser` — a streaming parser sized for feeds** — It parses incrementally and is built for podcast feeds specifically, where `feedparser` builds the whole document. For a large feed read only to find the latest episode, that is the cheaper shape.
+- **`podcastparser` — a streaming parser sized for feeds** — It parses incrementally and is built for podcast feeds specifically, where `feedparser` builds the whole document. This library already parses with it first, but only after downloading the whole feed body; for a large feed read only to find the latest episode, parsing as the bytes arrive is the cheaper shape.
 
 - **`streamlink` — a live episode is not a file** — Same lesson the Rust twin already encodes: resolve to an address for media that has no end, rather than trying to download it.
 

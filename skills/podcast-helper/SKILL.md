@@ -5,7 +5,7 @@ description: >-
   URL and either stream it as PCM frames (same shape as capture-helper's
   iter_mic_audio, ready for a VAD or an ASR) or archive it to a compressed
   file, plus RSS helpers that list a feed's episodes and pick the latest one,
-  and a probe that classifies a URL (feed / direct file / yt-dlp / live). Use
+  and a probe that classifies a URL (local / direct file / yt-dlp / live). Use
   when the user says "get the latest episode of this podcast", "list the
   episodes in this feed", "parse this RSS", "download / archive this episode
   as mp3", "stream this audio URL into my transcription pipeline", "decode
@@ -57,7 +57,7 @@ pip install 'podcast-helper[mcp]'          # + MCP tools over the same app
 |---|---|---|
 | List a feed's episodes | `podcast-helper feed --url URL` | `feed` |
 | The latest episode + its enclosure URL | `podcast-helper latest --url URL` | `latest_episode` |
-| Classify a URL (feed / direct / yt-dlp / live) | `podcast-helper probe --url URL` | — |
+| Classify a URL (file / direct / yt-dlp, live?) | `podcast-helper probe --url URL` | — |
 | Decode any URL to PCM | `podcast-helper stream --url URL` | `extract_audio_stream` |
 | Archive any URL to a file | `podcast-helper record --url URL --output F` | `extract_audio_stream(record_to=…)` |
 
@@ -101,8 +101,9 @@ browser, read `references/surfaces.md`. For the exhaustive trigger list, read
   materialises the file — the right call for a three-hour episode you only
   mean to transcribe.
 - **`probe` first when the URL is unfamiliar.** It tells you whether you have
-  a feed, a direct file, a yt-dlp source or a live stream, which decides
-  everything downstream.
+  a local file, a direct file or a yt-dlp source, and whether it is live,
+  which decides everything downstream. A feed reports the kind of its latest
+  episode, since that is what gets decoded.
 - **The frames match capture-helper on purpose.** Hand them to a VAD, an ASR
   or a level meter written for a live microphone without reshaping anything.
 - **This overlaps youtube-helper, deliberately.** Both reach yt-dlp sources:

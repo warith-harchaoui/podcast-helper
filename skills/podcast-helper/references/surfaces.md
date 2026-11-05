@@ -44,7 +44,7 @@ uvicorn podcast_helper.api:app --port 8000   # OpenAPI docs at /docs
 | GET | `/latest` | the newest episode |
 | GET | `/probe` | classify a URL |
 | POST | `/stream` | decode to raw `f32le` PCM |
-| POST | `/record` | archive to a file (`output_format`: mp3/m4a/opus/ogg/flac/wav), returned as the body |
+| POST | `/record` | archive to a file (`output_format`: mp3/m4a/aac/opus/ogg/flac/wav), returned as the body |
 
 ## 4. MCP — `fastapi-mcp` over the *same* app (`[mcp]`)
 
@@ -55,7 +55,11 @@ podcast-helper-mcp                  # same app, MCP mounted at /mcp
 
 `podcast_helper.mcp` takes the FastAPI app from `podcast_helper.api` and
 mounts `FastApiMCP` on it. Every MCP tool *is* an HTTP route, so the two
-surfaces cannot drift and one process serves both doors.
+surfaces cannot drift and one process serves both doors. The tools carry
+FastAPI's operation ids: `get_feed_feed_get`, `get_latest_latest_get`,
+`probe_probe_get`, `stream_stream_post`, `record_record_post`, plus
+`health_health_get` and `gui_gui_get`. The server binds `127.0.0.1:8000`;
+`PODCAST_HELPER_HOST` and `PODCAST_HELPER_PORT` override both.
 
 Register it with Claude Code:
 

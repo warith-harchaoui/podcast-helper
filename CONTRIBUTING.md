@@ -92,16 +92,16 @@ Releases live in [`CHANGELOG.md`](CHANGELOG.md) following the
 release is tagged `vX.Y.Z` in git, published as a GitHub release, and
 published to PyPI.
 
-Cross-helper dependencies (`os-helper`, `youtube-helper`, `audio-helper`,
-`video-helper`) resolve from PyPI via version ranges in `pyproject.toml`
-(e.g. `os-helper>=2.0.0,<3`), not git tag pins.
+Cross-helper dependencies (`os-helper`, `youtube-helper`, which brings
+`audio-helper` and `video-helper` along) resolve from PyPI via version
+ranges in `pyproject.toml` (e.g. `os-helper>=2.6.0,<5`), not git tag pins.
 
 ## CI
 
 GitHub Actions runs `pytest` on Python 3.12 (the full multi-version sweep
 runs locally before every push) plus a fully blocking `ruff check` +
-`ruff format --check` lint job. Integration tests are gated by
-`pytestmark = pytest.mark.integration` and skipped by default
+`ruff format --check` lint job. Integration tests are marked
+`@pytest.mark.integration` and skipped by default
 (`addopts = -m 'not integration'`).
 
 ## Running tests locally

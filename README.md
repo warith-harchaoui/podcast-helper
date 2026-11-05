@@ -139,7 +139,7 @@ For the full catalog of recipes (RSS, yt-dlp sources, live streams, stereo / mul
 |---|---|---|
 | **Local file** / `file://` | path exists on disk OR `file://` scheme | ffmpeg opens it directly. |
 | **Direct audio URL** (`.mp3`, `.m4a`, `.opus`, `.wav`, `.m3u8`, …) | URL extension is a known audio container | ffmpeg opens it directly with your `headers=` if any. |
-| **RSS / Atom feed** (`.xml`, `.rss`, `.atom`) | URL extension is a known feed container | `podcastparser` (fallback: `feedparser`) parses it; latest episode's enclosure is fetched. |
+| **RSS / Atom feed** (`.xml`, `.rss`, `.atom`) | URL extension is a known feed container; an extension-less URL that yt-dlp cannot resolve is sniffed for an RSS / Atom / XML `Content-Type` | `podcastparser` (fallback: `feedparser`) parses it; latest episode's enclosure is fetched. |
 | **YouTube / Vimeo / SoundCloud / Twitch VOD / Twitch live / …** | yt-dlp's extractor identifies it | yt-dlp picks `bestaudio*`, hands the direct URL + headers to ffmpeg. |
 | **Generic web URL** (anything else) | yt-dlp's `generic` extractor | URL used as-is. |
 | **Spotify** (open.spotify.com) | hostname match | `NotImplementedError`: Spotify audio is DRM-gated. Use the show's RSS feed if it exists. |
@@ -220,9 +220,14 @@ pip install 'podcast-helper[mcp]'          # + MCP tools (needs [api] too, pulle
 pip install 'podcast-helper[api,mcp]'      # everything
 ```
 
-Every surface publishes the same verbs, `feed`, `latest`, `stream`,
-`record`, `probe`, with identical argument names, so switching
-between them is a copy-paste. The Dockerfile in this repo ships the
+The CLI, HTTP and MCP surfaces publish the same verbs, `feed`, `latest`,
+`stream`, `record`, `probe`, with matching argument names, so a recipe
+moves between them by copy-paste. Two spellings differ over HTTP:
+`stereo=true` stands for the CLI's `--stereo`; `POST /record` takes an
+`output_format` and returns the file rather than writing to an `--output`
+path. `podcast-helper-mcp` serves the HTTP routes and the `/mcp` endpoint
+from one process, on `127.0.0.1:8000` unless `PODCAST_HELPER_HOST` /
+`PODCAST_HELPER_PORT` say otherwise. The Dockerfile in this repo ships the
 FastAPI surface on port 8000 out of the box (`docker build -t
 podcast-helper . && docker run --rm -p 8000:8000 podcast-helper`).
 
@@ -311,7 +316,7 @@ A companion crate, [`podcast-helper-rs`](https://github.com/warith-harchaoui/pod
 
 The interest is a single static binary with no Python interpreter to install — useful when podcast ingestion has to run as part of a larger Rust pipeline, feeding a Rust speech-recognition or diarization service, rather than a Python one.
 
-It is a smaller v0.1 surface, not a full replacement: no async frame iterator yet, no `itunes:duration` parsing. Its README lists the exact deliberate differences.
+It is a smaller surface, not a full replacement: no async frame iterator yet (a source is decoded into one block of samples), and no generic yt-dlp fallback for hosts it does not recognise. Its README lists the exact deliberate differences.
 
 ## Author
 

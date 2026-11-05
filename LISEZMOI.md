@@ -140,7 +140,7 @@ Pour le catalogue complet d'exemples (RSS, sources yt-dlp, flux live, stéréo /
 |---|---|---|
 | **Fichier local** / `file://` | chemin existant sur disque OU schéma `file://` | ffmpeg l'ouvre directement. |
 | **URL audio directe** (`.mp3`, `.m4a`, `.opus`, `.wav`, `.m3u8`, …) | l'extension de l'URL est un conteneur audio connu | ffmpeg l'ouvre directement avec vos éventuels `headers=`. |
-| **Flux RSS / Atom** (`.xml`, `.rss`, `.atom`) | l'extension de l'URL est un conteneur de flux connu | `podcastparser` (repli : `feedparser`) le parse ; l'enclosure du dernier épisode est récupérée. |
+| **Flux RSS / Atom** (`.xml`, `.rss`, `.atom`) | l'extension de l'URL est un conteneur de flux connu ; une URL sans extension que yt-dlp ne sait pas résoudre est reconnue à son `Content-Type` RSS / Atom / XML | `podcastparser` (repli : `feedparser`) le parse ; l'enclosure du dernier épisode est récupérée. |
 | **YouTube / Vimeo / SoundCloud / Twitch VOD / Twitch live / …** | l'extracteur yt-dlp l'identifie | yt-dlp choisit `bestaudio*`, passe l'URL directe + les headers à ffmpeg. |
 | **URL web générique** (tout le reste) | extracteur `generic` de yt-dlp | URL utilisée telle quelle. |
 | **Spotify** (open.spotify.com) | match par hostname | `NotImplementedError` : l'audio Spotify est verrouillé par DRM. Utilisez le flux RSS de l'émission s'il existe. |
@@ -221,9 +221,15 @@ pip install 'podcast-helper[mcp]'          # + les outils MCP (inclut [api] auto
 pip install 'podcast-helper[api,mcp]'      # tout
 ```
 
-Chaque surface publie les mêmes verbes, `feed`, `latest`, `stream`,
-`record`, `probe`, avec des noms d'arguments identiques, donc
-basculer d'une surface à l'autre relève du copier-coller. Le
+La CLI, l'API HTTP et le MCP publient les mêmes verbes, `feed`, `latest`,
+`stream`, `record`, `probe`, avec des noms d'arguments concordants : une
+recette passe de l'une à l'autre par copier-coller. Deux graphies
+diffèrent en HTTP : `stereo=true` tient lieu du `--stereo` de la CLI ;
+`POST /record` prend un `output_format` puis renvoie le fichier au lieu
+d'écrire vers un chemin `--output`. `podcast-helper-mcp` sert les routes
+HTTP avec le point d'accès `/mcp` dans un seul processus, sur
+`127.0.0.1:8000` sauf si `PODCAST_HELPER_HOST` / `PODCAST_HELPER_PORT`
+en décident autrement. Le
 Dockerfile de ce dépôt embarque la surface FastAPI sur le
 port 8000 par défaut (`docker build -t podcast-helper . && docker run
 --rm -p 8000:8000 podcast-helper`).
@@ -320,7 +326,7 @@ Un crate compagnon, [`podcast-helper-rs`](https://github.com/warith-harchaoui/po
 
 L'intérêt est un binaire statique unique, sans interpréteur Python à installer — utile quand l'ingestion de podcasts doit s'intégrer à un pipeline Rust plus large, par exemple pour alimenter un service Rust de reconnaissance vocale, plutôt qu'à un pipeline Python.
 
-C'est une surface v0.1 plus restreinte, pas un remplacement complet : pas encore d'itérateur asynchrone par trame, pas d'extraction `itunes:duration`. Son README donne les différences volontaires exactes.
+C'est une surface plus restreinte, pas un remplacement complet : pas encore d'itérateur asynchrone par trame (une source est décodée en un seul bloc d'échantillons), pas de repli générique sur yt-dlp pour les hôtes qu'il ne reconnaît pas. Son README donne les différences volontaires exactes.
 
 ## Auteur
 

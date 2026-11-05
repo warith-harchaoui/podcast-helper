@@ -87,7 +87,7 @@ needs its own surface: a live stream is not an episode.
   ±5 s; ``M`` = marker; ``A``/``B`` = swap between two waveforms in
   the diff view.
 - **Colorblind-safe by construction.** All state uses shape + color +
-  text, never color alone (see companion ``front-colors`` skill).
+  text, never color alone (see companion ``sprezzature-colors`` skill).
 
 ## What we deliberately don't do
 
@@ -97,14 +97,13 @@ needs its own surface: a live stream is not an episode.
 - **No cloud lock-in.** Everything runs on the FastAPI server the
   container already ships (``podcast-helper[api]``).
 - **No transcription in-app.** ASR belongs to a downstream helper
-  (``ask-helper``, ``docs-helper``). This GUI produces the PCM
+  (``vocal-helper``, which already consumes this package). This GUI produces the PCM
   frames and the archives; other tools consume them.
 
 ## Stack
 
 - Front end: TypeScript + Svelte 5 + WaveSurfer.js (waveforms) +
-  Vega-Lite (spectrograms). No React: matches the `front-ui`
-  companion skill's stack.
+  Vega-Lite (spectrograms). No React.
 - Back end: the FastAPI app already exists (``podcast_helper.api``).
   GUI is a client only.
 - Persistence: subscription list + episode metadata cached in

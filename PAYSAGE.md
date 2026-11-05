@@ -118,8 +118,9 @@ Deux réserves accompagnent le tableau plutôt qu'elles ne le suivent :
 - Les cinq étoiles en « Rééchantillonnage correct » sont héritées de
   `libswresample` de ffmpeg, qui fait le travail réel. Le chemin optionnel
   `resample_quality="high"` exige un ffmpeg compilé avec
-  `--enable-libsoxr`, que le build Homebrew standard n'embarque pas : mesuré
-  ici, il rend zéro trame.
+  `--enable-libsoxr`, que le build Homebrew standard n'embarque pas. Mesuré
+  ici : depuis la 1.6.2 il lève `RuntimeError` avant la première trame, là
+  où la 1.6.1 et les précédentes rendaient zéro trame en silence.
 - « Multi-surface » compte des portes, pas de la maturité : bibliothèque,
   CLI, API FastAPI, GUI navigateur puis MCP existent toutes et sont testées,
   mais une bibliothèque monotâche notée une étoile n'en fait pas moins bien
@@ -131,7 +132,7 @@ Deux réserves accompagnent le tableau plutôt qu'elles ne le suivent :
 
 - **L'espace de noms Podcast 2.0 — chapitres, transcriptions, financement, extraits** — `feedparser` lit le RSS avec l'espace de noms iTunes ; c'est dans l'espace Podcast 2.0 que vivent les chapitres puis les transcriptions publiées, or une transcription déjà présente dans le flux est un travail que cette suite refait sinon avec un GPU.
 
-- **`podcastparser` — un analyseur en flux taillé pour les flux de podcast** — Il analyse au fil de l'eau puis vise spécifiquement les flux de podcast, là où `feedparser` construit tout le document. Pour un gros flux lu seulement afin de trouver le dernier épisode, c'est la forme la moins chère.
+- **`podcastparser` — un analyseur en flux taillé pour les flux de podcast** — Il analyse au fil de l'eau puis vise spécifiquement les flux de podcast, là où `feedparser` construit tout le document. Cette bibliothèque s'en sert déjà en premier, mais seulement après avoir téléchargé le flux en entier ; pour un gros flux lu seulement afin de trouver le dernier épisode, analyser à mesure que les octets arrivent est la forme la moins chère.
 
 - **`streamlink` — un épisode en direct n'est pas un fichier** — Même leçon que celle déjà inscrite dans le jumeau Rust : résoudre vers une adresse pour un média sans fin, plutôt que d'essayer de le télécharger.
 
