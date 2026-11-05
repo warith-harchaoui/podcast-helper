@@ -56,8 +56,8 @@ def test_is_local_file_returns_true_for_file_scheme() -> None:
 
 def test_strip_file_scheme() -> None:
     """``file://`` is stripped to a bare path; bare paths pass through."""
-    assert _strip_file_scheme("file:///tmp/x.mp3") == "/tmp/x.mp3"
-    assert _strip_file_scheme("/tmp/x.mp3") == "/tmp/x.mp3"
+    assert _strip_file_scheme("file:///path/to/x.mp3") == "/path/to/x.mp3"
+    assert _strip_file_scheme("/path/to/x.mp3") == "/path/to/x.mp3"
 
 
 def test_url_extension() -> None:

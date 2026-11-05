@@ -146,12 +146,12 @@ def test_build_cmd_record_to_appends_archive_output() -> None:
         realtime=True,
         is_live=False,
         headers={},
-        record_to="/tmp/archive.mp3",
+        record_to="/path/to/archive.mp3",
     )
     joined = " ".join(cmd)
     # Two outputs: f32le pipe and the mp3 archive.
     assert "-f f32le" in joined
-    assert "/tmp/archive.mp3" in joined
+    assert "/path/to/archive.mp3" in joined
     assert "libmp3lame" in joined
 
 
@@ -165,7 +165,7 @@ def test_build_cmd_speed_and_record_to_apply_to_both_outputs() -> None:
         is_live=False,
         headers={},
         speed=1.5,
-        record_to="/tmp/archive.opus",
+        record_to="/path/to/archive.opus",
     )
     joined = " ".join(cmd)
     # atempo appears twice — once per output spec.
@@ -266,7 +266,7 @@ def test_the_timeout_precedes_the_input():
 
 def test_local_files_are_left_alone():
     """A path on disk cannot stall on a socket, so the flag would be noise."""
-    assert "-rw_timeout" not in _cmd("/tmp/local.wav")
+    assert "-rw_timeout" not in _cmd("/path/to/local.wav")
 
 
 def test_live_sources_are_bounded_too():
