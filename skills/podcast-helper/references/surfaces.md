@@ -59,7 +59,9 @@ surfaces cannot drift and one process serves both doors. The tools carry
 FastAPI's operation ids: `get_feed_feed_get`, `get_latest_latest_get`,
 `probe_probe_get`, `stream_stream_post`, `record_record_post`, plus
 `health_health_get` and `gui_gui_get`. The server binds `127.0.0.1:8000`;
-`PODCAST_HELPER_HOST` and `PODCAST_HELPER_PORT` override both.
+`--host` / `--port`, or `PODCAST_HELPER_HOST` and `PODCAST_HELPER_PORT` when
+the flags are absent, override both. `podcast-helper-mcp --help` prints the
+options and exits.
 
 Register it with Claude Code:
 

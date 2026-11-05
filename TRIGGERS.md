@@ -1,8 +1,12 @@
-# TRIGGERS: podcast-helper
+# podcast-helper — trigger catalogue
 
-This is the user-facing, exhaustive catalogue of what `podcast-helper` can do and
-the natural-language phrasings, commands, functions, URLs, and file types that
-should invoke it.
+The exhaustive catalogue of what `podcast-helper` can do and the
+natural-language phrasings, commands, functions, URLs and file types that
+should invoke it. It exists twice, identical: `TRIGGERS.md` at the repo root for
+people, `skills/podcast-helper/references/triggers.md` for agents;
+`scripts/check_triggers.py` fails when the two drift apart. The `description:`
+in the skill's `SKILL.md` is what a host model actually sees and is capped at
+1024 characters; this file carries the full list.
 
 `podcast-helper` is **URL-in → PCM-out** (PCM, pulse-code modulation, is the raw
 stream of uncompressed audio samples downstream models consume): it resolves any
@@ -14,16 +18,19 @@ edit files already on disk.
 ## The five verbs → how to invoke
 
 | Intent | CLI | Library | API |
-|--------|-----|---------|-----------|
+|--------|-----|---------|-----|
 | List an RSS / Atom feed's episodes | `podcast-helper feed` | `feed` | `GET /feed` |
 | Get the latest episode / enclosure URL | `podcast-helper latest` | `latest_episode` | `GET /latest` |
-| Decode any URL to raw PCM (stdout / WAV) | `podcast-helper stream` | `extract_audio_stream` | `POST /stream` |
+| Decode any URL to raw f32le PCM (stdout / HTTP body) | `podcast-helper stream` | `extract_audio_stream` | `POST /stream` |
 | Archive any URL to a compressed file | `podcast-helper record` | `extract_audio_stream(record_to=…)` | `POST /record` |
-| Classify a URL (file/direct/yt-dlp, live?) | `podcast-helper probe` | `_resolve_source` | `GET /probe` |
+| Classify a URL (`file` / `direct_audio` / `ytdlp:<extractor>`, live?) | `podcast-helper probe` | `_resolve_source` (internal) | `GET /probe` |
 
-Every verb is also reachable through the MCP server (`podcast-helper-mcp`,
-one tool per HTTP route, named after FastAPI's operation ids such as
-`get_feed_feed_get` or `record_record_post`) and the browser episode browser at `GET /gui`.
+Every verb is also reachable through the MCP server (`podcast-helper-mcp`, the
+`[mcp]` extra: one tool per HTTP route, named after FastAPI's operation ids such
+as `get_feed_feed_get` or `record_record_post`) and the browser episode browser
+at `GET /gui` (the `[api]` extra). `podcast-helper-mcp` binds `--host` /
+`--port` or `PODCAST_HELPER_HOST` / `PODCAST_HELPER_PORT` (default
+`127.0.0.1:8000`).
 
 ## Natural-language phrasings that should fire
 
@@ -34,20 +41,24 @@ one tool per HTTP route, named after FastAPI's operation ids such as
 - **stream**: "give me a PCM stream from this podcast / YouTube / SoundCloud
   URL", "decode this audio URL to 16 kHz mono", "stream this episode into my ASR
   / VAD / transcription pipeline", "consume this live HLS as PCM".
-- **record**: "download / archive this episode to mp3 / m4a / opus / flac / wav",
+- **record**: "download / archive this episode to mp3 / m4a / aac / opus / ogg /
+  flac / wav",
   "save the latest episode as an mp3", "archive this live stream while it airs".
 - **probe**: "classify / probe this URL", "is this a feed, a direct file, or a
   yt-dlp source", "is this URL live".
-- **Surfaces**: "run the podcast API server", "open the episode browser
-  GUI", "install podcast-helper".
+- **Surfaces**: "run the podcast API server", "expose podcast-helper over
+  MCP", "open the episode browser GUI", "install podcast-helper".
 
 ## URLs and file types it accepts
 
-- **RSS / Atom feeds**: `.xml .rss .atom`; hosts like `feeds.*`, `anchor.fm`,
-  `libsyn`, `buzzsprout`, `transistor.fm`, `simplecast`, `megaphone`, `acast`,
-  `captivate`, `podbean` (auto-picks the latest episode's enclosure).
-- **Direct audio enclosures**: `.mp3 .m4a .aac .opus .ogg .oga .wav .flac`, and
-  HLS `.m3u8` manifests.
+- **RSS / Atom feeds**: recognised by a `.xml .rss .atom` extension, or, for
+  the extension-less feed URLs hosts like `feeds.*`, `anchor.fm`, `libsyn`,
+  `buzzsprout`, `transistor.fm`, `simplecast`, `megaphone`, `acast`,
+  `captivate`, `podbean` serve, by an RSS / Atom / XML `Content-Type` once
+  yt-dlp cannot resolve the URL. A feed auto-picks the latest episode's
+  enclosure.
+- **Direct audio enclosures**: `.mp3 .m4a .aac .opus .ogg .oga .wav .flac .wma
+  .aiff .aif .ape .ac3 .amr`, and HLS `.m3u8` manifests.
 - **yt-dlp sources**: YouTube, Vimeo, SoundCloud, Twitch VOD / live, and the
   long yt-dlp extractor list (resolved via `bestaudio*`).
 - **Local files / `file://`**: opened verbatim by ffmpeg.
@@ -69,7 +80,7 @@ one tool per HTTP route, named after FastAPI's operation ids such as
 
 ## See also
 
-- [`README.md`](README.md): features, install, quick start.
-- [`EXAMPLES.md`](EXAMPLES.md): runnable recipes.
-- [`GUI.md`](GUI.md): the design plan for an ambitious visual product on top of
+- the repo's `README.md`: features, install, quick start.
+- the repo's `EXAMPLES.md`: runnable recipes.
+- the repo's `GUI.md`: the design plan for an ambitious visual product on top of
   the shipped episode browser (`GET /gui`).

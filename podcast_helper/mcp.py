@@ -59,22 +59,28 @@ else:  # pragma: no cover - legacy fastapi-mcp
     mcp.mount()
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Console entry point (``podcast-helper-mcp``): serve the API + MCP endpoint.
 
     Boots the FastAPI app (now serving both the plain HTTP routes and the
     ``/mcp`` MCP endpoint) with uvicorn in a single worker. Local-first: binds
-    to loopback by default (override with ``PODCAST_HELPER_HOST`` /
-    ``PODCAST_HELPER_PORT``).
+    to loopback by default (override with ``--host`` / ``--port`` or
+    ``PODCAST_HELPER_HOST`` / ``PODCAST_HELPER_PORT``). A click command, so ``--help``
+    answers instead of starting the server.
     """
-    import os
+    import click
 
-    import uvicorn
+    @click.command(context_settings={"help_option_names": ["-h", "--help"]})
+    @click.option("--host", envvar="PODCAST_HELPER_HOST", default="127.0.0.1", show_default=True)
+    @click.option("--port", envvar="PODCAST_HELPER_PORT", default=8000, type=int, show_default=True)
+    def serve(host: str, port: int) -> None:
+        """Serve the Podcast Helper API and its MCP endpoint (/mcp)."""
+        import uvicorn
 
-    host = os.environ.get("PODCAST_HELPER_HOST", "127.0.0.1")
-    port = int(os.environ.get("PODCAST_HELPER_PORT", "8000"))
-    print(f"Podcast Helper API + MCP -> http://{host}:{port}  (MCP at /mcp)")
-    uvicorn.run(app, host=host, port=port, workers=1)
+        print(f"Podcast Helper API + MCP -> http://{host}:{port}  (MCP at /mcp)")
+        uvicorn.run(app, host=host, port=port, workers=1)
+
+    serve.main(args=argv, prog_name="podcast-helper-mcp")
 
 
 if __name__ == "__main__":  # pragma: no cover
