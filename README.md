@@ -2,7 +2,7 @@
 
 [🇫🇷](https://github.com/warith-harchaoui/podcast-helper/blob/main/LISEZMOI.md) · [🇬🇧](https://github.com/warith-harchaoui/podcast-helper/blob/main/README.md)
 
-[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#the-promise)
+[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#the-promise)
 
 `Podcast Helper` belongs to a collection of libraries called `AI Helpers` developed for building Artificial Intelligence.
 
@@ -39,7 +39,7 @@ Two are refused upfront, with a clear hint rather than an obscure failure: Spoti
 
 ## Battle-tested
 
-`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.4), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration is green on `main`: `pytest` and `ruff check` both have to pass before anything merges.
+`podcast-helper` ships on [PyPI](https://pypi.org/project/podcast-helper/) under semantic-versioned tags (currently v1.6.5), so a pinned range such as `podcast-helper>=1.6.0,<2` stays stable under you. Continuous integration is green on `main`: `pytest` and `ruff check` both have to pass before anything merges.
 
 Two siblings from the same AI Helpers suite are declared dependencies:
 
@@ -69,7 +69,7 @@ This library is that one request, answered: `extract_audio_stream`, plus the sma
 
 ## Installation
 
-**Prerequisites:** **Python 3.10-3.13**, **git**, and **ffmpeg**, cross-platform:
+**Prerequisites:** **Python 3.10 or later**, **git**, and **ffmpeg**, cross-platform:
 
 - 🍎 **macOS** ([Homebrew](https://brew.sh)): `brew install python git ffmpeg`
 - 🐧 **Ubuntu/Debian**: `sudo apt update && sudo apt install -y python3 python3-pip git ffmpeg`

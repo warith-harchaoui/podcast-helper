@@ -2,7 +2,7 @@
 
 [🇫🇷](https://github.com/warith-harchaoui/podcast-helper/blob/main/LISEZMOI.md) · [🇬🇧](https://github.com/warith-harchaoui/podcast-helper/blob/main/README.md)
 
-[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#la-promesse)
+[![CI](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/warith-harchaoui/podcast-helper/actions/workflows/ci.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/podcast-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#la-promesse)
 
 `Podcast Helper` fait partie d'une collection de bibliothèques appelée `AI Helpers`, développée pour bâtir des applications d'intelligence artificielle.
 
@@ -39,7 +39,7 @@ Deux sont refusées d'emblée, avec une indication claire plutôt qu'un échec o
 
 ## Éprouvé en production
 
-`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.4), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée.
+`podcast-helper` est publié sur [PyPI](https://pypi.org/project/podcast-helper/) avec des tags versionnés selon le versionnage sémantique (actuellement v1.6.5), ce qui fait qu'une plage figée comme `podcast-helper>=1.6.0,<2` reste stable dans le temps. L'intégration continue est au vert sur `main` : `pytest` puis `ruff check` doivent tous deux passer avant qu'une contribution soit intégrée.
 
 Deux sœurs de la même suite AI Helpers sont des dépendances déclarées :
 
@@ -69,7 +69,7 @@ Cette bibliothèque, c'est cette demande-là, satisfaite : `extract_audio_stream
 
 ## Installation
 
-**Prérequis :** **Python 3.10-3.13**, **git** et **ffmpeg**, multiplateforme :
+**Prérequis :** **Python 3.10 ou plus récent**, **git** et **ffmpeg**, multiplateforme :
 
 - 🍎 **macOS** ([Homebrew](https://brew.sh)) : `brew install python git ffmpeg`
 - 🐧 **Ubuntu/Debian** : `sudo apt update && sudo apt install -y python3 python3-pip git ffmpeg`

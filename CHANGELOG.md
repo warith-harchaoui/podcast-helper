@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.5] - 2026-11-15
+
+### Changed
+
+- **No upper bound on Python any more.** `requires-python` was capped at
+  `>=3.10,<3.14` with no recorded reason, which refused every newer Python at install
+  time; it is now `>=3.10`. Badges and prerequisites say "Python 3.10 or later".
+
 ## [1.6.4] - 2026-11-05
 
 ### Fixed
@@ -589,7 +597,6 @@ suite foundation.
 - Apply the project coding standards across the package and `tests/` (Numpy
   docstrings, full typing, comment density above the floor); make the CI ruff
   job blocking. Refresh the project logo asset.
-
 
 ## [0.3.3] - 2026-07-08
 
